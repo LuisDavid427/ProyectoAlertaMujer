@@ -4,20 +4,140 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#FDF7FA">
 
-    <Button
-        android:id="@+id/btn_sos"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:text="S.O.S"
-        android:textSize="45sp"
+    <TextView
+        android:id="@+id/txt_saludo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hola, Usuario"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#4A148C"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/layout_cards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/txt_saludo">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_real_contactos"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_margin="8dp"
+            android:text="0\nContactos"
+            android:textAllCaps="false"
+            android:textColor="#4A148C"
+            android:textSize="14sp"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="15dp"
+            app:elevation="4dp"
+            app:rippleColor="#4D4A148C" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_real_gps"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_margin="8dp"
+            android:text="GPS Activo\nUbicación ON"
+            android:textAllCaps="false"
+            android:textColor="#2E7D32"
+            android:textSize="14sp"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="15dp"
+            app:elevation="4dp"
+            app:rippleColor="#4D2E7D32" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_instruccion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mantén presionado para activar"
+        android:textAlignment="center"
+        android:textColor="#555555"
+        app:layout_constraintBottom_toTopOf="@+id/btn_sos_circular"
+        app:layout_constraintTop_toBottomOf="@id/layout_cards" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_sos_circular"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:text="SOS"
+        android:textSize="35sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#FF0000"
+        app:backgroundTint="#E91E63"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:cornerRadius="130dp"
+        app:elevation="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:id="@+id/menu_inferior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mensaje"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_weight="1"
+            android:text="Mensaje"
+            android:textSize="10sp"
+            app:icon="@android:drawable/ic_dialog_email"
+            app:iconGravity="top"
+            app:iconSize="28dp"
+            app:iconTint="#4A148C"
+            android:textColor="#4A148C"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_autoridades"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Autoridades"
+            android:textColor="#4A148C"
+            android:textSize="10sp"
+            app:icon="@android:drawable/ic_menu_call"
+            app:iconGravity="top"
+            app:iconSize="28dp"
+            app:iconTint="#4A148C" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_historial"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_weight="1"
+            android:text="Historial"
+            android:textSize="10sp"
+            app:icon="@android:drawable/ic_menu_recent_history"
+            app:iconGravity="top"
+            app:iconSize="28dp"
+            app:iconTint="#4A148C"
+            android:textColor="#4A148C"/>
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
