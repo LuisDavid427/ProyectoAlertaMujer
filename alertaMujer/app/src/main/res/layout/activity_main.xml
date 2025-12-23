@@ -69,7 +69,11 @@
         android:textAlignment="center"
         android:textColor="#555555"
         app:layout_constraintBottom_toTopOf="@+id/btn_sos_circular"
-        app:layout_constraintTop_toBottomOf="@id/layout_cards" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_cards"
+        app:layout_constraintVertical_bias="0.5" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_sos_circular"

@@ -1,15 +1,21 @@
 package com.example.alertamujer
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() { // Cambiado a AppCompatActivity para ser iguales
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 1. Activa el diseño de borde a borde
-        enableEdgeToEdge()
-        // 2. Conecta con tu archivo XML donde pusiste el botón SOS
+        // QUITAMOS enableEdgeToEdge() por ahora
         setContentView(R.layout.activity_main)
+
+        val btnContactos = findViewById<MaterialButton>(R.id.btn_real_contactos)
+
+        btnContactos.setOnClickListener {
+            val intent = Intent(this, ContactosActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

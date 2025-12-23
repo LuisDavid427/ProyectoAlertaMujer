@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FDF7FA"
+    tools:context=".ContactosActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_contactos"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginTop="24dp"
+        android:background="#4A148C"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:navigationIconTint="#FFFFFF"
+        app:title="Gestión de Contactos"
+        app:titleTextColor="#FFFFFF"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_contactos"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp">
+
+        <TextView
+            android:id="@+id/title_contactos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="Mis Contactos de Confianza"
+            android:textColor="#4A148C"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_agregar_contacto"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:text="Agregar Nuevo Contacto"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:backgroundTint="#4A148C"
+            app:cornerRadius="15dp"
+            app:icon="@android:drawable/ic_input_add" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="Aún no tienes contactos registrados"
+            android:textColor="#757575" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
