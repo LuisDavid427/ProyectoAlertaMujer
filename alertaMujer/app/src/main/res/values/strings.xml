@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Alerta Mujer</string>
+    <string name="hola_usuario">Hola, Usuario</string>
+    <string name="contactos_activos">0\nContactos</string>
+    <string name="gps_activo">GPS Activo\nUbicación ON</string>
+    <string name="txt_instruccion">Mantén presionado para activar</string>
+    <string name="sos">SOS</string>
+    <string name="mensaje">Mensaje</string>
+    <string name="autoridades">Autoridades</string>
+    <string name="historial">Historial</string>
 </resources>

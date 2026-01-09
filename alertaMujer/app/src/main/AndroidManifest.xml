@@ -18,5 +18,9 @@
             android:name=".ContactosActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".AddContactoActivity"
+            android:exported="false" />
+
     </application>
 </manifest>

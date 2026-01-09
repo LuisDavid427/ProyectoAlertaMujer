@@ -18,48 +18,48 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationIconTint="#FFFFFF"
         app:title="Gestión de Contactos"
-        app:titleTextColor="#FFFFFF"
-        tools:layout_editor_absoluteX="0dp" />
+        app:titleTextColor="#FFFFFF" />
 
-    <LinearLayout
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_agregar_contacto"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Agregar Nuevo Contacto"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:backgroundTint="#4A148C"
+        app:cornerRadius="15dp"
+        app:icon="@android:drawable/ic_input_add"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_contactos" />
+
+    <TextView
+        android:id="@+id/tv_no_contacts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aún no tienes contactos registrados"
+        android:textColor="#757575"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"/>
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:padding="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_contactos"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp">
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/title_contactos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
-            android:text="Mis Contactos de Confianza"
-            android:textColor="#4A148C"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_agregar_contacto"
+        <LinearLayout
+            android:id="@+id/lista_contactos"
             android:layout_width="match_parent"
-            android:layout_height="65dp"
-            android:text="Agregar Nuevo Contacto"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            app:backgroundTint="#4A148C"
-            app:cornerRadius="15dp"
-            app:icon="@android:drawable/ic_input_add" />
-
-        <TextView
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:text="Aún no tienes contactos registrados"
-            android:textColor="#757575" />
-
-    </LinearLayout>
+            android:orientation="vertical"
+            android:padding="16dp" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
