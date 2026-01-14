@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FDF7FA">
+    android:background="?attr/colorSurface">
 
     <TextView
         android:id="@+id/txt_saludo"
@@ -14,11 +14,28 @@
         android:text="@string/hola_usuario"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#4A148C"
+        android:textColor="?attr/colorPrimary"
         android:layout_marginTop="40dp"
         android:layout_marginStart="24dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+
+    <ImageButton
+        android:id="@+id/btn_user_profile"
+        android:layout_width="35dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Configuración"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/baseline_settings_24"
+        app:layout_constraintBottom_toBottomOf="@+id/txt_saludo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_saludo"
+        app:tint="?attr/colorPrimary" />
+
 
     <LinearLayout
         android:id="@+id/layout_cards"
@@ -37,9 +54,9 @@
             android:layout_weight="1"
             android:text="@string/contactos_activos"
             android:textAllCaps="false"
-            android:textColor="#4A148C"
+            android:textColor="?attr/colorPrimary"
             android:textSize="14sp"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSurface"
             app:cornerRadius="15dp"
             app:elevation="4dp"
             app:rippleColor="#4D4A148C" />
@@ -55,7 +72,7 @@
             android:textAllCaps="false"
             android:textColor="#2E7D32"
             android:textSize="14sp"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSurface"
             app:cornerRadius="15dp"
             app:elevation="4dp"
             app:rippleColor="#4D2E7D32" />
@@ -68,7 +85,7 @@
         android:layout_height="wrap_content"
         android:text="@string/txt_instruccion"
         android:textAlignment="center"
-        android:textColor="#555555"
+        android:textColor="?attr/colorOnSurface"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_sos_circular"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
+        android:background="?attr/colorSurface"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -113,8 +130,8 @@
             app:icon="@android:drawable/ic_dialog_email"
             app:iconGravity="top"
             app:iconSize="28dp"
-            app:iconTint="#4A148C"
-            android:textColor="#4A148C"/>
+            app:iconTint="?attr/colorPrimary"
+            android:textColor="?attr/colorPrimary"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_autoridades"
@@ -123,12 +140,12 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/autoridades"
-            android:textColor="#4A148C"
+            android:textColor="?attr/colorPrimary"
             android:textSize="10sp"
             app:icon="@android:drawable/ic_menu_call"
             app:iconGravity="top"
             app:iconSize="28dp"
-            app:iconTint="#4A148C" />
+            app:iconTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_historial"
@@ -141,8 +158,8 @@
             app:icon="@android:drawable/ic_menu_recent_history"
             app:iconGravity="top"
             app:iconSize="28dp"
-            app:iconTint="#4A148C"
-            android:textColor="#4A148C"/>
+            app:iconTint="?attr/colorPrimary"
+            android:textColor="?attr/colorPrimary"/>
 
     </LinearLayout>
 
