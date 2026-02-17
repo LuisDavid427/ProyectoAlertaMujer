@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FDF7FA"
+    android:background="?attr/colorSurface"
     tools:context=".AddContactoActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -12,12 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_marginTop="24dp"
-        android:background="#4A148C"
+        android:background="?attr/colorSurface"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationIconTint="#FFFFFF"
         app:title="Agregar Nuevo Contacto"
-        app:titleTextColor="#FFFFFF" />
+        app:titleTextColor="?attr/colorPrimary" />
 
     <EditText
         android:id="@+id/et_nombre_contacto"

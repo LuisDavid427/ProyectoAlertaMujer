@@ -61,6 +61,6 @@ class MainActivity : AppCompatActivity() {
         val contactosArray = JSONArray(contactosJson)
         val numeroDeContactos = contactosArray.length()
 
-        btnContactos.text = "$numeroDeContactos\\nContactos"
+        btnContactos.text = "$numeroDeContactos\nContactos"
     }
 }
