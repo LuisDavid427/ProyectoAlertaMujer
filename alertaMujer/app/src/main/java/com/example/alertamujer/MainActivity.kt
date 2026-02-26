@@ -8,11 +8,22 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import android.widget.ImageButton
 import org.json.JSONArray
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import com.example.alertamujer.utils.PermissionUtils
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var btnUbicacion: MaterialButton
     private lateinit var btnContactos: MaterialButton
     private lateinit var btnUserProfile: ImageButton
+    private lateinit var btnSosAdjuntar: MaterialButton
+
+
 
     // Guardaremos el modo de tema con el que se creó esta actividad.
     private var currentUiMode: Int = 0
@@ -24,8 +35,13 @@ class MainActivity : AppCompatActivity() {
         // Guarda el modo de tema actual al crear la vista.
         currentUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
+        // 1. Inicialización de todos los botones
         btnContactos = findViewById(R.id.btn_real_contactos)
         btnUserProfile = findViewById(R.id.btn_user_profile)
+        btnUbicacion = findViewById(R.id.btn_ubicacion)
+        btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar) // <-- Sin "val", igual que los otros
+
+        // 2. Listeners (Acciones de los botones)
 
         btnContactos.setOnClickListener {
             val intent = Intent(this, ContactosActivity::class.java)
@@ -33,15 +49,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnUserProfile.setOnClickListener {
-            // Ya no necesitamos esperar un resultado. Solo abrimos la configuración.
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
-    }
 
+        btnUbicacion.setOnClickListener {
+            verificarPermisosUbicacion()
+        }
+
+        // El nuevo listener para la actividad de adjuntar
+        btnSosAdjuntar.setOnClickListener {
+            val intent = Intent(this, AdjuntarActivity::class.java)
+            startActivity(intent)
+        }
+    }
     override fun onResume() {
         super.onResume()
         actualizarNumeroDeContactos()
+        actualizarEstadoBotonUbicacion()
 
         // --- LA LÓGICA CLAVE ---
         // Comprueba si el tema guardado en las preferencias es diferente al que se muestra actualmente.
@@ -62,5 +87,59 @@ class MainActivity : AppCompatActivity() {
         val numeroDeContactos = contactosArray.length()
 
         btnContactos.text = "$numeroDeContactos\nContactos"
+    }
+
+
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+        if (fineGranted) {
+            // Caso exitoso: Tenemos ubicación precisa
+            actualizarEstadoBotonUbicacion()
+        } else {
+            // El usuario no dio el permiso preciso.
+            // Aquí es donde detectamos si el sistema está bloqueado (después de 2 intentos)
+            val permiso = android.Manifest.permission.ACCESS_FINE_LOCATION
+            val deberiaExplicar = ActivityCompat.shouldShowRequestPermissionRationale(this, permiso)
+
+            if (!deberiaExplicar) {
+                // Si llegamos aquí sin permiso y deberiaExplicar es FALSE,
+                // significa que el usuario marcó "No volver a preguntar" o ya fallaron los 2 intentos.
+                PermissionUtils.obtenerDialogoPermisoManual(this).show()
+            }
+
+            actualizarEstadoBotonUbicacion()
+        }
+    }
+
+    private fun verificarPermisosUbicacion() {
+        val estado = PermissionUtils.obtenerEstadoUbicacion(this)
+
+        when (estado) {
+            "CONFIGURACION" -> {
+                PermissionUtils.abrirAjustesSistema(this)
+            }
+            else -> {
+                // No importa si es PEDIR_INICIAL o PEDIR_PRECISA,
+                // lanzamos la petición y dejamos que el Launcher
+                // arriba decida si mostrar el diálogo manual o no.
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+    }
+
+    private fun actualizarEstadoBotonUbicacion() {
+        val config = PermissionUtils.obtenerVisualGps(this)
+        btnUbicacion.text = config.texto
+        btnUbicacion.setTextColor(ContextCompat.getColor(this, config.color))
     }
 }
