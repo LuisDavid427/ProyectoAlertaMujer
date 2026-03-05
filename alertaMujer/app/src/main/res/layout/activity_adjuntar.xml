@@ -18,24 +18,40 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationIconTint="?attr/colorPrimary"
         app:title="Adjuntar Evidencia"
-        app:titleTextColor="?attr/colorPrimary"
-        tools:layout_editor_absoluteX="0dp" />
+        app:titleTextColor="?attr/colorPrimary" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:padding="16dp"
+    <TextView
+        android:id="@+id/tv_instruccion"
+        android:layout_width="360dp"
+        android:layout_height="43dp"
+        android:layout_margin="16dp"
+        android:text="Selecciona el tipo de archivo que deseas enviar como evidencia de la alerta."
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_adjuntar" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_camara"
+        android:layout_width="318dp"
+        android:layout_height="124dp"
+        android:padding="20dp"
+        android:text="Tomar Foto/Video de Evidencia"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:backgroundTint="?attr/colorPrimaryVariant"
+        app:icon="@drawable/baseline_camera_alt_24"
+        app:iconGravity="top"
+        app:iconPadding="12dp"
+        app:iconSize="40dp"
+        app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_adjuntar">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Selecciona el tipo de archivo que deseas enviar como evidencia de la alerta."
-            android:textSize="16sp"
-            android:textColor="?attr/colorOnSurfaceVariant" />
-
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_instruccion"
+        app:layout_constraintVertical_bias="0.088" />
+    />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
