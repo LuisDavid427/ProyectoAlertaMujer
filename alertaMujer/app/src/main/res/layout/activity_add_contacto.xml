@@ -7,18 +7,30 @@
     android:background="?attr/colorSurface"
     tools:context=".AddContactoActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_add_contacto"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="24dp"
-        android:background="?attr/colorSurface"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="#FFFFFF"
-        app:title="Agregar Nuevo Contacto"
-        app:titleTextColor="?attr/colorPrimary" />
+    <include
+        android:id="@+id/btn_back"
+        layout="@layout/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
 
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_añadirContacto_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_añadirContacto_title" />
+
+    <TextView
+        android:id="@+id/tv_añadirContacto_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="Añadir Contacto"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <EditText
         android:id="@+id/et_nombre_contacto"
         android:layout_width="0dp"
@@ -30,7 +42,7 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_add_contacto" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_añadirContacto_title" />
 
     <EditText
         android:id="@+id/et_numero_contacto"

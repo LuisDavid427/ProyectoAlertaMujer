@@ -1,5 +1,7 @@
 package com.example.alertamujer
 
+import com.example.alertamujer.utils.configurarBotonAtras
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
@@ -12,16 +14,31 @@ class AdjuntarActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adjuntar)
 
-        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar_adjuntar)
         val btnCamara = findViewById<MaterialButton>(R.id.btn_camara)
+        val btnAudio = findViewById<MaterialButton>(R.id.btn_audio)
 
-        toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        // Configuración de la Toolbar
+
+        configurarBotonAtras()
 
         // Configuración del evento de clic para el botón de evidencia
         btnCamara.setOnClickListener {
             mostrarOpcionesCaptura()
+        }
+        btnAudio.setOnClickListener {
+            abrirAudio()
+        }
+    }
+
+    companion object {
+
+        fun newIntent(context: Context): Intent {
+            return Intent(context, AdjuntarActivity::class.java)
+        }
+
+        fun start(context: Context) {
+            val intent = newIntent(context)
+            context.startActivity(intent)
         }
     }
 
@@ -44,5 +61,10 @@ class AdjuntarActivity : AppCompatActivity() {
         if (intent.resolveActivity(packageManager) != null) {
             startActivityForResult(intent, requestCode)
         }
+    }
+
+    private fun abrirAudio(){
+        val intent =Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+        startActivityForResult(intent,103)
     }
 }

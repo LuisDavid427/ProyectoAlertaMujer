@@ -8,17 +8,31 @@
     android:background="?attr/colorSurface"
     tools:context=".AdjuntarActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_adjuntar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="36dp"
-        android:background="?attr/colorSurface"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="?attr/colorPrimary"
-        app:title="Adjuntar Evidencia"
-        app:titleTextColor="?attr/colorPrimary" />
+    <include
+        android:id="@+id/btn_back"
+        layout="@layout/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_adjuntar_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_adjuntar_title" />
+
+    <TextView
+        android:id="@+id/tv_adjuntar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="Adjuntar Evidencias"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <TextView
         android:id="@+id/tv_instruccion"
@@ -30,7 +44,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_adjuntar" />
+        app:layout_constraintTop_toBottomOf="@id/tv_adjuntar_title" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_camara"
@@ -52,6 +66,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_instruccion"
         app:layout_constraintVertical_bias="0.088" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_audio"
+        android:layout_width="318dp"
+        android:layout_height="124dp"
+        android:padding="20dp"
+        android:text="Capturar Audio"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:backgroundTint="?attr/colorPrimaryVariant"
+        app:icon="@drawable/outline_mic_24"
+        app:iconGravity="top"
+        app:iconPadding="12dp"
+        app:iconSize="40dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_instruccion"
+        app:layout_constraintVertical_bias="0.419" />
     />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,12 +16,15 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.example.alertamujer.utils.PermissionUtils
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var btnUbicacion: MaterialButton
     private lateinit var btnContactos: MaterialButton
     private lateinit var btnUserProfile: ImageButton
     private lateinit var btnSosAdjuntar: MaterialButton
+
+    private lateinit var btnSos: MaterialButton
 
 
 
@@ -40,27 +43,28 @@ class MainActivity : AppCompatActivity() {
         btnUserProfile = findViewById(R.id.btn_user_profile)
         btnUbicacion = findViewById(R.id.btn_ubicacion)
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar) // <-- Sin "val", igual que los otros
+        btnSos = findViewById(R.id.btn_sos_circular)
 
         // 2. Listeners (Acciones de los botones)
 
         btnContactos.setOnClickListener {
-            val intent = Intent(this, ContactosActivity::class.java)
-            startActivity(intent)
+            ContactosActivity.start(this)
         }
 
         btnUserProfile.setOnClickListener {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
+            SettingsActivity.start(this)
         }
 
         btnUbicacion.setOnClickListener {
             verificarPermisosUbicacion()
         }
+        btnSos.setOnClickListener {
+            SosActivity.start(this)
+        }
 
         // El nuevo listener para la actividad de adjuntar
         btnSosAdjuntar.setOnClickListener {
-            val intent = Intent(this, AdjuntarActivity::class.java)
-            startActivity(intent)
+            AdjuntarActivity.start(this)
         }
     }
     override fun onResume() {

@@ -1,5 +1,6 @@
 package com.example.alertamujer
 
+import com.example.alertamujer.utils.configurarBotonAtras
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,10 +24,7 @@ class ContactosActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contactos)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar_contactos)
-        toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        configurarBotonAtras()
 
         listaContactosLayout = findViewById(R.id.lista_contactos)
         tvNoContacts = findViewById(R.id.tv_no_contacts)
@@ -83,6 +81,18 @@ class ContactosActivity : AppCompatActivity() {
 
                 listaContactosLayout.addView(contactView)
             }
+        }
+    }
+
+    companion object {
+
+        fun newIntent(context: Context): Intent {
+            return Intent(context, ContactosActivity::class.java)
+        }
+
+        fun start(context: Context) {
+            val intent = newIntent(context)
+            context.startActivity(intent)
         }
     }
 

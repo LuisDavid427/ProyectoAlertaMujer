@@ -1,5 +1,7 @@
 package com.example.alertamujer
 
+import com.example.alertamujer.utils.configurarBotonAtras
+import android.widget.TextView
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,21 +20,19 @@ class AddContactoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_contacto)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar_add_contacto)
+        val tvTitulo = findViewById<TextView>(R.id.tv_contactos_title)
         val btnGuardarContacto = findViewById<Button>(R.id.btn_guardar_contacto)
         val etNombreContacto = findViewById<EditText>(R.id.et_nombre_contacto)
         val etNumeroContacto = findViewById<EditText>(R.id.et_numero_contacto)
 
-        toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        configurarBotonAtras()
 
         if (intent.hasExtra("CONTACTO_INDEX")) {
             contactoIndex = intent.getIntExtra("CONTACTO_INDEX", -1)
             val nombre = intent.getStringExtra("CONTACTO_NOMBRE")
             val numero = intent.getStringExtra("CONTACTO_NUMERO")
 
-            toolbar.title = "Editar Contacto"
+            tvTitulo.text = "Editar Contacto"
             etNombreContacto.setText(nombre)
             etNumeroContacto.setText(numero)
             btnGuardarContacto.text = "Guardar Cambios"

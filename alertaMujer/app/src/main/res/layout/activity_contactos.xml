@@ -8,18 +8,30 @@
     android:background="?attr/colorSurface"
     tools:context=".ContactosActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_contactos"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="36dp"
-        android:background="?attr/colorSurface"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="?attr/colorOnPrimary"
-        app:title="Gestión de Contactos"
-        app:titleTextColor="?attr/colorPrimary"
-        tools:layout_editor_absoluteX="0dp" />
+    <include
+        android:id="@+id/btn_back"
+        layout="@layout/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_contactos_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_contactos_title" />
+
+    <TextView
+        android:id="@+id/tv_contactos_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="Gestión de Contactos"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_agregar_contacto"
@@ -33,18 +45,15 @@
         app:cornerRadius="15dp"
         app:icon="@android:drawable/ic_input_add"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_contactos" />
+        app:layout_constraintTop_toBottomOf="@id/tv_contactos_title" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="22dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto"
-        app:layout_constraintVertical_bias="1.0"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto">
 
         <LinearLayout
             android:id="@+id/lista_contactos"
@@ -58,12 +67,12 @@
         android:id="@+id/tv_no_contacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         android:text="Aún no tienes contactos registrados"
         android:textColor="#757575"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_agregar_contacto" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

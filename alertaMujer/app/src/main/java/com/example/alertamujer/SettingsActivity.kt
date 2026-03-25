@@ -1,6 +1,7 @@
 package com.example.alertamujer
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -46,6 +47,18 @@ class SettingsActivity : AppCompatActivity() {
                 putBoolean("dark_mode", isChecked)
                 apply()
             }
+        }
+
+    }
+    companion object {
+
+        fun newIntent(context: Context): Intent {
+            return Intent(context, SettingsActivity::class.java)
+        }
+
+        fun start(context: Context) {
+            val intent = newIntent(context)
+            context.startActivity(intent)
         }
     }
 }
