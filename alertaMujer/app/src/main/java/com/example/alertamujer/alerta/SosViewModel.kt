@@ -2,12 +2,15 @@ package com.example.alertamujer.alerta
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import com.example.alertamujer.api.RetrofitClient
 import kotlinx.coroutines.launch
+import com.example.alertamujer.api.AlertaRequest
 
 class SosViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -36,9 +39,20 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
 
     // 3. Esta función ahora es privada, solo la usa el ViewModel por dentro
     private fun enviarAlertaAlServidor(latitud: Double, longitud: Double) {
+        // 1. Sacamos el ID que guardamos en el Login (usamos -1 si no hay nada)
+        val prefs = getApplication<Application>().getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
+        val userId = prefs.getInt("id_usuario", -1)
+
         viewModelScope.launch {
             try {
-                val request = AlertaRequest(latitud, longitud)
+                // 2. Ahora sí, llenamos los 4 campos que pide la clase
+                val request = AlertaRequest(
+                    latitud = latitud,
+                    longitud = longitud,
+                    id_usuario = userId, // <-- Aquí pasamos el ID real
+                    mensaje = "¡Auxilio! Alerta SOS iniciada" // <-- Y un mensaje
+                )
+
                 val response = RetrofitClient.instance.enviarAlertaSOS(request)
 
                 if (response.isSuccessful) {
@@ -47,7 +61,7 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
                     _estadoAlerta.value = EstadoAlerta.Error("Error del servidor: ${response.code()}")
                 }
             } catch (e: Exception) {
-                _estadoAlerta.value = EstadoAlerta.Error("No se pudo conectar al servidor")
+                _estadoAlerta.value = EstadoAlerta.Error("Fallo de conexión: ${e.message}")
             }
         }
     }

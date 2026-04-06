@@ -4,6 +4,12 @@ import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.alertamujer.api.RetrofitClient
+import kotlinx.coroutines.launch
+import com.example.alertamujer.api.RegistroRequest
+
+
 
 class RegistroViewModel : ViewModel() {
 
@@ -16,19 +22,27 @@ class RegistroViewModel : ViewModel() {
     val mensajeError: LiveData<String> get() = _mensajeError
 
     fun intentarRegistro(nombre: String, email: String, pass: String) {
-        // 1. Validaciones lógicas
         if (nombre.isEmpty() || email.isEmpty() || pass.isEmpty()) {
-            _mensajeError.value = "Por favor, completa todos los campos"
+            _mensajeError.value = "Completa todos los campos"
             return
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _mensajeError.value = "El correo no es válido"
-            return
-        }
+        viewModelScope.launch {
+            try {
+                val request = RegistroRequest(nombre, email, pass)
+                val response = RetrofitClient.instance.registrar(request)
 
-        // 2. Simulación de guardado (Aquí irá tu petición POST a Spring Boot/MySQL)
-        // Por ahora simulamos éxito inmediato
-        _registroExitoso.value = true
+                if (response.isSuccessful) {
+                    _registroExitoso.value = true
+                } else {
+                    // --- ESTE ES EL CAMBIO CLAVE ---
+                    // Leemos el cuerpo del error crudo que envía Spring Boot
+                    val errorRaw = response.errorBody()?.string() ?: "Error desconocido"
+                    _mensajeError.value = "Error del Servidor: $errorRaw"
+                }
+            } catch (e: Exception) {
+                _mensajeError.value = "Fallo de conexión: ${e.message}"
+            }
+        }
     }
 }

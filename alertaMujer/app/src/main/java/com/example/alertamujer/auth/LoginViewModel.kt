@@ -5,6 +5,12 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.example.alertamujer.api.RetrofitClient
+import kotlinx.coroutines.launch
+import com.example.alertamujer.api.LoginRequest
+
+
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,21 +32,25 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun intentarLogin(email: String, pass: String) {
-        if (email.isEmpty() || pass.isEmpty()) {
-            // Si hay error, disparamos la señal con el mensaje
-            _mensajeError.value = "Por favor, ingresa tus credenciales"
-            return
+        viewModelScope.launch {
+            try {
+                val request = LoginRequest(email, pass)
+                val response = RetrofitClient.instance.login(request)
+
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val data = response.body()
+                    sharedPreferences.edit().apply {
+                        putBoolean("isLoggedIn", true)
+                        putInt("id_usuario", data?.id_usuario ?: -1)
+                        apply()
+                    }
+                    _navegarAMain.value = true
+                } else {
+                    _mensajeError.value = "Error: Credenciales inválidas"
+                }
+            } catch (e: Exception) {
+                _mensajeError.value = "Fallo: ${e.message}"
+            }
         }
-
-        // --- ESTRUCTURA PARA FUTURA VALIDACIÓN CON BD ---
-        // Aquí conectarás con tu Spring Boot o MySQL. Por ahora simulamos el éxito.
-
-        // GUARDAR LA SESIÓN
-        val editor = sharedPreferences.edit()
-        editor.putBoolean("isLoggedIn", true)
-        editor.apply()
-
-        // Disparamos la señal para ir al MainActivity
-        _navegarAMain.value = true
     }
 }
