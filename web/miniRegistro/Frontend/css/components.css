@@ -1,0 +1,82 @@
+/* Logo */
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo img { height: 45px; width: auto; object-fit: contain; }
+
+/* Cards & Badges */
+.badge {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+/* Cuadrícula de Características (4 columnas en desktop) */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Crea las 4 columnas */
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+/* Pasos de "Cómo Funciona" */
+.steps-container {
+    display: flex;
+    justify-content: space-between; /* Los separa equitativamente */
+    gap: 30px;
+}
+
+.step {
+    flex: 1;
+    padding: 20px;
+}
+
+.circle {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* --- Form Components --- */
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}

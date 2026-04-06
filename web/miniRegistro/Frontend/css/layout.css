@@ -1,0 +1,133 @@
+/* Header & Nav */
+header {
+    padding: 20px 0;
+    background: var(--white);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+/* Hero Section - Ajustes de espacio */
+.hero {
+    display: flex;
+    align-items: center;
+    padding: 80px 0; /* Más espacio arriba y abajo */
+    gap: 40px;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    margin-bottom: 35px; /* Separa la descripción de los botones */
+    max-width: 600px;
+    color: var(--text-light);
+}
+
+.hero-btns {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px; /* Separa los botones de la info de seguridad */
+    flex-wrap: wrap;
+}
+
+.hero-image img {
+    max-width: 370px; /* Cambia este valor (ej. 400px, 500px) para ajustar el tamaño máximo */
+    width: 100%;       /* Permite que se reduzca en pantallas pequeñas */
+    height: auto;
+    display: block;
+}
+.hero-info {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+.hero-info span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Secciones de Características y Cómo Funciona */
+.features, .how-it-works {
+    padding: 100px 0;
+    text-align: center;
+}
+
+.subtitle {
+    margin-bottom: 50px;
+    color: var(--text-light);
+}
+/* Footer - Ajustes para centrado total */
+footer {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 60px 0 40px;
+    text-align: center; /* Alineación de texto base */
+}
+
+.footer-cta {
+    display: flex;
+    flex-direction: column; /* Pone un elemento debajo del otro */
+    align-items: center;    /* Centra horizontalmente */
+    justify-content: center;
+    gap: 15px;              /* Espacio uniforme entre textos y botón */
+}
+
+.footer-cta p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.footer-cta small {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.date {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.footer-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
+}
+
+/* --- Login Layout --- */
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* Centra el contenido verticalmente */
+    padding: 40px 0;
+}
+
+.login-card {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}

@@ -1,0 +1,69 @@
+package com.example.registro.controller;
+
+import com.example.registro.dto.LoginRequest;
+import com.example.registro.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
+public class AuthController {
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginData) {
+        
+        boolean esValido = usuarioService.esAdminValido(loginData.getEmail(), loginData.getPassword());
+        
+        if (esValido) {
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "mensaje", "Acceso concedido como Administrador"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of(
+                                     "success", false,
+                                     "error", "Credenciales incorrectas o permisos insuficientes"
+                                 ));
+        }
+    }
+
+        // Este es el que usará Android (Luis, copia y pega esto debajo de tu login de admin)
+    // POST: http://localhost:8080/api/auth/login-movil
+    @PostMapping("/login-movil")
+    public ResponseEntity<?> loginMovil(@RequestBody LoginRequest loginData) {
+        
+        // Usamos el nuevo método del Service
+        Map<String, Object> datosUsuario = usuarioService.validarUsuarioMovil(
+            loginData.getEmail(), 
+            loginData.getPassword()
+        );
+
+        if (datosUsuario != null) {
+            // Todo OK: Devolvemos success y el ID para que Android lo guarde
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "id_usuario", datosUsuario.get("id_usuario"),
+                "nombre", datosUsuario.get("nombre"),
+                "mensaje", "Acceso concedido"
+            ));
+        } else {
+            // Fallo: Usuario no existe o contraseña errónea
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "success", false,
+                "error", "Correo o contraseña incorrectos"
+            ));
+        }
+    }
+}

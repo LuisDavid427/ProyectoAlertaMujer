@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Alerta Mujer</title>
+    
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    
+    <link rel="stylesheet" href="css/dashboard.css?v=2.0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="inicio.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+                    <img src="imagenes/logo.png" alt="Alerta Mujer"> 
+                    <span>Alerta Mujer | Panel Administrativo</span>
+                </a>
+            </div>
+            <div class="header-actions">
+                <a href="#" id="btn-logout" class="btn-secondary" onclick="cerrarSesion(event)">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <div class="dashboard-header">
+            <h2>Administrar</h2>
+            
+            <div class="toggle-container">
+                <span id="lbl-alertas" class="toggle-label active-alertas">Alertas</span>
+                <label class="switch">
+                    <input type="checkbox" id="vistaSwitch" onchange="alternarVista(this)">
+                    <span class="slider"></span>
+                </label>
+                <span id="lbl-usuarios" class="toggle-label">Usuarios</span>
+            </div>
+        </div>
+
+        <div class="toolbar card">
+            <input type="text" id="buscador" class="input-field search-bar" placeholder="Buscar alerta por código o ubicación...">
+            <input type="date" id="filtroFecha" class="input-field date-filter" style="width: auto;">
+            
+            <select id="filtroEstado" class="input-field" style="width: auto; cursor: pointer;">
+                <option value="todos">Todos los registros</option>
+                <option value="activos">🔴 Solo Activ@s</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <div style="margin-bottom: 15px;">
+                <span id="badge-estado" class="badge">🔴 Activas</span>
+            </div>
+            
+            <h3 id="titulo-seccion">Registro de Alertas SOS</h3>
+            <p id="desc-seccion" style="color: var(--text-light); margin-top: 5px;">
+                Visualización en tiempo real de las alertas de emergencia emitidas.
+            </p>
+            
+            <div class="placeholder-content">
+                [ La tabla de datos se renderizará aquí ]
+            </div>
+        </div>
+
+    </main>
+
+    <script src="dashboard.js?v=2.0"></script>
+</body>
+</html>

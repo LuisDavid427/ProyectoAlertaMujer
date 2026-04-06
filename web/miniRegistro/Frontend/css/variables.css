@@ -1,0 +1,27 @@
+:root {
+    --primary-color: #e63d7b;
+    --secondary-color: #fce4ec;
+    --dark-bg: #0f172a;
+    --text-main: #333;
+    --text-light: #666;
+    --white: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-main);
+    background-color: #fafafa;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
