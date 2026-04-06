@@ -46,4 +46,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Librería de Google para obtener la ubicación (GPS)
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    // Retrofit para peticiones HTTP al servidor
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    // Gson para traducir objetos Kotlin a JSON automáticamente
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 }

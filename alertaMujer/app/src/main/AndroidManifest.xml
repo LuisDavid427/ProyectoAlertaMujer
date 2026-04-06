@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".AlertaMujerApp"
@@ -12,7 +13,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
         <activity
-        android:name=".LoginActivity"
+        android:name=".auth.LoginActivity"
         android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
@@ -21,24 +22,27 @@
     </activity>
 
         <activity
-            android:name=".ContactosActivity"
+            android:name=".contactos.ContactosActivity"
             android:exported="false" />
 
         <activity
-            android:name=".AddContactoActivity"
+            android:name=".contactos.AddContactoActivity"
             android:exported="false" />
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".AdjuntarActivity"
+            android:name=".alerta.AdjuntarActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".main.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".RegistroActivity"
+            android:name=".auth.RegistroActivity"
+            android:exported="false" />
+        <activity
+            android:name=".alerta.SosActivity"
             android:exported="false" />
     </application>
 </manifest>

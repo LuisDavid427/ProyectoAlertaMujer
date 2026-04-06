@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
-    tools:context=".ContactosActivity">
+    tools:context=".contactos.ContactosActivity">
 
     <include
         android:id="@+id/btn_back"

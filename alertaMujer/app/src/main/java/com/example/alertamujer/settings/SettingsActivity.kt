@@ -1,16 +1,21 @@
-package com.example.alertamujer
+package com.example.alertamujer.settings
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.alertamujer.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
+
+    // ¡La magia del MVVM! Instanciamos nuestro cerebro
+    private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,36 +27,38 @@ class SettingsActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btn_save_account)
         val switchTheme = findViewById<SwitchMaterial>(R.id.switch_theme)
 
-        val sharedPreferences = getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPreferences.getBoolean("dark_mode", false)
-        switchTheme.isChecked = isDarkMode
+        // 1. OBSERVAR: Le preguntamos al ViewModel cómo debe estar el Switch al inicio
+        viewModel.isDarkMode.observe(this) { isDark ->
+            switchTheme.isChecked = isDark
+        }
 
-        // El botón de regreso simplemente cierra la actividad.
+        // 2. ACCIONES:
         btnBack.setOnClickListener {
             finish()
         }
 
         btnSave.setOnClickListener {
-            // Lógica para guardar el nombre de usuario y la contraseña
+            val user = etUsername.text.toString()
+            val pass = etPassword.text.toString()
+
+            // Le pasamos la tarea sucia al ViewModel
+            viewModel.saveCredentials(user, pass)
         }
 
         switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            // Simplemente aplicamos el tema y guardamos la preferencia.
-            // El sistema y nuestro código en onResume se encargarán del resto.
+            // La Actividad SOLO hace cosas visuales (cambiar los colores de Android)
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-            with(sharedPreferences.edit()) {
-                putBoolean("dark_mode", isChecked)
-                apply()
-            }
+
+            // Le avisa al ViewModel para que él guarde el dato en memoria
+            viewModel.updateTheme(isChecked)
         }
-
     }
-    companion object {
 
+    companion object {
         fun newIntent(context: Context): Intent {
             return Intent(context, SettingsActivity::class.java)
         }
