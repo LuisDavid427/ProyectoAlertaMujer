@@ -32,10 +32,9 @@ public class RolModel {
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "id_politica") // Esto crea la columna física en la tabla 'roles'
+    @JoinColumn(name = "id_politica")
     private PoliticaContrasenaModel politica;
 
-    // Relación Muchos a Muchos con Permisos
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "roles_permisos",
@@ -44,7 +43,6 @@ public class RolModel {
     )
     private List<PermisoModel> permisos;
 
-    // Relación hacia la tabla intermedia de usuarios
     @OneToMany(mappedBy = "rol")
     private List<UsuarioRolModel> usuariosAsignados;
 }

@@ -48,7 +48,7 @@ public class AlertaController {
         }
     }
 
-    // GET: http://localhost:8080/api/alertas/activas (Lo usará tu panel web)
+    // GET: http://localhost:8080/api/alertas/activas (Lo usará panel web)
     @GetMapping("/activas")
     public ResponseEntity<List<AlertaModel>> listarAlertasActivas() {
         List<AlertaModel> alertas = alertaService.obtenerAlertasActivas();

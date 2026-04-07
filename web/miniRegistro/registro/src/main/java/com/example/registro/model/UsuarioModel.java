@@ -37,15 +37,14 @@ public class UsuarioModel {
     private String email;
     
     @Column(nullable = false)
-    @JsonProperty("contrasena") // Para que Android pueda mandar "contrasena"
+    @JsonProperty("contrasena")
     private String contrasena_hash;
 
-    // Cambiamos nullable = false a true para que no explote si no se envía
     @Column(name = "fecha_nacimiento", nullable = true) 
     private LocalDateTime fechaNacimiento;
 
     @Column(name = "estado_usuario")
-    private Boolean estadoUsuario = true; // Ya tiene valor por defecto
+    private Boolean estadoUsuario = true; 
 
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;

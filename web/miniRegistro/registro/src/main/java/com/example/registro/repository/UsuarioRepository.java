@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface UsuarioRepository extends JpaRepository<UsuarioModel, Long> {
 
-    // Importante: El nombre del SP debe ser exacto al de MySQL
     @Query(value = "CALL sp_validar_login_admin(:p_email, :p_pass)", nativeQuery = true)
     Optional<Object[]> validarAccesoAdmin(@Param("p_email") String email, @Param("p_pass") String password);
 

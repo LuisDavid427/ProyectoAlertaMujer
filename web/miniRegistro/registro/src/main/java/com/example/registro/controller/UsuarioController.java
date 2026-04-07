@@ -24,7 +24,7 @@ import com.example.registro.service.UsuarioService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/usuarios") // Cambiamos la ruta para que sea específica de gestión
+@RequestMapping("/api/usuarios")
 @CrossOrigin(origins = "*")  
 public class UsuarioController {
 
@@ -37,19 +37,15 @@ private RolRepository rolRepository;
 @PostMapping("/guardar")
 public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioModel usuario) {
     try {
-        // 1. Buscamos el objeto Rol que creamos en el paso 1
         RolModel rolUsuaria = rolRepository.findByNombreRol("USUARIA")
             .orElseThrow(() -> new RuntimeException("Error: El rol 'USUARIA' no existe en la DB. ¡Ejecuta el INSERT!"));
 
-        // 2. Creamos el vínculo en la tabla intermedia (UsuarioRolModel)
         UsuarioRolModel relacion = new UsuarioRolModel();
         relacion.setUsuario(usuario);
         relacion.setRol(rolUsuaria);
 
-        // 3. Se lo asignamos al usuario (CascadeType.ALL hará el resto)
         usuario.setRolesAsignados(List.of(relacion));
 
-        // 4. ¡A guardar en MySQL!
         usuarioService.guardar(usuario);
         
         return ResponseEntity.ok(Map.of("success", true, "mensaje", "Registrada con éxito"));

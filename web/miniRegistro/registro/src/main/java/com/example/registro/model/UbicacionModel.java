@@ -27,7 +27,6 @@ public class UbicacionModel {
     @Column(name = "id_ubicacion")
     private Long id;
 
-    // Relación: Muchas ubicaciones pertenecen a una sola alerta
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_alerta", nullable = false)
     private AlertaModel alerta;

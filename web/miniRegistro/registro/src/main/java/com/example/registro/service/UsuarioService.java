@@ -4,14 +4,11 @@ import com.example.registro.model.UsuarioModel;
 import com.example.registro.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Map;       // ¡Esta falta!
-import java.util.HashMap;   // ¡Y esta también!
-import java.util.Optional;  // Esta ya la tenías, pero revísala.
-import java.util.List;      // Por si usas listas.
-
+import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.Optional; 
+import java.util.List;      
+
 
 @Service
 public class UsuarioService {

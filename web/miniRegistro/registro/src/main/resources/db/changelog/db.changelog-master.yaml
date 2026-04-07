@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/scripts/tablas.sql
+      
+#  - include:
+#      file: db/changelog/scripts/needApp.sql
+      
+#  - include:
+#      file: db/changelog/scripts/needWeb.sql

@@ -32,26 +32,23 @@ public class AuthController {
             ));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Map.of(
-                                     "success", false,
-                                     "error", "Credenciales incorrectas o permisos insuficientes"
-                                 ));
+                .body(Map.of(
+                    "success", false,
+                    "error", "Credenciales incorrectas o permisos insuficientes"
+                ));
         }
     }
 
-        // Este es el que usará Android (Luis, copia y pega esto debajo de tu login de admin)
     // POST: http://localhost:8080/api/auth/login-movil
     @PostMapping("/login-movil")
     public ResponseEntity<?> loginMovil(@RequestBody LoginRequest loginData) {
         
-        // Usamos el nuevo método del Service
         Map<String, Object> datosUsuario = usuarioService.validarUsuarioMovil(
             loginData.getEmail(), 
             loginData.getPassword()
         );
 
         if (datosUsuario != null) {
-            // Todo OK: Devolvemos success y el ID para que Android lo guarde
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "id_usuario", datosUsuario.get("id_usuario"),
@@ -59,7 +56,6 @@ public class AuthController {
                 "mensaje", "Acceso concedido"
             ));
         } else {
-            // Fallo: Usuario no existe o contraseña errónea
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                 "success", false,
                 "error", "Correo o contraseña incorrectos"

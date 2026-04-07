@@ -26,7 +26,6 @@ public class PermisoModel {
     @Column(length = 255)
     private String descripcion;
 
-    // Relación inversa: Un permiso puede estar en muchos roles
     @ManyToMany(mappedBy = "permisos")
     private List<RolModel> roles;
 }

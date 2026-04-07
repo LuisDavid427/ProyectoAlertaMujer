@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "politicas_contrasenas")
-@Data // Esto te ahorra escribir Getters y Setters
+@Data
 public class PoliticaContrasenaModel {
 
     @Id
@@ -22,7 +22,6 @@ public class PoliticaContrasenaModel {
     @Column(columnDefinition = "int default 20")
     private Integer maxlongitud = 20;
 
-    // Usamos Boolean para los tinyint(1) de MySQL
     @Column(name = "requiere_mayusculas")
     private Boolean requiereMayusculas = true;
 

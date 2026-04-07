@@ -29,7 +29,6 @@ public class AlertaModel {
     @Column(name = "id_alerta")
     private Integer id;
 
-    // Relación: Muchas alertas pertenecen a un usuario
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioModel usuario;
@@ -49,7 +48,6 @@ public class AlertaModel {
     @Column(name = "estado_alerta", length = 50)
     private String estadoAlerta = "activa";
 
-    // Relación: Una alerta puede tener un historial de ubicaciones GPS (para el rastreo en vivo)
     @OneToMany(mappedBy = "alerta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UbicacionModel> ubicaciones;
 }

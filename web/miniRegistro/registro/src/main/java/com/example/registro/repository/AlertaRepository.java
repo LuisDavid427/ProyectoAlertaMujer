@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface AlertaRepository extends JpaRepository<AlertaModel, Integer> {
     
-    // Trae todas las alertas dependiendo de su estado (ej. "activa")
     List<AlertaModel> findByEstadoAlerta(String estadoAlerta);
 }
