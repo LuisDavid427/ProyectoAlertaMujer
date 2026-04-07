@@ -13,7 +13,6 @@ import com.google.android.material.textfield.TextInputEditText
 
 class LoginActivity : AppCompatActivity() {
 
-    // ¡Conectamos el ViewModel!
     private val viewModel: LoginViewModel by viewModels()
 
     private lateinit var etEmail: TextInputEditText
@@ -52,12 +51,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun observarViewModel() {
-        // 1. Escuchamos si hay errores (ej. campos vacíos o, en el futuro, contraseña incorrecta)
         viewModel.mensajeError.observe(this) { mensaje ->
             Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
         }
 
-        // 2. Escuchamos si nos dan luz verde para entrar a la app
         viewModel.navegarAMain.observe(this) { navegar ->
             if (navegar) {
                 irAMain()
@@ -68,6 +65,6 @@ class LoginActivity : AppCompatActivity() {
     private fun irAMain() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // Destruye el Login para que no regrese al presionar "atrás"
+        finish()
     }
 }

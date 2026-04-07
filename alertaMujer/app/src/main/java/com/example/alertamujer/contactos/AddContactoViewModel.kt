@@ -10,7 +10,6 @@ import org.json.JSONObject
 
 class AddContactoViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Usamos este LiveData como una "señal" para avisar que se guardó con éxito
     private val _guardadoExitoso = MutableLiveData<Boolean>()
     val guardadoExitoso: LiveData<Boolean> get() = _guardadoExitoso
 
@@ -26,17 +25,14 @@ class AddContactoViewModel(application: Application) : AndroidViewModel(applicat
         nuevoContacto.put("numero", numero)
 
         if (index != -1) {
-            // Modo Edición
             contactosArray.put(index, nuevoContacto)
         } else {
-            // Modo Nuevo Contacto
             contactosArray.put(nuevoContacto)
         }
 
         editor.putString("contactos", contactosArray.toString())
         editor.apply()
 
-        // Disparamos la señal de éxito para que la Actividad reaccione
         _guardadoExitoso.value = true
     }
 }

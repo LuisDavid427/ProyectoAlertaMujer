@@ -6,10 +6,8 @@ import androidx.lifecycle.ViewModel
 
 class AdjuntarViewModel : ViewModel() {
 
-    // Definimos los tipos de captura posibles
     enum class TipoCaptura { FOTO, VIDEO, AUDIO, MOSTRAR_OPCIONES }
 
-    // Señal para que la Vista sepa qué debe abrir
     private val _accionCaptura = MutableLiveData<TipoCaptura>()
     val accionCaptura: LiveData<TipoCaptura> get() = _accionCaptura
 

@@ -17,7 +17,6 @@ class AdjuntarActivity : AppCompatActivity() {
 
     private val viewModel: AdjuntarViewModel by viewModels()
 
-    // --- LANZADORES MODERNOS (Sustituyen a startActivityForResult) ---
     private val tomarFotoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             Toast.makeText(this, "Foto capturada con éxito", Toast.LENGTH_SHORT).show()

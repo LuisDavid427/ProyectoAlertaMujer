@@ -14,7 +14,6 @@ import com.example.alertamujer.utils.configurarBotonAtras
 
 class AddContactoActivity : AppCompatActivity() {
 
-    // ¡Conectamos nuestro nuevo ViewModel!
     private val viewModel: AddContactoViewModel by viewModels()
 
     private var contactoIndex: Int = -1
@@ -30,7 +29,6 @@ class AddContactoActivity : AppCompatActivity() {
 
         configurarBotonAtras()
 
-        // Validamos si venimos a Editar o a Agregar
         if (intent.hasExtra("CONTACTO_INDEX")) {
             contactoIndex = intent.getIntExtra("CONTACTO_INDEX", -1)
             val nombre = intent.getStringExtra("CONTACTO_NOMBRE")
@@ -42,16 +40,13 @@ class AddContactoActivity : AppCompatActivity() {
             btnGuardarContacto.text = "Guardar Cambios"
         }
 
-        // Suscribimos la Vista a la señal del ViewModel
         observarViewModel()
 
-        // Acción del botón
         btnGuardarContacto.setOnClickListener {
             val nombre = etNombreContacto.text.toString()
             val numero = etNumeroContacto.text.toString()
 
             if (nombre.isNotBlank() && numero.isNotBlank()) {
-                // Le pasamos la tarea sucia al cerebro
                 viewModel.guardarContacto(nombre, numero, contactoIndex)
             } else {
                 Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
@@ -60,7 +55,6 @@ class AddContactoActivity : AppCompatActivity() {
     }
 
     private fun observarViewModel() {
-        // Cuando el ViewModel confirme que guardó, cerramos la pantalla
         viewModel.guardadoExitoso.observe(this) { exito ->
             if (exito) {
                 Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show()

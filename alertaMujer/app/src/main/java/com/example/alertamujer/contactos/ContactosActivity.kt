@@ -17,7 +17,6 @@ import com.google.android.material.button.MaterialButton
 
 class ContactosActivity : AppCompatActivity() {
 
-    // ¡Conectamos el ViewModel!
     private val viewModel: ContactosViewModel by viewModels()
 
     private lateinit var listaContactosLayout: LinearLayout
@@ -38,28 +37,23 @@ class ContactosActivity : AppCompatActivity() {
             AddContactoActivity.start(this)
         }
 
-        // Suscribimos la vista para que escuche al ViewModel
         observarViewModel()
     }
 
     override fun onResume() {
         super.onResume()
-        // Solo damos la orden, el ViewModel hace el trabajo pesado
         viewModel.cargarContactos()
     }
 
     private fun observarViewModel() {
-        // Cada vez que el ViewModel actualiza la lista, se dispara esta función
         viewModel.contactos.observe(this) { lista ->
             dibujarContactos(lista)
         }
     }
 
     private fun dibujarContactos(listaContactos: List<Contacto>) {
-        // 1. Limpiamos la pantalla
         listaContactosLayout.removeAllViews()
 
-        // 2. Dibujamos según el estado de la lista
         if (listaContactos.isEmpty()) {
             tvNoContacts.visibility = View.VISIBLE
         } else {
@@ -73,7 +67,6 @@ class ContactosActivity : AppCompatActivity() {
                 val btnEditar = contactView.findViewById<ImageButton>(R.id.btn_editar_contacto)
                 val btnEliminar = contactView.findViewById<ImageButton>(R.id.btn_eliminar_contacto)
 
-                // Usamos el modelo limpio de Kotlin
                 tvNombre.text = contacto.nombre
                 tvNumero.text = contacto.numero
 
@@ -99,7 +92,6 @@ class ContactosActivity : AppCompatActivity() {
             .setTitle("Confirmar Eliminación")
             .setMessage("¿Estás seguro de que quieres eliminar este contacto?")
             .setPositiveButton("Eliminar") { _, _ ->
-                // Le pasamos el problema al ViewModel
                 viewModel.eliminarContacto(index)
             }
             .setNegativeButton("Cancelar", null)

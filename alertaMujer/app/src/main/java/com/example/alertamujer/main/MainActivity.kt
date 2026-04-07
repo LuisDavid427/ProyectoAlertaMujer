@@ -40,38 +40,30 @@ class MainActivity : AppCompatActivity() {
 
         currentUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
-        // 1. PRIMERO enlazamos todas las vistas
         btnContactos = findViewById(R.id.btn_real_contactos)
         btnUserProfile = findViewById(R.id.btn_user_profile)
         btnUbicacion = findViewById(R.id.btn_ubicacion)
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar)
         btnSos = findViewById(R.id.btn_sos_circular)
 
-        // 2. LUEGO podemos modificarlas (ocultamos el botón adjuntar al inicio)
         btnSosAdjuntar.visibility = View.GONE
 
-        // --- OBSERVAR AL VIEWMODEL ---
         observarViewModel()
         observarEstadoSOS()
 
-        // --- LISTENERS ---
         btnContactos.setOnClickListener { ContactosActivity.start(this) }
         btnUserProfile.setOnClickListener { SettingsActivity.start(this) }
         btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
         btnSosAdjuntar.setOnClickListener { AdjuntarActivity.start(this) }
 
         btnSos.setOnClickListener {
-            // Evaluamos en qué estado estamos al presionar
             when (sosViewModel.estadoAlerta.value) {
                 is SosViewModel.EstadoAlerta.Activa -> {
-                    // Si ya estaba activa, la desactivamos
                     sosViewModel.desactivarAlerta()
                 }
                 is SosViewModel.EstadoAlerta.Enviando -> {
-                    // No hacemos nada, que espere a que termine
                 }
                 else -> {
-                    // Si estaba inactiva o dio error, disparamos el GPS y la alerta
                     dispararAlerta()
                 }
             }
@@ -81,17 +73,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         actualizarEstadoBotonUbicacion()
-        // Le decimos al ViewModel: "¡Oye, la pantalla volvió a abrirse, actualiza los datos!"
         viewModel.cargarDatosGenerales()
     }
 
     private fun observarViewModel() {
-        // 1. Observar cambios en los contactos
         viewModel.numeroContactos.observe(this) { cantidad ->
             btnContactos.text = "$cantidad\nContactos"
         }
 
-        // 2. Observar cambios en el tema
         viewModel.isDarkModeOn.observe(this) { isDark ->
             val expectedUiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
             if (currentUiMode != expectedUiMode) {
@@ -100,9 +89,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // =======================================================
-    // LA MÁQUINA DE ESTADOS VISUALES
-    // =======================================================
     private fun observarEstadoSOS() {
         sosViewModel.estadoAlerta.observe(this) { estado ->
             when (estado) {
@@ -126,7 +112,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 is SosViewModel.EstadoAlerta.Error -> {
                     Toast.makeText(this, estado.mensaje, Toast.LENGTH_LONG).show()
-                    // Si falla, volvemos todo a la normalidad forzando el estado Inactivo
                     sosViewModel.desactivarAlerta()
                 }
             }
@@ -134,16 +119,12 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-// =======================================================
-    // CAPTURA DE GPS REAL
-    // =======================================================
     private fun dispararAlerta() {
         val permisoAceptado = ContextCompat.checkSelfPermission(
             this, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         if (permisoAceptado) {
-            // ¡La magia del MVVM! La Actividad ya no lee sensores, solo da la orden
             sosViewModel.obtenerUbicacionYEnviar()
         } else {
             Toast.makeText(this, "Debes conceder permisos de ubicación primero", Toast.LENGTH_LONG).show()
@@ -151,9 +132,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // =================================================================
-    // LÓGICA DE PERMISOS (Se queda en la Vista porque interactúa con el SO)
-    // =================================================================
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()

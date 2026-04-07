@@ -10,11 +10,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.alertamujer.R
+import com.example.alertamujer.utils.configurarBotonAtras
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
 
-    // ¡La magia del MVVM! Instanciamos nuestro cerebro
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,15 +27,11 @@ class SettingsActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btn_save_account)
         val switchTheme = findViewById<SwitchMaterial>(R.id.switch_theme)
 
-        // 1. OBSERVAR: Le preguntamos al ViewModel cómo debe estar el Switch al inicio
         viewModel.isDarkMode.observe(this) { isDark ->
             switchTheme.isChecked = isDark
         }
 
-        // 2. ACCIONES:
-        btnBack.setOnClickListener {
-            finish()
-        }
+        configurarBotonAtras()
 
         btnSave.setOnClickListener {
             val user = etUsername.text.toString()

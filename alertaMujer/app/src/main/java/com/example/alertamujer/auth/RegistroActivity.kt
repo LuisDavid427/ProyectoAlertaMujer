@@ -10,7 +10,6 @@ import com.google.android.material.textfield.TextInputEditText
 
 class RegistroActivity : AppCompatActivity() {
 
-    // Conectamos el ViewModel
     private val viewModel: RegistroViewModel by viewModels()
 
     private lateinit var etNombre: TextInputEditText
@@ -40,18 +39,15 @@ class RegistroActivity : AppCompatActivity() {
             val email = etEmail.text.toString().trim()
             val pass = etPass.text.toString().trim()
 
-            // Delegamos la lógica al ViewModel
             viewModel.intentarRegistro(nombre, email, pass)
         }
     }
 
     private fun observarViewModel() {
-        // Escuchamos si hay errores de validación
         viewModel.mensajeError.observe(this) { mensaje ->
             Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
         }
 
-        // Escuchamos si el registro fue exitoso para cerrar la pantalla
         viewModel.registroExitoso.observe(this) { exito ->
             if (exito) {
                 Toast.makeText(this, "Registro exitoso", Toast.LENGTH_LONG).show()

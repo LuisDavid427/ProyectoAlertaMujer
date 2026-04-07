@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-// --- MODELOS (El contrato con tu base de datos) ---
+
 
 data class LoginRequest(
     val email: String,
@@ -16,7 +16,7 @@ data class LoginRequest(
 data class RegistroRequest(
     val nombre: String,
     val email: String,
-    val contrasena: String, // Coincide con tu UsuarioModel.java
+    val contrasena: String,
 )
 
 data class AuthResponse(
@@ -33,10 +33,8 @@ data class AlertaRequest(
     val mensaje: String
 )
 
-// --- INTERFAZ (Las rutas de Spring Boot) ---
 
 interface ApiService {
-    // Cambiamos la ruta para que apunte al nuevo método de Java
     @POST("api/auth/login-movil")
     suspend fun login(@Body datos: LoginRequest): Response<AuthResponse>
 
@@ -48,7 +46,6 @@ interface ApiService {
     suspend fun enviarAlertaSOS(@Body alerta: AlertaRequest): Response<Void>
 }
 
-// --- EL CLIENTE (El motor) ---
 
 object RetrofitClient {
     private const val BASE_URL = "http://localhost:8080/"

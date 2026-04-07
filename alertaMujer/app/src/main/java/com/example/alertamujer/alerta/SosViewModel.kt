@@ -17,11 +17,9 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
     private val _estadoAlerta = MutableLiveData<EstadoAlerta>(EstadoAlerta.Inactiva)
     val estadoAlerta: LiveData<EstadoAlerta> get() = _estadoAlerta
 
-    // 1. El ViewModel ahora es el dueño del sensor GPS
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(application)
 
-    // 2. Función pública que llamará la Actividad
-    @SuppressLint("MissingPermission") // Lo suprimimos porque la Actividad ya verificó el permiso antes de llamar aquí
+    @SuppressLint("MissingPermission")
     fun obtenerUbicacionYEnviar() {
         _estadoAlerta.value = EstadoAlerta.Enviando
 
@@ -37,20 +35,17 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // 3. Esta función ahora es privada, solo la usa el ViewModel por dentro
     private fun enviarAlertaAlServidor(latitud: Double, longitud: Double) {
-        // 1. Sacamos el ID que guardamos en el Login (usamos -1 si no hay nada)
         val prefs = getApplication<Application>().getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
         val userId = prefs.getInt("id_usuario", -1)
 
         viewModelScope.launch {
             try {
-                // 2. Ahora sí, llenamos los 4 campos que pide la clase
                 val request = AlertaRequest(
                     latitud = latitud,
                     longitud = longitud,
-                    id_usuario = userId, // <-- Aquí pasamos el ID real
-                    mensaje = "¡Auxilio! Alerta SOS iniciada" // <-- Y un mensaje
+                    id_usuario = userId,
+                    mensaje = "¡Auxilio! Alerta SOS iniciada"
                 )
 
                 val response = RetrofitClient.instance.enviarAlertaSOS(request)

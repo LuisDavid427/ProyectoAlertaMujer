@@ -13,11 +13,9 @@ import com.example.alertamujer.api.RegistroRequest
 
 class RegistroViewModel : ViewModel() {
 
-    // Señal para avisar que el registro fue exitoso
     private val _registroExitoso = MutableLiveData<Boolean>()
     val registroExitoso: LiveData<Boolean> get() = _registroExitoso
 
-    // Señal para mostrar errores de validación
     private val _mensajeError = MutableLiveData<String>()
     val mensajeError: LiveData<String> get() = _mensajeError
 
@@ -35,8 +33,6 @@ class RegistroViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _registroExitoso.value = true
                 } else {
-                    // --- ESTE ES EL CAMBIO CLAVE ---
-                    // Leemos el cuerpo del error crudo que envía Spring Boot
                     val errorRaw = response.errorBody()?.string() ?: "Error desconocido"
                     _mensajeError.value = "Error del Servidor: $errorRaw"
                 }
