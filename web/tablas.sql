@@ -1,4 +1,3 @@
-create database if not exists db_alerta_mujer;
 use db_alerta_mujer;
 
 SET FOREIGN_KEY_CHECKS = 0;

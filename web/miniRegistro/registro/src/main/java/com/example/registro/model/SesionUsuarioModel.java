@@ -8,41 +8,39 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "dispositivos")
+@Table(name = "sesion_usuarios")
 @Getter
 @Setter
-public class DispositivoModel {
+public class SesionUsuarioModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_dispositivo")
+    @Column(name = "id_sesion")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioModel usuario;
 
-    @Column(name = "modelo_dispositivo", length = 100)
-    private String modeloDispositivo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_dispositivo", nullable = false)
+    private DispositivoModel dispositivo;
 
-    @Column(name = "os_version", length = 50)
-    private String osVersion;
+    @Column(name = "fechainicio", insertable = false, updatable = false)
+    private LocalDateTime fechaInicio;
 
-    @Column(name = "token_fcm")
-    private String tokenFcm;
+    @Column(name = "fechafin")
+    private LocalDateTime fechaFin;
 
-    @Column(name = "fecha_registro", insertable = false, updatable = false)
-    private LocalDateTime fechaRegistro;
+    @Column(name = "ip_origen", length = 50)
+    private String ipOrigen;
 
-    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
-    private List<SesionUsuarioModel> sesiones;
+    @Column(name = "estadosesion", length = 50)
+    private String estadoSesion = "ACTIVA";
 }
