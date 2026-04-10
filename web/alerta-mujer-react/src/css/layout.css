@@ -1,0 +1,220 @@
+/* --- Estilos base que ya tenías (PC) --- */
+
+header {
+    padding: 20px 0;
+    background: var(--white);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    padding: 80px 0;
+    gap: 40px;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    margin-bottom: 35px;
+    max-width: 600px;
+    color: var(--text-light);
+}
+
+.hero-btns {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.hero-image img {
+    max-width: 370px;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.hero-info {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+.hero-info span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.features, .how-it-works {
+    padding: 100px 0;
+    text-align: center;
+}
+
+.subtitle {
+    margin-bottom: 50px;
+    color: var(--text-light);
+}
+
+footer {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 60px 0 40px;
+    text-align: center;
+}
+
+.footer-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden; 
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Login Layout --- */
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 40px 0;
+}
+
+.login-card {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+    /* 1. Fondo y Espaciado General */
+    body {
+        background-color: #f8f9fa; /* Un gris muy claro para que las tarjetas blancas resalten */
+    }
+
+    .container {
+        padding: 0 20px !important;
+    }
+
+    /* 2. Header: Más compacto y centrado */
+    .nav-container {
+        flex-direction: column;
+        padding: 15px 0;
+        gap: 10px;
+    }
+
+    header img {
+        height: 30px !important; /* Logo más discreto */
+    }
+
+    /* 3. Hero Section: Menos texto, más impacto */
+    .hero {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 30px 0 !important;
+        gap: 20px !important;
+    }
+
+    .hero-content h1 {
+        font-size: 1.8rem !important; /* Título más balanceado */
+        letter-spacing: -0.5px;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    .hero-btns {
+        flex-direction: column; /* Botones uno sobre otro para que sean fáciles de tocar */
+        width: 100%;
+    }
+
+    .hero-btns button, .hero-btns a {
+        width: 100% !important;
+        text-align: center;
+    }
+
+    /* 4. Login Card: Efecto Aplicación */
+    .login-main {
+        padding: 20px !important;
+        min-height: 70vh !important;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 20px !important; /* Bordes mucho más redondeados */
+        padding: 30px 20px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; /* Sombra muy suave */
+        border: 1px solid #eee;
+    }
+
+    /* 5. Inputs: Espacio para el dedo */
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        color: var(--primary-color); /* Usamos tu color rosa para los labels */
+    }
+
+    input.input-field {
+        height: 50px; /* Más altos para que sean fáciles de presionar */
+        border-radius: 12px !important;
+        background: #fdfdfd;
+    }
+
+    /* 6. Footer: Simplificado */
+    .footer-cta p {
+        font-size: 1.2rem !important;
+    }
+    /* Buscamos los contenedores que tengan las tarjetas o pasos */
+    .features, .how-it-works, .steps, .grid { 
+        display: flex !important;
+        flex-direction: column !important; /* ¡Obligatorio! Los pone uno debajo del otro */
+        align-items: center !important;
+        gap: 20px !important;
+        padding: 40px 20px !important;
+    }
+
+    /* Si tus tarjetas tienen un ancho fijo (ej. 300px), esto lo rompe y lo ajusta */
+    .feature-card, .step-item, .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    /* Si usas imágenes o iconos dentro, que no se deformen */
+    .feature-card img, .step-item img {
+        max-width: 80px; /* O el tamaño que prefieras para móvil */
+        height: auto;
+    }
+}

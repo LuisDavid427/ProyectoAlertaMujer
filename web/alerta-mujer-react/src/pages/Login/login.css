@@ -1,0 +1,47 @@
+/* src/pages/Login/login.css */
+
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px); /* Ajusta según el alto de tu header */
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+/* IMPORTANTE: Esto hace que el label esté ARRIBA del input */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.input-field {
+    width: 100%; /* Forzar que ocupe todo el ancho de la tarjeta */
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.login-btn {
+    width: 100%;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
