@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
         <activity
-        android:name=".auth.LoginActivity"
+        android:name=".ui.auth.LoginActivity"
         android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
@@ -23,24 +23,24 @@
     </activity>
 
         <activity
-            android:name=".contactos.ContactosActivity"
+            android:name=".ui.contactos.ContactosActivity"
             android:exported="false" />
 
         <activity
-            android:name=".contactos.AddContactoActivity"
+            android:name=".ui.contactos.AddContactoActivity"
             android:exported="false" />
 
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".alerta.AdjuntarActivity"
+            android:name=".ui.alerta.AdjuntarActivity"
             android:exported="false" />
         <activity
-            android:name=".main.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".auth.RegistroActivity"
+            android:name=".ui.auth.RegistroActivity"
             android:exported="false" />
         <activity
             android:name=".alerta.SosActivity"

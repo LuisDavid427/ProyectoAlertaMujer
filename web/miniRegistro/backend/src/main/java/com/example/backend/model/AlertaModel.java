@@ -36,12 +36,6 @@ public class AlertaModel {
     @Column(name = "fecha", insertable = false, updatable = false)
     private LocalDateTime fecha;
 
-    @Column(name = "url_imagen", length = 255)
-    private String urlImagen;
-
-    @Column(name = "url_audio", length = 255)
-    private String urlAudio;
-
     @Column(name = "mensaje", length = 250, nullable = false)
     private String mensaje;
 
@@ -50,4 +44,9 @@ public class AlertaModel {
 
     @OneToMany(mappedBy = "alerta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UbicacionModel> ubicaciones;
+
+    // --- NUEVA RELACIÓN ---
+    // Una alerta puede tener muchas evidencias (fotos, videos, audios)
+    @OneToMany(mappedBy = "alerta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EvidenciaModel> evidencias;
 }

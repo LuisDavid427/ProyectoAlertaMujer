@@ -74,10 +74,8 @@ create table alertas (
     id_alerta int primary key auto_increment,
     id_usuario int not null,
     fecha datetime default current_timestamp,
-    url_imagen varchar(255) null,
-    url_audio varchar(255) null,
     mensaje varchar(250) not null,
-    estado_alerta varchar(50) default 'ACTIVA',
+    estado_alerta varchar(50) default 'activa',
     foreign key (id_usuario) references usuarios(id_usuario)
 );
 
@@ -108,6 +106,15 @@ create table log_errores (
 -- FASE 3: TRIÁNGULO DE SEGURIDAD Y TABLAS INTERMEDIAS
 -- ==========================================
 
+create table evidencias (
+    id_evidencia int primary key auto_increment,
+    id_alerta int not null,
+    url varchar(255) not null,
+    tipo varchar(50) not null,
+    fecha_envio datetime default current_timestamp,
+    foreign key (id_alerta) references alertas(id_alerta) on delete cascade
+);
+
 create table sesion_usuarios (
     id_sesion int primary key auto_increment,
     id_usuario int not null,
@@ -115,7 +122,7 @@ create table sesion_usuarios (
     fechainicio datetime default current_timestamp,
     fechafin datetime null,
     ip_origen varchar(50),
-    estadosesion varchar(50) default 'ACTIVA',
+    estadosesion varchar(50) default 'activa',
     foreign key (id_usuario) references usuarios(id_usuario) on delete cascade,
     foreign key (id_dispositivo) references dispositivos(id_dispositivo) on delete cascade
 );
@@ -128,7 +135,7 @@ create table ubicaciones (
     velocidad decimal(5, 2) null,
     precision_gps decimal(5, 2) null,
     fecha_hora_registro datetime default current_timestamp,
-    foreign key (id_alerta) references alertas(id_alerta)
+    foreign key (id_alerta) references alertas(id_alerta) on delete cascade
 );
 
 create table usuarios_roles (

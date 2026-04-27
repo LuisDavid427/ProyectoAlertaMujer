@@ -1,6 +1,6 @@
 // src/services/authService.js
 
-const API_URL = 'http://192.168.1.15:8080/api/auth';
+const API_URL = 'http://192.168.1.22:8080/api/auth';
 
 export async function loginApp(email, password) {
     const respuesta = await fetch(`${API_URL}/login`, {
