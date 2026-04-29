@@ -97,7 +97,7 @@ export default function Login() {
                 </div>
             </main>
 
-            {/* Invocamos nuestra ficha de Lego para los errores */}
+            {/* Invocamos nuestro componente para los errores */}
             <ErrorModal 
                 isOpen={isErrorOpen} 
                 mensaje={errorMessage} 

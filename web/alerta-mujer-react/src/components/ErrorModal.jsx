@@ -4,7 +4,7 @@ export default function ErrorModal({ isOpen, mensaje, onClose }) {
     // Si isOpen es falso, no renderiza absolutamente nada (Bajo acoplamiento perfecto)
     if (!isOpen) return null;
 
-    // Estilos en línea básicos para la capa oscura (si no los tienes en tu CSS)
+    // Estilos en línea básicos para la capa oscura 
     const capaOscuraStyle = {
         position: 'fixed',
         top: 0, left: 0, width: '100%', height: '100%',
