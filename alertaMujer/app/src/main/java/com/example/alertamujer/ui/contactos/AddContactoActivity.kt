@@ -64,14 +64,4 @@ class AddContactoActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, AddContactoActivity::class.java)
-        }
-
-        fun start(context: Context) {
-            val intent = newIntent(context)
-            context.startActivity(intent)
-        }
-    }
 }

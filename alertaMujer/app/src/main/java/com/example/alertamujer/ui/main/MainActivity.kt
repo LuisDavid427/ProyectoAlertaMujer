@@ -18,8 +18,10 @@ import com.example.alertamujer.presentation.alerta.SosViewModel
 import com.example.alertamujer.ui.contactos.ContactosActivity
 import com.example.alertamujer.presentation.main.MainViewModel
 import com.example.alertamujer.ui.settings.SettingsActivity
+import com.example.alertamujer.ui.settings.MensajeActivity
 import com.example.alertamujer.utils.PermissionUtils
 import com.google.android.material.button.MaterialButton
+import com.example.alertamujer.utils.abrirActividad
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnUserProfile: ImageButton
     private lateinit var btnSosAdjuntar: MaterialButton
     private lateinit var btnSos: MaterialButton
+    private lateinit var btnMensaje: MaterialButton // <-- VARIABLE NUEVA
 
     private var currentUiMode: Int = 0
 
@@ -46,24 +49,30 @@ class MainActivity : AppCompatActivity() {
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar)
         btnSos = findViewById(R.id.btn_sos_circular)
 
+        // <-- ENLACE DEL NUEVO BOTÓN (Cambia el ID si en tu XML se llama distinto)
+        btnMensaje = findViewById(R.id.btn_mensaje)
+
         btnSosAdjuntar.visibility = View.GONE
 
         observarViewModel()
         observarEstadoSOS()
 
-        btnContactos.setOnClickListener { ContactosActivity.start(this) }
-        btnUserProfile.setOnClickListener { SettingsActivity.start(this) }
+
         btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
+
+        btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
+        btnContactos.setOnClickListener { abrirActividad<ContactosActivity>() }
+        btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
+
         btnSosAdjuntar.setOnClickListener {
-            // 1. Obtenemos el ID de la alerta que guardó el SosViewModel
             val idActual = sosViewModel.idAlertaActual.value
 
             if (idActual != null) {
-                // 2. Pasamos el contexto explícito y el ID
-                AdjuntarActivity.start(this@MainActivity, idActual)
+                abrirActividad<AdjuntarActivity> {
+                    putExtra("EXTRA_ID_ALERTA", idActual)
+                }
             } else {
-                // Seguridad por si el botón aparece pero no hay ID (no debería pasar)
-                Toast.makeText(this, "Error: No se encontró el ID de la alerta", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Error: No se encontró el ID de la alerta", Toast.LENGTH_SHORT).show()
             }
         }
 

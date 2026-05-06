@@ -94,12 +94,4 @@ class AdjuntarActivity : AppCompatActivity() {
         startActivity(intent) // Aquí podrías usar otro launcher para procesar el audio
     }
 
-    companion object {
-        fun start(context: Context, idAlertaActual: Int) {
-            val intent = Intent(context, AdjuntarActivity::class.java).apply {
-                putExtra("EXTRA_ID_ALERTA", idAlertaActual)
-            }
-            context.startActivity(intent)
-        }
-    }
 }

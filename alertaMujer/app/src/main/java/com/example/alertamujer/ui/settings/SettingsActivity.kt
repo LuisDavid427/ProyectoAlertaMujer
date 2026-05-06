@@ -55,14 +55,4 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, SettingsActivity::class.java)
-        }
-
-        fun start(context: Context) {
-            val intent = newIntent(context)
-            context.startActivity(intent)
-        }
-    }
 }

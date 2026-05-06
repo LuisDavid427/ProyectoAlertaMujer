@@ -50,11 +50,14 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
             .getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
         val userId = prefs.getInt("id_usuario", -1)
 
+        // NUEVO: Leemos el mensaje personalizado. Si no hay nada, usa el de por defecto.
+        val mensajePersonalizado = prefs.getString("mensaje_sos", "¡Auxilio! Alerta SOS iniciada") ?: "¡Auxilio! Alerta SOS iniciada"
+
         viewModelScope.launch {
             try {
                 val request = AlertaRequest(
                     id_usuario = userId,
-                    mensaje = "¡Auxilio! Alerta SOS iniciada",
+                    mensaje = mensajePersonalizado,
                     latitud = latitud,
                     longitud = longitud
                 )

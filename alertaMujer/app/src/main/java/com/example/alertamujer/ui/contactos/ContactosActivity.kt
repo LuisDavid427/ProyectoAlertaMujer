@@ -14,8 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.contactos.Contacto
 import com.example.alertamujer.presentation.contactos.ContactosViewModel
+import com.example.alertamujer.utils.abrirActividad
 import com.example.alertamujer.utils.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
+
+
 
 class ContactosActivity : AppCompatActivity() {
 
@@ -35,9 +38,7 @@ class ContactosActivity : AppCompatActivity() {
         tvNoContacts = findViewById(R.id.tv_no_contacts)
         btnAgregarContacto = findViewById(R.id.btn_agregar_contacto)
 
-        btnAgregarContacto.setOnClickListener {
-            AddContactoActivity.start(this)
-        }
+        btnAgregarContacto.setOnClickListener { abrirActividad<AddContactoActivity>() }
 
         observarViewModel()
     }
@@ -62,7 +63,8 @@ class ContactosActivity : AppCompatActivity() {
             tvNoContacts.visibility = View.GONE
 
             for (contacto in listaContactos) {
-                val contactView = LayoutInflater.from(this).inflate(R.layout.item_contacto, listaContactosLayout, false)
+                val contactView = LayoutInflater.from(this)
+                    .inflate(R.layout.item_contacto, listaContactosLayout, false)
 
                 val tvNombre = contactView.findViewById<TextView>(R.id.tv_nombre_contacto)
                 val tvNumero = contactView.findViewById<TextView>(R.id.tv_numero_contacto)
@@ -100,14 +102,4 @@ class ContactosActivity : AppCompatActivity() {
             .show()
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, ContactosActivity::class.java)
-        }
-
-        fun start(context: Context) {
-            val intent = newIntent(context)
-            context.startActivity(intent)
-        }
-    }
 }
