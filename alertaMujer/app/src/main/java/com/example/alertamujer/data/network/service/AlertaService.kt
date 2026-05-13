@@ -3,11 +3,13 @@ package com.example.alertamujer.data.network.services
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.AlertaResponse
 import com.example.alertamujer.data.dto.UbicacionRequest
+import com.example.alertamujer.data.dto.AlertaRecibidaDTO
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.GET
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Multipart
@@ -33,4 +35,8 @@ interface AlertaService {
         @Part archivo: MultipartBody.Part,
         @Part("tipo") tipo: RequestBody
     ): Response<Map<String, Any>>
+
+    // EL NUEVO para recibir (Asegúrate de que la ruta coincida con la de tu Spring Boot):
+    @GET("api/alertas/activas")
+    suspend fun obtenerAlertasActivas(): Response<List<AlertaRecibidaDTO>>
 }

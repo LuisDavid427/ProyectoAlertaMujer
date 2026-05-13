@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AlertaRequest {
     
     @JsonProperty("id_usuario") // Esto amarra el nombre de Android con el de Java
-    private Integer idUsuario;
+    private long idUsuario;
     private String mensaje;
     // --- NUEVOS CAMPOS GPS ---
     private Double latitud;

@@ -22,7 +22,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginData) {
-        
+        System.out.println("LLEGÓ DE REACT: Correo=" + loginData.getEmail() + " | Pass=" + loginData.getPassword());
         boolean esValido = usuarioService.esAdminValido(loginData.getEmail(), loginData.getPassword());
         
         if (esValido) {

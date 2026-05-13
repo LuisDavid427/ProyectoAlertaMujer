@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -56,4 +58,14 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // Importa el BoM de Firebase para gestionar versiones automáticamente
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+
+// Dependencia para notificaciones push
+    implementation("com.google.firebase:firebase-messaging")
+
+// Opcional: Para analíticas y diagnóstico de las notificaciones
+    implementation("com.google.firebase:firebase-analytics")
 }

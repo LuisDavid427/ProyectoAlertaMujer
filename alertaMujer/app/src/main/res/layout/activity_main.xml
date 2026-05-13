@@ -37,6 +37,22 @@
         app:layout_constraintVertical_bias="0.0"
         app:tint="?attr/colorPrimary" />
 
+    <ImageButton
+        android:id="@+id/btn_chats"
+        android:layout_width="35dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="84dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="chats"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/outline_chat_24"
+        app:layout_constraintBottom_toBottomOf="@+id/txt_saludo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_saludo"
+        app:layout_constraintVertical_bias="0.0"
+        app:tint="?attr/colorPrimary" />
+
     <LinearLayout
         android:id="@+id/layout_cards"
         android:layout_width="match_parent"

@@ -19,6 +19,7 @@ import com.example.alertamujer.ui.contactos.ContactosActivity
 import com.example.alertamujer.presentation.main.MainViewModel
 import com.example.alertamujer.ui.settings.SettingsActivity
 import com.example.alertamujer.ui.settings.MensajeActivity
+import com.example.alertamujer.ui.contactos.ChatsActivity
 import com.example.alertamujer.utils.PermissionUtils
 import com.google.android.material.button.MaterialButton
 import com.example.alertamujer.utils.abrirActividad
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSosAdjuntar: MaterialButton
     private lateinit var btnSos: MaterialButton
     private lateinit var btnMensaje: MaterialButton // <-- VARIABLE NUEVA
+    private lateinit var btnChats: ImageButton
 
     private var currentUiMode: Int = 0
 
@@ -48,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         btnUbicacion = findViewById(R.id.btn_ubicacion)
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar)
         btnSos = findViewById(R.id.btn_sos_circular)
+        btnChats = findViewById(R.id.btn_chats)
 
         // <-- ENLACE DEL NUEVO BOTÓN (Cambia el ID si en tu XML se llama distinto)
         btnMensaje = findViewById(R.id.btn_mensaje)
@@ -63,6 +66,8 @@ class MainActivity : AppCompatActivity() {
         btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
         btnContactos.setOnClickListener { abrirActividad<ContactosActivity>() }
         btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
+        btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
+
 
         btnSosAdjuntar.setOnClickListener {
             val idActual = sosViewModel.idAlertaActual.value

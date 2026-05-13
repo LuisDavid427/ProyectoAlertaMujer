@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
 
+
     <application
         android:usesCleartextTraffic="true"
         android:name=".AlertaMujerApp"
@@ -49,6 +50,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.settings.MensajeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.contactos.ChatsActivity"
             android:exported="false" />
     </application>
 </manifest>

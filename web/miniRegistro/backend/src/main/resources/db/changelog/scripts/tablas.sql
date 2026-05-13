@@ -30,12 +30,6 @@ create table configuraciones_seguridad (
     descripcion varchar(255)
 );
 
-create table contactos (
-    id_contacto int primary key auto_increment,
-    nombre varchar(80) not null,
-    telefono varchar(15) not null
-);
-
 create table unidades_respuestas (
     id_unidad int primary key auto_increment,
     nombre_unidad varchar(250) not null,
@@ -178,7 +172,6 @@ create table usuarios_contactos (
     id_uc int primary key auto_increment,
     id_usuario int not null,
     id_contacto int not null,
-    parentesco varchar(150),
     foreign key (id_usuario) references usuarios(id_usuario),
-    foreign key (id_contacto) references contactos(id_contacto)
+    foreign key (id_contacto) references usuarios(id_usuario)
 );

@@ -1,12 +1,14 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.UsuarioDashboardDTO;
 import com.example.backend.model.UsuarioModel;
 import com.example.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Optional; 
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.List;      
 
 
@@ -57,6 +59,8 @@ public class UsuarioService {
         
         return null; // Credenciales incorrectas o usuario no encontrado
     }
+    
+
 }
 
 

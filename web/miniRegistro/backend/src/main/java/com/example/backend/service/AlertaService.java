@@ -1,7 +1,9 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.AlertaDashboardDTO;
 import com.example.backend.dto.AlertaRequest;
 import com.example.backend.dto.UbicacionRequest;
+import com.example.backend.dto.UsuarioDashboardDTO;
 import com.example.backend.model.AlertaModel;
 import com.example.backend.model.UbicacionModel;
 import com.example.backend.model.UsuarioModel;
@@ -23,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AlertaService {
@@ -151,7 +154,5 @@ public class AlertaService {
         alertaRepository.save(alerta);
     }
 
-    public List<AlertaModel> obtenerAlertasActivas() {
-        return alertaRepository.findByEstadoAlerta("activa");
-    }
+
 }

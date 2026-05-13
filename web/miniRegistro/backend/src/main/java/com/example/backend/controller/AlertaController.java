@@ -4,6 +4,7 @@ import com.example.backend.dto.AlertaRequest;
 import com.example.backend.dto.UbicacionRequest;
 import com.example.backend.model.AlertaModel;
 import com.example.backend.service.AlertaService;
+import com.example.backend.dto.AlertaDashboardDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -117,10 +118,5 @@ public class AlertaController {
         }
     }
 
-    // GET: http://localhost:8080/api/alertas/activas (Lo usará panel web)
-    @GetMapping("/activas")
-    public ResponseEntity<List<AlertaModel>> listarAlertasActivas() {
-        List<AlertaModel> alertas = alertaService.obtenerAlertasActivas();
-        return ResponseEntity.ok(alertas);
-    }
+
 }

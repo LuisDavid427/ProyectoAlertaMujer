@@ -20,3 +20,13 @@ data class UbicacionRequest(
     val latitud: Double,
     val longitud: Double
 )
+
+data class AlertaRecibidaDTO(
+    val id_alerta: Int,
+    val id_usuario: Int,
+    val nombre_usuario: String, // Tu backend debería enviar el nombre para saber quién es
+    val mensaje: String,
+    val latitud: Double,
+    val longitud: Double,
+    val fecha_hora: String // Fecha en la que se emitió
+)
