@@ -2,6 +2,7 @@ package com.example.alertamujer.data.repository
 
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.AlertaResponse
+import com.example.alertamujer.data.dto.UbicacionRequest
 import com.example.alertamujer.data.dto.AlertaRecibidaDTO
 import com.example.alertamujer.data.network.RetrofitClient
 import retrofit2.Response
@@ -22,8 +23,17 @@ class AlertaRepository {
         return RetrofitClient.alertaService.subirEvidencia(idAlerta, archivo, tipo)
     }
 
-    suspend fun obtenerAlertasActivas(): Response<List<AlertaRecibidaDTO>> {
-        // Asegúrate de que "apiService" o "alertaService" sea como llamas a tu instancia de Retrofit aquí
-        return RetrofitClient.alertaService.obtenerAlertasActivas()
+    suspend fun enviarUbicacionContinua(
+        idAlerta: Int,
+        request: UbicacionRequest
+    ): Response<Map<String, Any>> {
+        return RetrofitClient.alertaService.enviarUbicacionContinua(idAlerta, request)
     }
+
+    suspend fun desactivarAlerta(
+        idAlerta: Int
+    ): Response<Map<String, Any>> {
+        return RetrofitClient.alertaService.desactivarAlerta(idAlerta)
+    }
+
 }

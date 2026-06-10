@@ -1,7 +1,5 @@
 package com.example.alertamujer.ui.contactos
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -11,7 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.contactos.AddContactoViewModel
-import com.example.alertamujer.utils.configurarBotonAtras
+import com.example.alertamujer.util.configurarBotonAtras
 
 class AddContactoActivity : AppCompatActivity() {
 

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.chat.ChatViewModel
-import com.example.alertamujer.utils.configurarBotonAtras
+import com.example.alertamujer.util.configurarBotonAtras
 
 class ChatsActivity : AppCompatActivity() {
 

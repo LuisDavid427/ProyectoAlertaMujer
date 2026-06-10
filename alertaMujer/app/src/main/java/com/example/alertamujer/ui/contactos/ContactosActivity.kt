@@ -1,6 +1,5 @@
 package com.example.alertamujer.ui.contactos
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.contactos.Contacto
 import com.example.alertamujer.presentation.contactos.ContactosViewModel
-import com.example.alertamujer.utils.abrirActividad
-import com.example.alertamujer.utils.configurarBotonAtras
+import com.example.alertamujer.util.abrirActividad
+import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
 
 

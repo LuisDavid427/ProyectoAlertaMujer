@@ -35,8 +35,4 @@ interface AlertaService {
         @Part archivo: MultipartBody.Part,
         @Part("tipo") tipo: RequestBody
     ): Response<Map<String, Any>>
-
-    // EL NUEVO para recibir (Asegúrate de que la ruta coincida con la de tu Spring Boot):
-    @GET("api/alertas/activas")
-    suspend fun obtenerAlertasActivas(): Response<List<AlertaRecibidaDTO>>
 }

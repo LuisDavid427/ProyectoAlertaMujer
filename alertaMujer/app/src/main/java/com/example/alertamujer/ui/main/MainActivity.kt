@@ -20,9 +20,9 @@ import com.example.alertamujer.presentation.main.MainViewModel
 import com.example.alertamujer.ui.settings.SettingsActivity
 import com.example.alertamujer.ui.settings.MensajeActivity
 import com.example.alertamujer.ui.contactos.ChatsActivity
-import com.example.alertamujer.utils.PermissionUtils
+import com.example.alertamujer.util.PermissionUtils
 import com.google.android.material.button.MaterialButton
-import com.example.alertamujer.utils.abrirActividad
+import com.example.alertamujer.util.abrirActividad
 
 class MainActivity : AppCompatActivity() {
 

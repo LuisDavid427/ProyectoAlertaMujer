@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "569848694335",
+    "project_id": "alerta-mujer-d404e",
+    "storage_bucket": "alerta-mujer-d404e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569848694335:android:81296fb46d0bd792d61a8a",
+        "android_client_info": {
+          "package_name": "com.example.alertamujer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaLQfJBtK9aUPRQDcco-0IirD3l4NDqn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -54,7 +54,7 @@ public class AlertaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
         }
     }
-// ... tu código anterior (@PostMapping("/emitir") y @GetMapping("/activas")) ...
+
 
     // POST: http://localhost:8080/api/alertas/{id}/ubicacion
     @PostMapping("/{id}/ubicacion")

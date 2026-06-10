@@ -1,4 +1,4 @@
-package com.example.alertamujer.utils
+package com.example.alertamujer.util
 import com.example.alertamujer.R
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity

@@ -37,7 +37,7 @@ private RolRepository rolRepository;
 @PostMapping("/guardar")
 public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioModel usuario) {
     try {
-        RolModel rolUsuaria = rolRepository.findByNombreRol("USUARIA")
+        RolModel rolUsuaria = rolRepository.findByNombreRol("usuaria")
             .orElseThrow(() -> new RuntimeException("Error: El rol 'USUARIA' no existe en la DB. ¡Ejecuta el INSERT!"));
 
         UsuarioRolModel relacion = new UsuarioRolModel();
@@ -57,8 +57,4 @@ public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioModel usuario) {
 
 
 
-    @GetMapping("/listar")
-    public List<UsuarioModel> listar() {
-        return usuarioService.listarTodos();
-    }
 }

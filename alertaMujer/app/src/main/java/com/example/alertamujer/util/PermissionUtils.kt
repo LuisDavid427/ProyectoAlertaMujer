@@ -1,4 +1,4 @@
-package com.example.alertamujer.utils
+package com.example.alertamujer.util
 
 import android.Manifest
 import android.content.Context

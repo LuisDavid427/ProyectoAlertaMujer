@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.settings.MensajeViewModel
-import com.example.alertamujer.utils.configurarBotonAtras
+import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 

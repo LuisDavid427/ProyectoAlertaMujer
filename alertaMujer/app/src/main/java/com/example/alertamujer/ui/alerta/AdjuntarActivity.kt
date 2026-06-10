@@ -1,6 +1,5 @@
 package com.example.alertamujer.ui.alerta
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -12,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.alerta.AdjuntarViewModel
-import com.example.alertamujer.utils.configurarBotonAtras
+import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.io.FileOutputStream

@@ -59,7 +59,7 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 // =================================================================
-                // VÍA 1: POR LA PROPIA APLICACIÓN (Hacia tu Spring Boot)
+                // VÍA 1: POR LA PROPIA APLICACIÓN (Hacia Spring Boot)
                 // =================================================================
                 val request = AlertaRequest(
                     id_usuario = userId,
@@ -76,7 +76,7 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
                     _estadoAlerta.value = EstadoAlerta.Activa
 
                     // =================================================================
-                    // VÍA 2: POR SMS EN SEGUNDO PLANO (A los familiares)
+                    // VÍA 2: POR SMS EN SEGUNDO PLANO
                     // Se ejecuta justo después de que Spring Boot confirma la alerta
                     // =================================================================
                     enviarSmsOculto(mensajePersonalizado, latitud, longitud)

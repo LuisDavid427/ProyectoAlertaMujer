@@ -69,8 +69,6 @@ export default function Dashboard() {
             <main className="container">
                 <div className="dashboard-header">
                         <h2>Administrar</h2>
-                        {/* Aquí está el cambio: he añadido la lógica condicional para la clase active-usuarios-bg */}
-
                         <div className={`toggle-container ${vistaActual === 'usuarios' ? 'usuarios-active' : ''}`}>
                             <span className={`toggle-label ${vistaActual === 'alertas' ? 'active-alertas' : ''}`}>Alertas</span>
                             <label className="switch">
