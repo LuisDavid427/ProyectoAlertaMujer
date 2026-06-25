@@ -56,6 +56,9 @@ public class UsuarioModel {
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
+    @Column(name = "fcm_token", length = 255)
+    private String fcmToken;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UsuarioRolModel> rolesAsignados;
 

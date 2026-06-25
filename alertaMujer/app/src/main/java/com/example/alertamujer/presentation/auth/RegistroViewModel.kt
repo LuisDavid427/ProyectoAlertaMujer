@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.alertamujer.data.dto.RegistroRequest
 import com.example.alertamujer.data.dto.AuthResponse
-import com.example.alertamujer.data.repository.AuthRepository
+import com.example.alertamujer.data.network.repository.AuthRepository
 import kotlinx.coroutines.launch
 import retrofit2.Response
 

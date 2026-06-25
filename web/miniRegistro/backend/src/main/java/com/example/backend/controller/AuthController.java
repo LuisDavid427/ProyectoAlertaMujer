@@ -1,15 +1,13 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.FcmTokenRequest;
 import com.example.backend.dto.LoginRequest;
+import com.example.backend.service.AuthService;
 import com.example.backend.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
@@ -18,35 +16,15 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    private UsuarioService usuarioService;
+    private AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginData) {
-        System.out.println("LLEGÓ DE REACT: Correo=" + loginData.getEmail() + " | Pass=" + loginData.getPassword());
-        boolean esValido = usuarioService.esAdminValido(loginData.getEmail(), loginData.getPassword());
-        
-        if (esValido) {
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "mensaje", "Acceso concedido como Administrador"
-            ));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of(
-                    "success", false,
-                    "error", "Credenciales incorrectas o permisos insuficientes"
-                ));
-        }
-    }
+    @Autowired
+    private UsuarioService usuarioService;
 
     // POST: http://localhost:8080/api/auth/login-movil
     @PostMapping("/login-movil")
     public ResponseEntity<?> loginMovil(@RequestBody LoginRequest loginData) {
-        
-        Map<String, Object> datosUsuario = usuarioService.validarUsuarioMovil(
-            loginData.getEmail(), 
-            loginData.getPassword()
-        );
+        Map<String, Object> datosUsuario = authService.validarMovil(loginData.getEmail(), loginData.getPassword());
 
         if (datosUsuario != null) {
             return ResponseEntity.ok(Map.of(
@@ -59,6 +37,40 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                 "success", false,
                 "error", "Correo o contraseña incorrectos"
+            ));
+        }
+    }
+
+    // POST: http://localhost:8080/api/auth/login
+    @PostMapping("/login")
+    public ResponseEntity<?> loginWeb(@RequestBody LoginRequest loginData) {
+        boolean esValido = authService.validarAdmin(loginData.getEmail(), loginData.getPassword());
+        
+        if (esValido) {
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "mensaje", "Acceso concedido como Administrador"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "success", false,
+                "error", "Credenciales incorrectas o permisos insuficientes"
+            ));
+        }
+    }
+
+    @PostMapping("/actualizar-token")
+    public ResponseEntity<?> actualizarToken(@RequestBody FcmTokenRequest request) {
+        try {
+            usuarioService.actualizarTokenFcm(request.getIdUsuario(), request.getToken());
+            return ResponseEntity.ok(Map.of(
+                "success", true, 
+                "mensaje", "Token de FCM actualizado correctamente"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false, 
+                "error", e.getMessage()
             ));
         }
     }

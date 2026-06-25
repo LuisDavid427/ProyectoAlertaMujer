@@ -2,6 +2,7 @@ package com.example.alertamujer.data.network
 
 import com.example.alertamujer.data.network.services.AuthService
 import com.example.alertamujer.data.network.services.AlertaService
+import com.example.alertamujer.data.network.services.UsuarioService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -21,5 +22,9 @@ object RetrofitClient {
 
     val alertaService: AlertaService by lazy {
         retrofit.create(AlertaService::class.java)
+    }
+
+    val usuarioService: UsuarioService by lazy {
+        retrofit.create(UsuarioService::class.java)
     }
 }

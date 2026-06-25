@@ -24,10 +24,8 @@ import retrofit2.Response
 class SosViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AlertaRepository()
-
     private val _estadoAlerta = MutableLiveData<EstadoAlerta>(EstadoAlerta.Inactiva)
     val estadoAlerta: LiveData<EstadoAlerta> get() = _estadoAlerta
-
     private val _idAlertaActual = MutableLiveData<Int?>()
     val idAlertaActual: LiveData<Int?> get() = _idAlertaActual
 
@@ -58,9 +56,8 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                // =================================================================
+
                 // VÍA 1: POR LA PROPIA APLICACIÓN (Hacia Spring Boot)
-                // =================================================================
                 val request = AlertaRequest(
                     id_usuario = userId,
                     mensaje = mensajePersonalizado,
@@ -75,10 +72,10 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
                     _idAlertaActual.value = id
                     _estadoAlerta.value = EstadoAlerta.Activa
 
-                    // =================================================================
+
                     // VÍA 2: POR SMS EN SEGUNDO PLANO
                     // Se ejecuta justo después de que Spring Boot confirma la alerta
-                    // =================================================================
+
                     enviarSmsOculto(mensajePersonalizado, latitud, longitud)
 
                 } else {

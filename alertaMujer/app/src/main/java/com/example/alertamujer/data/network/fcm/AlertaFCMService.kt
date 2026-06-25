@@ -1,4 +1,4 @@
-package com.example.alertamujer.network.fcm
+package com.example.alertamujer.data.network.fcm
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.example.alertamujer.data.network.RetrofitClient
 import com.example.alertamujer.util.AesUtil // <-- Importa la clase utilitaria que creaste en Kotlin
+import com.example.alertamujer.data.dto.FcmTokenRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +20,6 @@ import org.json.JSONObject
 
 class AlertaFCMService : FirebaseMessagingService() {
 
-    // La MISMA llave exacta que pusiste en tu servidor Spring Boot
     private val LLAVE_SECRETA = "AlertaMujerSuperSecretKey2026!!!"
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -84,6 +84,9 @@ class AlertaFCMService : FirebaseMessagingService() {
         guardarTokenEnServidor(token)
     }
 
+// ... asegúrate de tener importado el DTO arriba:
+// import com.example.alertamujer.data.dto.FcmTokenRequest
+
     private fun guardarTokenEnServidor(token: String) {
         val sharedPreferences = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)
         val idUsuario = sharedPreferences.getInt("id_usuario", -1)
@@ -91,9 +94,19 @@ class AlertaFCMService : FirebaseMessagingService() {
         if (idUsuario != -1) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val respuesta = RetrofitClient.authService.actualizarToken(idUsuario, token)
+                    // 1. Armamos el DTO con la estructura exacta que espera Spring Boot
+                    val request = FcmTokenRequest(idUsuario = idUsuario, token = token)
+
+                    // 2. Usamos usuarioService (el nuevo que creamos) en lugar de authService
+                    val respuesta = RetrofitClient.usuarioService.actualizarToken(request)
+
+                    if (respuesta.isSuccessful) {
+                        Log.d("FCM_TOKEN", "Token sincronizado con éxito en MySQL")
+                    } else {
+                        Log.e("FCM_TOKEN", "Error en el servidor al guardar el token")
+                    }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("FCM_TOKEN", "Fallo de red al enviar token: ${e.message}")
                 }
             }
         }

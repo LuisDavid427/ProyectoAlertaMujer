@@ -13,7 +13,7 @@ object AesUtil {
     private const val TAMAÑO_IV = 12
     private const val TAMAÑO_TAG = 128
 
-    // Método para desencriptar (el que usarás en tu AlertaFCMService)
+    // Método para desencriptar (el que usará AlertaFCMService)
     fun desencriptar(textoCifradoBase64: String, claveSecreta: String): String {
         val mensajeCifradoConIv = Base64.getDecoder().decode(textoCifradoBase64)
 

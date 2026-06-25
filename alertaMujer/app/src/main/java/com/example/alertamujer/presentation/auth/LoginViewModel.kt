@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.alertamujer.data.dto.LoginRequest
 import com.example.alertamujer.data.dto.AuthResponse
-import com.example.alertamujer.data.repository.AuthRepository
+import com.example.alertamujer.data.network.repository.AuthRepository
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import com.google.firebase.messaging.FirebaseMessaging
@@ -37,8 +37,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             _navegarAMain.value = true
         }
     }
-
-
 
     fun intentarLogin(email: String, pass: String) {
         if (email.isEmpty() || pass.isEmpty()) {
@@ -97,15 +95,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun registrarDispositivoEnServidor(idUsuario: Int, token: String) {
-        val modelo = android.os.Build.MODEL
-        val versionOS = "Android ${android.os.Build.VERSION.RELEASE}"
-
-        viewModelScope.launch {
-            // Enviar al repositorio: idUsuario, token, modelo, versionOS
-            repository.actualizarTokenFCM(idUsuario, token, modelo, versionOS)
-        }
-    }
     private fun guardarSesion(idUsuario: Int) {
         sharedPreferences.edit().apply {
             putBoolean("isLoggedIn", true)

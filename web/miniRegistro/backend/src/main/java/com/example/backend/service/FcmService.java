@@ -16,7 +16,7 @@ import java.util.Map;
 @Service
 public class FcmService {
 
-    // RECUERDA: Esta llave debe tener exactamente 32 caracteres y ser idéntica a la de Android
+    // Esta llave debe tener exactamente 32 caracteres y ser idéntica a la de Android
     private static final String LLAVE_SECRETA = "AlertaMujerSuperSecretKey2026!!!";
 
     public void enviarAlertaAProtectores(List<String> tokens, String nombreVictima, String mensaje) {

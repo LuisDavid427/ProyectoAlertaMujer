@@ -9,14 +9,12 @@ import java.util.Optional;
 import java.util.List;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<UsuarioModel, Long> {
+public interface UsuarioRepository extends JpaRepository<UsuarioModel, Integer> {
 
-    @Query(value = "CALL sp_validar_login_admin(:p_email, :p_pass)", nativeQuery = true)
-    Optional<Object[]> validarAccesoAdmin(@Param("p_email") String email, @Param("p_pass") String password);
+    // Extrae el usuario para que Spring Boot valide el Hash
+    Optional<UsuarioModel> findByEmail(String email);
 
-    @Query(value = "CALL sp_validar_login_usuario(:email, :pass)", nativeQuery = true)
-    List<Object[]> validarLoginUsuario(@Param("email") String email, @Param("pass") String pass);
-
-    @Query(value = "call sp_listar_usuarios_dashboard(:busqueda)", nativeQuery = true)
-    List<Object[]> llamarSpUsuarios(@Param("busqueda") String busqueda); // Cambiamos Object[] por Object
+    // Mantenemos el SP que no involucra contraseñas
+    @Query(value = "CALL sp_listar_usuarios_dashboard(:busqueda)", nativeQuery = true)
+    List<Object[]> llamarSpUsuarios(@Param("busqueda") String busqueda); 
 }

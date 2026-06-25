@@ -3,8 +3,8 @@ package com.example.alertamujer.data.network.repository
 import com.example.alertamujer.data.dto.LoginRequest
 import com.example.alertamujer.data.dto.RegistroRequest
 import com.example.alertamujer.data.dto.AuthResponse
+import com.example.alertamujer.data.dto.FcmTokenRequest
 import com.example.alertamujer.data.network.RetrofitClient
-import com.example.alertamujer.data.network.fcm.AlertaFCMService
 import retrofit2.Response
 
 class AuthRepository {
@@ -14,13 +14,17 @@ class AuthRepository {
         return RetrofitClient.authService.login(request)
     }
 
-    // NUEVO: Función para el Registro
+    // Función para el Registro
     suspend fun registrar(request: RegistroRequest): Response<AuthResponse> {
         return RetrofitClient.authService.registrar(request)
     }
-    // En AuthRepository.kt
+
+    // Función para actualizar el Token FCM
     suspend fun actualizarTokenFCM(idUsuario: Int, token: String): Response<Void> {
-        // Este endpoint lo crearemos en Spring Boot (ej: /api/usuarios/actualizar-token)
-        return RetrofitClient.actualizarToken(idUsuario, token)
+        // 1. Empacamos los datos en el objeto que espera Spring Boot
+        val request = FcmTokenRequest(idUsuario = idUsuario, token = token)
+
+        // 2. Consumimos el endpoint usando el nuevo usuarioService
+        return RetrofitClient.usuarioService.actualizarToken(request)
     }
 }

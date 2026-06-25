@@ -1,10 +1,9 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.AlertaDashboardDTO;
 import com.example.backend.dto.AlertaRequest;
 import com.example.backend.dto.UbicacionRequest;
-import com.example.backend.dto.UsuarioDashboardDTO;
 import com.example.backend.model.AlertaModel;
+import com.example.backend.model.EvidenciaModel;
 import com.example.backend.model.UbicacionModel;
 import com.example.backend.model.UsuarioModel;
 import com.example.backend.repository.AlertaRepository;
@@ -13,19 +12,15 @@ import com.example.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
-import com.example.backend.model.EvidenciaModel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AlertaService {
@@ -36,11 +31,13 @@ public class AlertaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Usamos @Transactional para que, si algo falla, no se guarde la alerta a medias
+    // FASE 1: Crear la alerta inicial
     @Transactional(rollbackFor = Exception.class)
     public AlertaModel procesarNuevaAlerta(AlertaRequest request) throws Exception {
         
-        Optional<UsuarioModel> usuarioOpt = usuarioRepository.findById(Long.valueOf(request.getIdUsuario()));
+        // CORRECCIÓN AQUÍ: Casteamos a Integer para que coincida con el modelo de la BD
+        Integer idUsuario = Integer.valueOf(request.getIdUsuario().toString());
+        Optional<UsuarioModel> usuarioOpt = usuarioRepository.findById(idUsuario);
         
         if (!usuarioOpt.isPresent()) {
             throw new Exception("Usuario no encontrado");
@@ -50,29 +47,21 @@ public class AlertaService {
         AlertaModel nuevaAlerta = new AlertaModel();
         nuevaAlerta.setUsuario(usuarioOpt.get());
         nuevaAlerta.setMensaje(request.getMensaje());
-        // Se maneja en minúsculas como lo definiste en el script SQL
         nuevaAlerta.setEstadoAlerta("activa"); 
 
         // 2. Preparamos la primera Ubicación GPS
         UbicacionModel primeraUbicacion = new UbicacionModel();
-        
-        // Usamos BigDecimal.valueOf() para hacer la conversión segura
         primeraUbicacion.setLatitud(BigDecimal.valueOf(request.getLatitud()));
         primeraUbicacion.setLongitud(BigDecimal.valueOf(request.getLongitud()));
-        
-        // Conectamos la ubicación con la alerta
         primeraUbicacion.setAlerta(nuevaAlerta);
-        
 
         // 3. Empacamos la ubicación dentro de la lista de la alerta
-        // (Como configuraste CascadeType.ALL en el modelo, al guardar la alerta se guardará la ubicación automáticamente)
         nuevaAlerta.setUbicaciones(new ArrayList<>());
         nuevaAlerta.getUbicaciones().add(primeraUbicacion);
 
         // 4. Guardamos en MySQL y retornamos
         return alertaRepository.save(nuevaAlerta);
     }
-
 
     // FASE 2: Agregar nueva ubicación al rastreo (Cada 5 segundos)
     @Transactional(rollbackFor = Exception.class)
@@ -86,8 +75,7 @@ public class AlertaService {
 
         AlertaModel alerta = alertaOpt.get();
 
-        // Si la alerta ya fue apagada, no deberíamos seguir guardando ubicaciones
-        if (alerta.getEstadoAlerta().equals("inactiva")) {
+        if ("inactiva".equals(alerta.getEstadoAlerta())) {
             throw new Exception("No se pueden agregar ubicaciones a una alerta inactiva.");
         }
 
@@ -96,7 +84,6 @@ public class AlertaService {
         nuevaUbicacion.setLongitud(BigDecimal.valueOf(request.getLongitud()));
         nuevaUbicacion.setAlerta(alerta);
 
-        // Agregamos la nueva ubicación a la lista y guardamos
         alerta.getUbicaciones().add(nuevaUbicacion);
         alertaRepository.save(alerta);
     }
@@ -125,34 +112,27 @@ public class AlertaService {
         }
         AlertaModel alerta = alertaOpt.get();
 
-        // 1. Definir la carpeta donde se guardarán los archivos en tu PC
-        // OJO: Asegúrate de usar dobles barras en Windows
+        // Directorio local para guardar los archivos
         String carpetaDestino = "C://AlertaMujer//evidencias//"; 
         Path rutaDirectorio = Paths.get(carpetaDestino);
 
-        // Si la carpeta no existe, Spring Boot la crea automáticamente
         if (!Files.exists(rutaDirectorio)) {
             Files.createDirectories(rutaDirectorio);
         }
 
-        // 2. Generar un nombre único para que no se sobrescriban las fotos
-        // UUID genera un código raro tipo "a1b2c3d4-..."
         String nombreUnico = UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename();
         Path rutaCompleta = rutaDirectorio.resolve(nombreUnico);
 
-        // 3. Copiar el archivo físico de la memoria RAM al Disco Duro
+        // Copiar el archivo al disco duro
         Files.copy(archivo.getInputStream(), rutaCompleta);
 
-        // 4. Preparar el registro para MySQL
+        // Preparar el registro para la BD
         EvidenciaModel nuevaEvidencia = new EvidenciaModel();
         nuevaEvidencia.setAlerta(alerta);
-        nuevaEvidencia.setUrl(rutaCompleta.toString()); // Guardamos la ruta "C://AlertaMujer/evidencias/foto.jpg"
-        nuevaEvidencia.setTipo(tipo); // "foto" o "audio"
+        nuevaEvidencia.setUrl(rutaCompleta.toString());
+        nuevaEvidencia.setTipo(tipo);
 
-        // 5. Guardar en la base de datos
         alerta.getEvidencias().add(nuevaEvidencia);
         alertaRepository.save(alerta);
     }
-
-
 }
