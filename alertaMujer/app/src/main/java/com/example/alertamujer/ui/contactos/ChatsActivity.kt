@@ -2,55 +2,55 @@ package com.example.alertamujer.ui.contactos
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.alertamujer.R
-import com.example.alertamujer.presentation.chat.ChatViewModel
-import com.example.alertamujer.util.configurarBotonAtras
+import com.example.alertamujer.presentation.contactos.ChatsViewModel
+import com.example.alertamujer.ui.contactos.adapter.ChatAdapter
 
+/**
+ * Pantalla de visualización de alertas en tiempo real.
+ * Sigue el patrón Observer para mantener la sincronización con el ViewModel.
+ */
 class ChatsActivity : AppCompatActivity() {
 
-    private val viewModel: ChatViewModel by viewModels()
-
-    // private lateinit var adapter: ChatAdapter // ¡Lo armaremos en el siguiente paso!
+    private lateinit var viewModel: ChatsViewModel
+    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var rvChatAlertas: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
-        configurarBotonAtras()
         setupRecyclerView()
-        observarViewModel()
-
-        viewModel.cargarChat()
-
-        // Recargar el chat al deslizar hacia abajo
-        findViewById<SwipeRefreshLayout>(R.id.swipeRefreshChat).setOnRefreshListener {
-            viewModel.cargarChat()
-        }
+        setupViewModel()
     }
 
     private fun setupRecyclerView() {
-        val rvChat = findViewById<RecyclerView>(R.id.rv_chat_alertas)
-        rvChat.layoutManager = LinearLayoutManager(this)
-
-        // Aquí conectaremos el adaptador más adelante
-        // adapter = ChatAdapter(emptyList())
-        // rvChat.adapter = adapter
-    }
-
-    private fun observarViewModel() {
-        viewModel.alertas.observe(this) { listaMensajes ->
-            // adapter.actualizarLista(listaMensajes)
-            findViewById<SwipeRefreshLayout>(R.id.swipeRefreshChat).isRefreshing = false
+        rvChatAlertas = findViewById(R.id.rv_chat_alertas)
+        // stackFromEnd permite que los mensajes se apilen hacia arriba (estilo WhatsApp)
+        rvChatAlertas.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd = true
         }
 
-        viewModel.error.observe(this) { msj ->
-            Toast.makeText(this, msj, Toast.LENGTH_SHORT).show()
-            findViewById<SwipeRefreshLayout>(R.id.swipeRefreshChat).isRefreshing = false
+        // Inicializamos con lista vacía
+        chatAdapter = ChatAdapter(mutableListOf()) { alerta ->
+            // Aquí dispararemos la lógica de Google Maps en la siguiente fase
+            Toast.makeText(this, "Redirigiendo a GPS...", Toast.LENGTH_SHORT).show()
+        }
+        rvChatAlertas.adapter = chatAdapter
+    }
+
+    private fun setupViewModel() {
+        viewModel = ViewModelProvider(this)[ChatsViewModel::class.java]
+
+        // Observar cambios en el ViewModel
+        viewModel.mensajes.observe(this) { listaActualizada ->
+            chatAdapter.actualizarMensajes(listaActualizada)
+            // Auto-scroll al último mensaje al recibir uno nuevo
+            rvChatAlertas.scrollToPosition(listaActualizada.size - 1)
         }
     }
 }
