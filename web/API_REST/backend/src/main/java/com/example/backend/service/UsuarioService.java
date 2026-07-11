@@ -3,9 +3,11 @@ package com.example.backend.service;
 import com.example.backend.model.UsuarioModel;
 import com.example.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -13,27 +15,38 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // 1. Mantenemos la funcionalidad de listar todos los usuarios
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // Listar todos los usuarios
     public List<UsuarioModel> listarTodos() {
         return usuarioRepository.findAll();
     }
 
-    // 2. Mantenemos la funcionalidad de guardar (útil para registros o actualizaciones)
+    // Registrar usuario
     public UsuarioModel guardar(UsuarioModel usuario) {
+
+        // Cifrar la contraseña antes de guardarla
+        usuario.setContrasena_hash(
+                passwordEncoder.encode(usuario.getContrasena_hash())
+        );
+
         return usuarioRepository.save(usuario);
     }
 
-    // 3. NUEVO: Un método limpio para que AuthService pueda buscar un usuario por su correo
+    // Buscar por correo
     public Optional<UsuarioModel> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 
-    // Agrega este método dentro de UsuarioService
+    // Actualizar el token de Firebase
     public void actualizarTokenFcm(Integer idUsuario, String token) throws Exception {
+
         UsuarioModel usuario = usuarioRepository.findById(idUsuario)
-            .orElseThrow(() -> new Exception("Usuario no encontrado"));
-            
+                .orElseThrow(() -> new Exception("Usuario no encontrado"));
+
         usuario.setFcmToken(token);
+
         usuarioRepository.save(usuario);
     }
 }

@@ -175,3 +175,10 @@ create table usuarios_contactos (
     foreign key (id_usuario) references usuarios(id_usuario),
     foreign key (id_contacto) references usuarios(id_usuario)
 );
+
+
+-- changeset luisdavid:4
+-- ==========================================
+-- FASE 4: ACTUALIZACIONES DE MODELO
+-- ==========================================
+ALTER TABLE usuarios ADD COLUMN fcm_token VARCHAR(255);

@@ -37,7 +37,7 @@ public class AlertaController {
     @PostMapping("/emitir")
     public ResponseEntity<Map<String, Object>> emitirAlerta(@RequestBody AlertaRequest peticion) {
         Map<String, Object> respuesta = new HashMap<>();
-        
+        System.out.println(">>> Entró al controlador emitirAlerta");
         try {
             AlertaModel alertaGuardada = alertaService.procesarNuevaAlerta(peticion);
             

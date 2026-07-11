@@ -50,9 +50,14 @@ public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioModel usuario) {
         
         return ResponseEntity.ok(Map.of("success", true, "mensaje", "Registrada con éxito"));
 
-    } catch (Exception e) {
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-    }
+    }catch (Exception e) {
+    e.printStackTrace();
+
+    return ResponseEntity.badRequest().body(Map.of(
+        "success", false,
+        "error", e.getMessage()
+    ));
+}
 }
 
 

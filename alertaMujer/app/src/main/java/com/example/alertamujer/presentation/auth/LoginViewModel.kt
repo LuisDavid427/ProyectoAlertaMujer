@@ -17,22 +17,18 @@ import android.util.Log
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Capa de Datos: Inyectamos el repositorio
     private val repository = AuthRepository()
 
     private val sharedPreferences: SharedPreferences =
         application.getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
 
-    // LiveData para manejar la navegación hacia el Main
     private val _navegarAMain = MutableLiveData<Boolean>()
     val navegarAMain: LiveData<Boolean> get() = _navegarAMain
 
-    // LiveData para manejar los mensajes de error en la UI
     private val _mensajeError = MutableLiveData<String>()
     val mensajeError: LiveData<String> get() = _mensajeError
 
     init {
-        // Verificación automática de sesión al arrancar
         if (sharedPreferences.getBoolean("isLoggedIn", false)) {
             _navegarAMain.value = true
         }
@@ -54,11 +50,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (data?.success == true) {
                         val id = data.id_usuario ?: -1
-                        guardarSesion(id)
+                        val tokenJwt = data.token ?: "" // Extraemos el token del cuerpo
 
-                        // --- LA PIEZA CLAVE ---
+                        // Guardamos el estado y la llave de autorización
+                        guardarSesion(id, tokenJwt)
+
                         vincularDispositivoConFCM(id)
-                        // ----------------------
 
                         _navegarAMain.value = true
                     } else {
@@ -74,7 +71,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun vincularDispositivoConFCM(idUsuario: Int) {
-        // Le pedimos a Firebase el Token único de este celular
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w("FCM", "Error al obtener token", task.exception)
@@ -83,7 +79,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             val token = task.result
 
-            // Enviamos el token al servidor en segundo plano
             viewModelScope.launch {
                 try {
                     repository.actualizarTokenFCM(idUsuario, token)
@@ -95,10 +90,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun guardarSesion(idUsuario: Int) {
+    // Modificado para persistir el JWT
+    private fun guardarSesion(idUsuario: Int, token: String) {
         sharedPreferences.edit().apply {
             putBoolean("isLoggedIn", true)
             putInt("id_usuario", idUsuario)
+            putString("token_jwt", token) // <--- Guardado seguro
             apply()
         }
     }

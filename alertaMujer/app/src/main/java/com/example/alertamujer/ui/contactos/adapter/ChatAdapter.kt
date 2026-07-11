@@ -14,6 +14,8 @@ class ChatAdapter(
     private val onMapaClick: (MensajeAlerta) -> Unit
 ) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_chat_alerta, parent, false)
@@ -25,6 +27,8 @@ class ChatAdapter(
     }
 
     override fun getItemCount(): Int = listaMensajes.size
+
+
 
     /**
      * Esta es la función que te faltaba.

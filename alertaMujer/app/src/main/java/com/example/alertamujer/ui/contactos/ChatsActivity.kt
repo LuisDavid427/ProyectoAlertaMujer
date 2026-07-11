@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.contactos.ChatsViewModel
 import com.example.alertamujer.ui.contactos.adapter.ChatAdapter
+import com.example.alertamujer.util.configurarBotonAtras
 
 /**
  * Pantalla de visualización de alertas en tiempo real.
@@ -20,10 +21,12 @@ class ChatsActivity : AppCompatActivity() {
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var rvChatAlertas: RecyclerView
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-
+        configurarBotonAtras()
         setupRecyclerView()
         setupViewModel()
     }

@@ -16,7 +16,7 @@ insert into roles_permisos (id_rol, id_permiso) values (1, 1), (1, 2);
 
 -- 4. insertar el usuario administrador
 insert into usuarios (nombre, email, contrasena_hash, fecha_nacimiento, estado_usuario)
-values ('luis david conde sanchez', 'luisdavidcondesanchez@gmail.com', 'admin', '2007-07-08', 1);
+values ('luis david conde sanchez', 'luisdavidconde@gmail.com', 'admin', '2007-07-08', 1);
 
 -- 5. asignar el rol de administrador
 insert into usuarios_roles (id_usuario, id_rol)

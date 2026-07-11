@@ -11,29 +11,32 @@ import okhttp3.RequestBody
 
 class AlertaRepository {
 
-    // El repositorio usa la instancia que creamos en el RetrofitClient
-    suspend fun enviarAlertaSOS(request: AlertaRequest): Response<AlertaResponse> {
-        return RetrofitClient.alertaService.enviarAlertaSOS(request)
+    // Ahora recibimos el token como primer parámetro en todas las funciones
+    suspend fun enviarAlertaSOS(token: String, request: AlertaRequest): Response<AlertaResponse> {
+        return RetrofitClient.alertaService.enviarAlertaSOS(token, request)
     }
+
     suspend fun subirEvidencia(
+        token: String,
         idAlerta: Int,
         archivo: MultipartBody.Part,
         tipo: RequestBody
     ): Response<Map<String, Any>> {
-        return RetrofitClient.alertaService.subirEvidencia(idAlerta, archivo, tipo)
+        return RetrofitClient.alertaService.subirEvidencia(token, idAlerta, archivo, tipo)
     }
 
     suspend fun enviarUbicacionContinua(
+        token: String,
         idAlerta: Int,
         request: UbicacionRequest
     ): Response<Map<String, Any>> {
-        return RetrofitClient.alertaService.enviarUbicacionContinua(idAlerta, request)
+        return RetrofitClient.alertaService.enviarUbicacionContinua(token, idAlerta, request)
     }
 
     suspend fun desactivarAlerta(
+        token: String,
         idAlerta: Int
     ): Response<Map<String, Any>> {
-        return RetrofitClient.alertaService.desactivarAlerta(idAlerta)
+        return RetrofitClient.alertaService.desactivarAlerta(token, idAlerta)
     }
-
 }

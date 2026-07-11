@@ -31,6 +31,9 @@ public class AlertaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+
+    
+
     // FASE 1: Crear la alerta inicial
     @Transactional(rollbackFor = Exception.class)
     public AlertaModel procesarNuevaAlerta(AlertaRequest request) throws Exception {
@@ -88,20 +91,15 @@ public class AlertaService {
         alertaRepository.save(alerta);
     }
 
-    // FASE 3: Apagar la alerta (Desactivar)
+    @Transactional 
     public void desactivarAlerta(Integer idAlerta) throws Exception {
-        Optional<AlertaModel> alertaOpt = alertaRepository.findById(idAlerta);
+        AlertaModel alerta = alertaRepository.findById(idAlerta)
+                .orElseThrow(() -> new Exception("La alerta especificada no existe."));
         
-        if (!alertaOpt.isPresent()) {
-            throw new Exception("La alerta especificada no existe.");
-        }
-
-        AlertaModel alerta = alertaOpt.get();
         alerta.setEstadoAlerta("inactiva");
-        
         alertaRepository.save(alerta);
+        alertaRepository.flush(); 
     }
-
     // FASE 4: Recibir y guardar archivos físicos (Fotos y Audios)
     @Transactional(rollbackFor = Exception.class)
     public void guardarEvidencia(Integer idAlerta, MultipartFile archivo, String tipo) throws Exception {

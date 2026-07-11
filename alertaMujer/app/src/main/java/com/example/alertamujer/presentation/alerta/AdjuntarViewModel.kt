@@ -12,6 +12,8 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import android.app.Application
+import android.content.Context
 
 class AdjuntarViewModel : ViewModel() {
 
@@ -35,8 +37,14 @@ class AdjuntarViewModel : ViewModel() {
         }
     }
 
-    fun enviarArchivoAlServidor(idAlerta: Int, file: File, esVideo: Boolean) {
+    // En tu ViewModel, cambia la firma de la función:
+    fun enviarArchivoAlServidor(context: Context, idAlerta: Int, file: File, esVideo: Boolean) {
         _estadoSubida.value = "Subiendo archivo..."
+
+        // Ahora usas el context que te pasaron como parámetro
+        val prefs = context.getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("token_jwt", "") ?: ""
+        val tokenFormateado = "Bearer $token"
 
         viewModelScope.launch {
             try {
@@ -47,7 +55,8 @@ class AdjuntarViewModel : ViewModel() {
                 val tipoStr = if (esVideo) "VIDEO" else "FOTO"
                 val tipoBody: RequestBody = tipoStr.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                val response = repository.subirEvidencia(idAlerta, body, tipoBody)
+                // 2. Pasamos el token como primer argumento, tal como lo exige el nuevo repositorio
+                val response = repository.subirEvidencia(tokenFormateado, idAlerta, body, tipoBody)
 
                 if (response.isSuccessful) {
                     _estadoSubida.value = "Evidencia enviada con éxito"

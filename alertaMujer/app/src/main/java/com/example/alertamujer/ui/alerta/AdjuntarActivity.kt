@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
+import androidx.activity.viewModels // Asegúrate de tener este import
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
@@ -18,16 +18,17 @@ import java.io.FileOutputStream
 
 class AdjuntarActivity : AppCompatActivity() {
 
+    // 1. Ahora que es un ViewModel estándar, esta línea es suficiente
     private val viewModel: AdjuntarViewModel by viewModels()
     private var idAlerta: Int = -1
 
-    // Captura de Foto
     private val tomarFotoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val bitmap = result.data?.extras?.get("data") as? Bitmap
             bitmap?.let {
                 val file = guardarBitmapEnArchivo(it)
-                viewModel.enviarArchivoAlServidor(idAlerta, file, false)
+                // 2. Aquí pasamos 'this' como el Context que pide tu función
+                viewModel.enviarArchivoAlServidor(this, idAlerta, file, false)
             }
         }
     }
@@ -36,7 +37,6 @@ class AdjuntarActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adjuntar)
 
-        // Recuperamos el ID de la alerta enviado desde MainActivity o SosViewModel
         idAlerta = intent.getIntExtra("EXTRA_ID_ALERTA", -1)
 
         configurarBotonAtras()
@@ -83,6 +83,7 @@ class AdjuntarActivity : AppCompatActivity() {
 
     private fun lanzarCamara(accion: String) {
         val intent = Intent(accion)
+        // Nota: Si intentas lanzar video, asegúrate de tener los permisos de cámara y almacenamiento
         if (intent.resolveActivity(packageManager) != null) {
             tomarFotoLauncher.launch(intent)
         }
@@ -90,7 +91,6 @@ class AdjuntarActivity : AppCompatActivity() {
 
     private fun lanzarAudio() {
         val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
-        startActivity(intent) // Aquí podrías usar otro launcher para procesar el audio
+        startActivity(intent)
     }
-
 }
