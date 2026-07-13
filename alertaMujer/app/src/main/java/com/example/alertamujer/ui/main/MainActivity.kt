@@ -48,6 +48,11 @@ class MainActivity : AppCompatActivity() {
 
         // Enlaces de Vistas
         btnContactos = findViewById(R.id.btn_real_contactos)
+
+        // Observamos el número de contactos que viene de Room
+        viewModel.numeroContactos.observe(this) { count ->
+            btnContactos.text = "$count\nContactos"
+        }
         btnUserProfile = findViewById(R.id.btn_user_profile)
         btnUbicacion = findViewById(R.id.btn_ubicacion)
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar)

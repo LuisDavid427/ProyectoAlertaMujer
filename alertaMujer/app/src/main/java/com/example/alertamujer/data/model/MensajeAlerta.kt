@@ -5,6 +5,5 @@ data class MensajeAlerta(
     val nombre_usuario: String,
     val mensaje: String,
     val latitud: Double,
-    val longitud: Double,
-    val timestamp: Long
+    val longitud: Double
 )

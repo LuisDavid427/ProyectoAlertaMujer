@@ -1,12 +1,6 @@
 package com.example.alertamujer.data.dto
 
-// Lo que envías cuando presionas el botón SOS
-data class AlertaRequest(
-    val id_usuario: Int,
-    val mensaje: String,
-    val latitud: Double,
-    val longitud: Double
-)
+
 
 // Lo que el servidor te responde (te da el id_alerta para seguir mandando GPS)
 data class AlertaResponse(
@@ -29,4 +23,21 @@ data class AlertaRecibidaDTO(
     val latitud: Double,
     val longitud: Double,
     val fecha_hora: String // Fecha en la que se emitió
+)
+
+data class AlertaRequest(
+    val idUsuario: Int,
+    val mensaje: String,
+    val latitud: Double,
+    val longitud: Double,
+    val contactosNotificar: List<String> // <--- NUEVO: Lista de emails
+)
+
+// Asegúrate de que este archivo tenga exactamente los mismos parámetros
+data class MensajeAlerta(
+    val id_alerta: Int,
+    val nombre_usuario: String,
+    val mensaje: String,
+    val latitud: Double,
+    val longitud: Double // <--- DEBE coincidir con el nombre aquí
 )

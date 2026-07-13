@@ -15,40 +15,32 @@ class AddContactoActivity : AppCompatActivity() {
 
     private val viewModel: AddContactoViewModel by viewModels()
 
-    private var contactoIndex: Int = -1
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_contacto)
 
         val tvTitulo = findViewById<TextView>(R.id.tv_añadirContacto_title)
-        val btnGuardarContacto = findViewById<Button>(R.id.btn_guardar_contacto)
-        val etNombreContacto = findViewById<EditText>(R.id.et_nombre_contacto)
-        val etNumeroContacto = findViewById<EditText>(R.id.et_numero_contacto)
+        val btnGuardar = findViewById<Button>(R.id.btn_guardar_contacto)
+        val etNombre = findViewById<EditText>(R.id.et_nombre_contacto)
+        val etNumero = findViewById<EditText>(R.id.et_numero_contacto)
+        val etEmail = findViewById<EditText>(R.id.et_email_contacto)
 
         configurarBotonAtras()
 
-        if (intent.hasExtra("CONTACTO_INDEX")) {
-            contactoIndex = intent.getIntExtra("CONTACTO_INDEX", -1)
-            val nombre = intent.getStringExtra("CONTACTO_NOMBRE")
-            val numero = intent.getStringExtra("CONTACTO_NUMERO")
-
-            tvTitulo.text = "Editar Contacto"
-            etNombreContacto.setText(nombre)
-            etNumeroContacto.setText(numero)
-            btnGuardarContacto.text = "Guardar Cambios"
-        }
+        // Nota: Al usar Room, la edición se simplifica. Si quieres editar,
+        // pasa el ID del contacto en el intent.
 
         observarViewModel()
 
-        btnGuardarContacto.setOnClickListener {
-            val nombre = etNombreContacto.text.toString()
-            val numero = etNumeroContacto.text.toString()
+        btnGuardar.setOnClickListener {
+            val nombre = etNombre.text.toString()
+            val numero = etNumero.text.toString()
+            val email = etEmail.text.toString()
 
-            if (nombre.isNotBlank() && numero.isNotBlank()) {
-                viewModel.guardarContacto(nombre, numero, contactoIndex)
+            if (nombre.isNotBlank() && numero.isNotBlank() && email.isNotBlank()) {
+                viewModel.guardarContacto(nombre, numero, email)
             } else {
-                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -61,5 +53,4 @@ class AddContactoActivity : AppCompatActivity() {
             }
         }
     }
-
 }

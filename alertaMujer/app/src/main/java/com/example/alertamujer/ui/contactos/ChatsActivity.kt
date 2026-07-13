@@ -1,59 +1,57 @@
 package com.example.alertamujer.ui.contactos
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alertamujer.R
-import com.example.alertamujer.presentation.contactos.ChatsViewModel
 import com.example.alertamujer.ui.contactos.adapter.ChatAdapter
-import com.example.alertamujer.util.configurarBotonAtras
+import com.example.alertamujer.presentation.contactos.ChatViewModel
+import com.example.alertamujer.data.local.entity.toMensajeAlerta
 
-/**
- * Pantalla de visualización de alertas en tiempo real.
- * Sigue el patrón Observer para mantener la sincronización con el ViewModel.
- */
 class ChatsActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: ChatsViewModel
-    private lateinit var chatAdapter: ChatAdapter
-    private lateinit var rvChatAlertas: RecyclerView
-
-
+    private lateinit var adapter: ChatAdapter
+    private val viewModel: ChatViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu_alertas)
-        configurarBotonAtras()
+
         setupRecyclerView()
-        setupViewModel()
+
+        // Observamos la base de datos local
+        viewModel.listaAlertas.observe(this) { alertas ->
+            // Mapeamos de Entity a lo que espera tu adaptador
+            adapter.actualizarMensajes(alertas.map { it.toMensajeAlerta() })
+        }
+
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
     }
 
     private fun setupRecyclerView() {
-        rvChatAlertas = findViewById(R.id.rv_chat_alertas)
-        // stackFromEnd permite que los mensajes se apilen hacia arriba (estilo WhatsApp)
-        rvChatAlertas.layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd = true
+        adapter = ChatAdapter(mutableListOf()) { alerta ->
+            val gmmIntentUri = Uri.parse("geo:${alerta.latitud},${alerta.longitud}?q=${alerta.latitud},${alerta.longitud}")
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+
+            if (mapIntent.resolveActivity(packageManager) != null) {
+                startActivity(mapIntent)
+            } else {
+                Toast.makeText(this, "Google Maps no instalado", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // Inicializamos con lista vacía
-        chatAdapter = ChatAdapter(mutableListOf()) { alerta ->
-            // Aquí dispararemos la lógica de Google Maps en la siguiente fase
-            Toast.makeText(this, "Redirigiendo a GPS...", Toast.LENGTH_SHORT).show()
-        }
-        rvChatAlertas.adapter = chatAdapter
-    }
-
-    private fun setupViewModel() {
-        viewModel = ViewModelProvider(this)[ChatsViewModel::class.java]
-
-        // Observar cambios en el ViewModel
-        viewModel.mensajes.observe(this) { listaActualizada ->
-            chatAdapter.actualizarMensajes(listaActualizada)
-            // Auto-scroll al último mensaje al recibir uno nuevo
-            rvChatAlertas.scrollToPosition(listaActualizada.size - 1)
+        findViewById<RecyclerView>(R.id.rv_chat_alertas).apply {
+            layoutManager = LinearLayoutManager(this@ChatsActivity).apply {
+                stackFromEnd = true // Esto hace que los mensajes nuevos aparezcan abajo como en WhatsApp
+            }
+            adapter = this@ChatsActivity.adapter
         }
     }
 }

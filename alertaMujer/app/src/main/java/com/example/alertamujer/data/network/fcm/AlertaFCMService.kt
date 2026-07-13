@@ -3,7 +3,6 @@ package com.example.alertamujer.data.network.fcm
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -13,6 +12,8 @@ import com.google.firebase.messaging.RemoteMessage
 import com.example.alertamujer.data.network.RetrofitClient
 import com.example.alertamujer.util.AesUtil // <-- Importa la clase utilitaria que creaste en Kotlin
 import com.example.alertamujer.data.dto.FcmTokenRequest
+import com.example.alertamujer.data.local.entity.AlertaEntity
+import com.example.alertamujer.data.local.AppDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,35 +25,35 @@ class AlertaFCMService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-
-        // 1. Extraer el paquete seguro que envió Spring Boot
         val datosSeguros = remoteMessage.data["datos_seguros"]
 
         if (datosSeguros != null) {
             try {
-                // 2. DESENCRIPTAR (Abrimos el cofre)
                 val jsonDesencriptado = AesUtil.desencriptar(datosSeguros, LLAVE_SECRETA)
-
-                // 3. Extraemos los datos que ya están en texto legible
                 val jsonObject = JSONObject(jsonDesencriptado)
-                val nombreVictima = jsonObject.optString("nombre_victima", "Alguien")
-                val mensaje = jsonObject.optString("mensaje", "Necesita ayuda inmediata")
 
-                // 4. Mostrar la notificación en la barra de estado con los datos reales
-                mostrarNotificacionEmergencia(nombreVictima, mensaje)
+                // Convertimos a Entidad de Room
+                val alertaEntity = AlertaEntity(
+                    id_alerta = jsonObject.optInt("id_alerta"),
+                    nombre_usuario = jsonObject.optString("nombre_victima", "Alguien"),
+                    mensaje = jsonObject.optString("mensaje", "Auxilio!"),
+                    latitud = jsonObject.optDouble("latitud"),
+                    longitud = jsonObject.optDouble("longitud")
+                )
 
-                // 5. Notificar a la App (Broadcast) para que el Chat se refresque solo
-                val intent = Intent("NUEVA_ALERTA_RECIBIDA")
-                sendBroadcast(intent)
+                // Guardamos en Room inmediatamente
+                val db = AppDatabase.getDatabase(applicationContext)
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.alertaDao().insertarAlerta(alertaEntity)
+                }
+
+                mostrarNotificacionEmergencia(alertaEntity.nombre_usuario, alertaEntity.mensaje)
 
             } catch (e: Exception) {
-                Log.e("ALERTA_SEGURA", "Fallo de seguridad: No se pudo desencriptar el mensaje: ${e.message}")
+                Log.e("ALERTA_SEGURA", "Fallo: ${e.message}")
             }
-        } else {
-            Log.w("ALERTA_SEGURA", "Alerta ignorada: Se recibió un mensaje sin cifrado.")
         }
     }
-
     private fun mostrarNotificacionEmergencia(titulo: String, contenido: String) {
         val channelId = "canal_emergencia_sos"
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -84,8 +85,7 @@ class AlertaFCMService : FirebaseMessagingService() {
         guardarTokenEnServidor(token)
     }
 
-// ... asegúrate de tener importado el DTO arriba:
-// import com.example.alertamujer.data.dto.FcmTokenRequest
+
 
     private fun guardarTokenEnServidor(token: String) {
         val sharedPreferences = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)

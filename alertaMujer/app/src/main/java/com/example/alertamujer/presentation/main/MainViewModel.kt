@@ -5,24 +5,22 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.json.JSONArray
+import androidx.lifecycle.map
+import com.example.alertamujer.data.local.AppDatabase
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val prefsContactos = application.getSharedPreferences("contactos_prefs", Context.MODE_PRIVATE)
+    private val db = AppDatabase.getDatabase(application)
     private val prefsSettings = application.getSharedPreferences("settings_prefs", Context.MODE_PRIVATE)
-    private val _numeroContactos = MutableLiveData<Int>()
-    val numeroContactos: LiveData<Int> get() = _numeroContactos
+
+    // Reactivo: Si la BD cambia, el número de contactos se recalcula solo
+    val numeroContactos: LiveData<Int> = db.contactoDao().obtenerTodosLosContactos().map { it.size }
+
     private val _isDarkModeOn = MutableLiveData<Boolean>()
     val isDarkModeOn: LiveData<Boolean> get() = _isDarkModeOn
 
     fun cargarDatosGenerales() {
-        // 1. Lógica para contar contactos (JSON)
-        val contactosJson = prefsContactos.getString("contactos", "[]")
-        val contactosArray = JSONArray(contactosJson)
-        _numeroContactos.value = contactosArray.length()
-
-        // 2. Lógica para saber el tema preferido
+        // Carga el tema una sola vez o cuando sea necesario
         _isDarkModeOn.value = prefsSettings.getBoolean("dark_mode", false)
     }
 }

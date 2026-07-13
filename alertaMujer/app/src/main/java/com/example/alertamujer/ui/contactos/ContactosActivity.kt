@@ -1,6 +1,5 @@
 package com.example.alertamujer.ui.contactos
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,13 +10,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
-import com.example.alertamujer.presentation.contactos.Contacto
+
+import com.example.alertamujer.data.local.entity.ContactoEntity
 import com.example.alertamujer.presentation.contactos.ContactosViewModel
 import com.example.alertamujer.util.abrirActividad
 import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
-
-
 
 class ContactosActivity : AppCompatActivity() {
 
@@ -39,21 +37,13 @@ class ContactosActivity : AppCompatActivity() {
 
         btnAgregarContacto.setOnClickListener { abrirActividad<AddContactoActivity>() }
 
-        observarViewModel()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.cargarContactos()
-    }
-
-    private fun observarViewModel() {
+        // Observamos directamente el LiveData de Room
         viewModel.contactos.observe(this) { lista ->
             dibujarContactos(lista)
         }
     }
 
-    private fun dibujarContactos(listaContactos: List<Contacto>) {
+    private fun dibujarContactos(listaContactos: List<ContactoEntity>) {
         listaContactosLayout.removeAllViews()
 
         if (listaContactos.isEmpty()) {
@@ -65,24 +55,12 @@ class ContactosActivity : AppCompatActivity() {
                 val contactView = LayoutInflater.from(this)
                     .inflate(R.layout.item_contacto, listaContactosLayout, false)
 
-                val tvNombre = contactView.findViewById<TextView>(R.id.tv_nombre_contacto)
-                val tvNumero = contactView.findViewById<TextView>(R.id.tv_numero_contacto)
-                val btnEditar = contactView.findViewById<ImageButton>(R.id.btn_editar_contacto)
-                val btnEliminar = contactView.findViewById<ImageButton>(R.id.btn_eliminar_contacto)
+                contactView.findViewById<TextView>(R.id.tv_nombre_contacto).text = contacto.nombre
+                contactView.findViewById<TextView>(R.id.tv_numero_contacto).text = contacto.numero
 
-                tvNombre.text = contacto.nombre
-                tvNumero.text = contacto.numero
-
-                btnEditar.setOnClickListener {
-                    val intent = Intent(this, AddContactoActivity::class.java)
-                    intent.putExtra("CONTACTO_INDEX", contacto.index)
-                    intent.putExtra("CONTACTO_NOMBRE", contacto.nombre)
-                    intent.putExtra("CONTACTO_NUMERO", contacto.numero)
-                    startActivity(intent)
-                }
-
-                btnEliminar.setOnClickListener {
-                    mostrarDialogoDeConfirmacion(contacto.index)
+                // Eliminar usando el ID real de la base de datos
+                contactView.findViewById<ImageButton>(R.id.btn_eliminar_contacto).setOnClickListener {
+                    mostrarDialogoDeConfirmacion(contacto.id)
                 }
 
                 listaContactosLayout.addView(contactView)
@@ -90,15 +68,14 @@ class ContactosActivity : AppCompatActivity() {
         }
     }
 
-    private fun mostrarDialogoDeConfirmacion(index: Int) {
+    private fun mostrarDialogoDeConfirmacion(id: Int) {
         AlertDialog.Builder(this)
             .setTitle("Confirmar Eliminación")
-            .setMessage("¿Estás seguro de que quieres eliminar este contacto?")
+            .setMessage("¿Eliminar este contacto?")
             .setPositiveButton("Eliminar") { _, _ ->
-                viewModel.eliminarContacto(index)
+                viewModel.eliminarContacto(id)
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
-
 }

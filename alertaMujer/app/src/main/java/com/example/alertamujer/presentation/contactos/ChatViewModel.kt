@@ -1,25 +1,21 @@
 package com.example.alertamujer.presentation.contactos
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.alertamujer.data.model.MensajeAlerta
+import com.example.alertamujer.data.local.AppDatabase
+import com.example.alertamujer.data.local.entity.AlertaEntity
 
-/**
- * Gestiona el estado de las alertas.
- * Utiliza LiveData para asegurar que la UI reaccione a los cambios de datos.
- */
-class ChatsViewModel : ViewModel() {
+class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _mensajes = MutableLiveData<MutableList<MensajeAlerta>>(mutableListOf())
-    val mensajes: LiveData<MutableList<MensajeAlerta>> get() = _mensajes
+    private val db = AppDatabase.getDatabase(application)
 
-    /**
-     * Inserta una nueva alerta recibida y notifica a los observadores.
-     */
-    fun recibirNuevaAlerta(nuevaAlerta: MensajeAlerta) {
-        val listaActual = _mensajes.value ?: mutableListOf()
-        listaActual.add(nuevaAlerta)
-        _mensajes.value = listaActual
-    }
+    // El RecyclerView observará esta lista. Cuando Room cambia, la UI se actualiza sola.
+    val listaAlertas: LiveData<List<AlertaEntity>> = db.alertaDao().obtenerTodasLasAlertas()
+
+    private val _mensajeError = MutableLiveData<String>()
+    val mensajeError: LiveData<String> get() = _mensajeError
+
+
 }
