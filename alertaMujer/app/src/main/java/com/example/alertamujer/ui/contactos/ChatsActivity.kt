@@ -25,7 +25,7 @@ class ChatsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chat)
+        setContentView(R.layout.activity_menu_alertas)
         configurarBotonAtras()
         setupRecyclerView()
         setupViewModel()

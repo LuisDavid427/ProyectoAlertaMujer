@@ -75,7 +75,7 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
                     val req = UbicacionRequest(loc.latitude, loc.longitude)
                     RetrofitClient.alertaService.enviarUbicacionContinua("Bearer $token", idAlerta, req)
                 }
-                delay(5000) // Cambié 50000 por 5000 para que sea real
+                delay(10000)
             }
         }
     }
