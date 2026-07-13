@@ -2,15 +2,17 @@ package com.example.alertamujer.ui.alerta
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels // Asegúrate de tener este import
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.alerta.AdjuntarViewModel
+import com.example.alertamujer.util.SessionManager
 import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
 import java.io.File
@@ -18,17 +20,32 @@ import java.io.FileOutputStream
 
 class AdjuntarActivity : AppCompatActivity() {
 
-    // 1. Ahora que es un ViewModel estándar, esta línea es suficiente
     private val viewModel: AdjuntarViewModel by viewModels()
-    private var idAlerta: Int = -1
+    private lateinit var sessionManager: SessionManager
 
-    private val tomarFotoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var idAlerta: Int = -1
+    private var tipoMediaActual: String = "FOTO"
+
+    private val mediaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            val bitmap = result.data?.extras?.get("data") as? Bitmap
-            bitmap?.let {
-                val file = guardarBitmapEnArchivo(it)
-                // 2. Aquí pasamos 'this' como el Context que pide tu función
-                viewModel.enviarArchivoAlServidor(this, idAlerta, file, false)
+            val data = result.data
+
+            // LECTURA SEGURA: Se obtiene el token desde la bóveda encriptada
+            val token = sessionManager.obtenerToken() ?: ""
+            val tokenFormateado = "Bearer $token"
+
+            if (tipoMediaActual == "FOTO") {
+                val bitmap = data?.extras?.get("data") as? Bitmap
+                bitmap?.let {
+                    val file = guardarBitmapEnArchivo(it)
+                    viewModel.enviarArchivoAlServidor(tokenFormateado, idAlerta, file, "FOTO")
+                }
+            } else {
+                val uri = data?.data
+                uri?.let {
+                    val file = uriToFile(it, tipoMediaActual)
+                    viewModel.enviarArchivoAlServidor(tokenFormateado, idAlerta, file, tipoMediaActual)
+                }
             }
         }
     }
@@ -36,6 +53,8 @@ class AdjuntarActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adjuntar)
+
+        sessionManager = SessionManager(this)
 
         idAlerta = intent.getIntExtra("EXTRA_ID_ALERTA", -1)
 
@@ -53,9 +72,18 @@ class AdjuntarActivity : AppCompatActivity() {
         viewModel.accionCaptura.observe(this) { tipo ->
             when (tipo) {
                 AdjuntarViewModel.TipoCaptura.MOSTRAR_OPCIONES -> mostrarDialogoOpciones()
-                AdjuntarViewModel.TipoCaptura.FOTO -> lanzarCamara(MediaStore.ACTION_IMAGE_CAPTURE)
-                AdjuntarViewModel.TipoCaptura.VIDEO -> lanzarCamara(MediaStore.ACTION_VIDEO_CAPTURE)
-                AdjuntarViewModel.TipoCaptura.AUDIO -> lanzarAudio()
+                AdjuntarViewModel.TipoCaptura.FOTO -> {
+                    tipoMediaActual = "FOTO"
+                    lanzarIntent(MediaStore.ACTION_IMAGE_CAPTURE)
+                }
+                AdjuntarViewModel.TipoCaptura.VIDEO -> {
+                    tipoMediaActual = "VIDEO"
+                    lanzarIntent(MediaStore.ACTION_VIDEO_CAPTURE)
+                }
+                AdjuntarViewModel.TipoCaptura.AUDIO -> {
+                    tipoMediaActual = "AUDIO"
+                    lanzarIntent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+                }
             }
         }
 
@@ -73,6 +101,18 @@ class AdjuntarActivity : AppCompatActivity() {
         return file
     }
 
+    private fun uriToFile(uri: Uri, tipo: String): File {
+        val extension = if (tipo == "VIDEO") ".mp4" else ".m4a"
+        val file = File(cacheDir, "evidencia_${System.currentTimeMillis()}$extension")
+
+        contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
+
     private fun mostrarDialogoOpciones() {
         val opciones = arrayOf("Tomar Foto", "Grabar Video")
         AlertDialog.Builder(this)
@@ -81,16 +121,13 @@ class AdjuntarActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun lanzarCamara(accion: String) {
-        val intent = Intent(accion)
-        // Nota: Si intentas lanzar video, asegúrate de tener los permisos de cámara y almacenamiento
-        if (intent.resolveActivity(packageManager) != null) {
-            tomarFotoLauncher.launch(intent)
+    private fun lanzarIntent(accion: String) {
+        try {
+            val intent = Intent(accion)
+            mediaLauncher.launch(intent)
+        } catch (e: Exception) {
+            // Manejo de la restricción de visibilidad de paquetes en Android 11+
+            Toast.makeText(this, "Tu dispositivo no tiene una app para esta acción", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun lanzarAudio() {
-        val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
-        startActivity(intent)
     }
 }

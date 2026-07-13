@@ -67,4 +67,5 @@ dependencies {
 
 // Opcional: Para analíticas y diagnóstico de las notificaciones
     implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

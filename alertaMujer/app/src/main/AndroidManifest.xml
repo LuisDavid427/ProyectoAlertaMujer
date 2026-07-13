@@ -54,8 +54,9 @@
         <activity
             android:name=".ui.contactos.ChatsActivity"
             android:exported="false" />
+
         <service
-            android:name=".network.fcm.AlertaFCMService"
+            android:name=".data.network.fcm.AlertaFCMService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

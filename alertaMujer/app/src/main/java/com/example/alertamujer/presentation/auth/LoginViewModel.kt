@@ -1,8 +1,7 @@
 package com.example.alertamujer.presentation.auth
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,17 +9,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.alertamujer.data.dto.LoginRequest
 import com.example.alertamujer.data.dto.AuthResponse
 import com.example.alertamujer.data.network.repository.AuthRepository
+import com.example.alertamujer.util.SessionManager
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import com.google.firebase.messaging.FirebaseMessaging
-import android.util.Log
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AuthRepository()
 
-    private val sharedPreferences: SharedPreferences =
-        application.getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
+    // AHORA USAMOS LA BÓVEDA SEGURA PARA GUARDAR LA SESIÓN
+    private val sessionManager = SessionManager(application)
 
     private val _navegarAMain = MutableLiveData<Boolean>()
     val navegarAMain: LiveData<Boolean> get() = _navegarAMain
@@ -29,7 +28,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val mensajeError: LiveData<String> get() = _mensajeError
 
     init {
-        if (sharedPreferences.getBoolean("isLoggedIn", false)) {
+        // Lee el estado desde la bóveda encriptada
+        if (sessionManager.estaLogueado()) {
             _navegarAMain.value = true
         }
     }
@@ -50,11 +50,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (data?.success == true) {
                         val id = data.id_usuario ?: -1
-                        val tokenJwt = data.token ?: "" // Extraemos el token del cuerpo
+                        val tokenJwt = data.token ?: ""
 
-                        // Guardamos el estado y la llave de autorización
+                        // GUARDADO SEGURO
                         guardarSesion(id, tokenJwt)
-
                         vincularDispositivoConFCM(id)
 
                         _navegarAMain.value = true
@@ -90,13 +89,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Modificado para persistir el JWT
     private fun guardarSesion(idUsuario: Int, token: String) {
-        sharedPreferences.edit().apply {
-            putBoolean("isLoggedIn", true)
-            putInt("id_usuario", idUsuario)
-            putString("token_jwt", token) // <--- Guardado seguro
-            apply()
-        }
+        // Todo se guarda a través del SessionManager
+        sessionManager.guardarEstadoLogin(true)
+        sessionManager.guardarIdUsuario(idUsuario)
+        sessionManager.guardarToken(token)
     }
 }

@@ -12,8 +12,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import android.app.Application
-import android.content.Context
 
 class AdjuntarViewModel : ViewModel() {
 
@@ -37,25 +35,22 @@ class AdjuntarViewModel : ViewModel() {
         }
     }
 
-    // En tu ViewModel, cambia la firma de la función:
-    fun enviarArchivoAlServidor(context: Context, idAlerta: Int, file: File, esVideo: Boolean) {
+    fun enviarArchivoAlServidor(tokenFormateado: String, idAlerta: Int, file: File, tipoMedia: String) {
         _estadoSubida.value = "Subiendo archivo..."
-
-        // Ahora usas el context que te pasaron como parámetro
-        val prefs = context.getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
-        val token = prefs.getString("token_jwt", "") ?: ""
-        val tokenFormateado = "Bearer $token"
 
         viewModelScope.launch {
             try {
-                val mimeType = if (esVideo) "video/mp4" else "image/jpeg"
+                // Configura el MIME type exacto que necesita tu servidor Spring Boot
+                val mimeType = when (tipoMedia) {
+                    "VIDEO" -> "video/mp4"
+                    "AUDIO" -> "audio/mpeg"
+                    else -> "image/jpeg"
+                }
+
                 val requestFile: RequestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
                 val body: MultipartBody.Part = MultipartBody.Part.createFormData("archivo", file.name, requestFile)
+                val tipoBody: RequestBody = tipoMedia.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                val tipoStr = if (esVideo) "VIDEO" else "FOTO"
-                val tipoBody: RequestBody = tipoStr.toRequestBody("text/plain".toMediaTypeOrNull())
-
-                // 2. Pasamos el token como primer argumento, tal como lo exige el nuevo repositorio
                 val response = repository.subirEvidencia(tokenFormateado, idAlerta, body, tipoBody)
 
                 if (response.isSuccessful) {

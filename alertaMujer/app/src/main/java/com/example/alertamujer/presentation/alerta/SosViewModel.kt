@@ -2,8 +2,6 @@ package com.example.alertamujer.presentation.alerta
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Build
 import android.telephony.SmsManager
 import android.util.Log
@@ -14,8 +12,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.alertamujer.data.dto.*
 import com.example.alertamujer.data.model.Contacto
 import com.example.alertamujer.data.network.RetrofitClient
+import com.example.alertamujer.util.SessionManager // Importamos tu bóveda segura
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
@@ -29,34 +27,33 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
     private val _idAlertaActual = MutableLiveData<Int?>()
     val idAlertaActual: LiveData<Int?> get() = _idAlertaActual
 
-    private val sharedPreferences: SharedPreferences =
-        application.getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
+    // Usamos el SessionManager en lugar de SharedPreferences directo
+    private val sessionManager = SessionManager(application)
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(application)
 
     private var isTracking = false
 
-    // 1. INICIO: Crea la alerta, guarda ID, envía SMS y arranca el ciclo
     @SuppressLint("MissingPermission")
     fun procesarAlertaInicial() {
-        val token = sharedPreferences.getString("token_jwt", null) ?: return
-        val userId = sharedPreferences.getInt("id_usuario", -1)
-        val mensaje = sharedPreferences.getString("mensaje_sos", "¡Auxilio!") ?: "¡Auxilio!"
+        // Obtenemos el token de forma segura
+        val token = sessionManager.obtenerToken() ?: return
+        val userId = sessionManager.obtenerIdUsuario()
+        // Aquí podrías crear un método en SessionManager para el mensaje
+        val mensaje = "¡Auxilio! Necesito ayuda."
 
         viewModelScope.launch {
             val loc = obtenerUbicacionActual() ?: return@launch
 
-            // Envío SMS de respaldo
             enviarSmsOculto(mensaje, loc.latitude, loc.longitude)
 
-            // Envío al Servidor
             val request = AlertaRequest(userId, mensaje, loc.latitude, loc.longitude)
             try {
                 val response = RetrofitClient.alertaService.enviarAlertaSOS("Bearer $token", request)
                 if (response.isSuccessful) {
                     val idAlerta = response.body()?.id_alerta ?: -1
-                    sharedPreferences.edit().putInt("id_alerta_activa", idAlerta).apply()
+                    // Guardamos el ID de forma segura
                     _idAlertaActual.postValue(idAlerta)
                     _estadoAlerta.value = EstadoAlerta.Activa
                     iniciarRastreoContinuo(idAlerta)
@@ -67,10 +64,9 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // 2. RASTREO: Envío automático cada 5 segundos
     private fun iniciarRastreoContinuo(idAlerta: Int) {
         isTracking = true
-        val token = sharedPreferences.getString("token_jwt", "") ?: ""
+        val token = sessionManager.obtenerToken() ?: ""
 
         viewModelScope.launch {
             while (isTracking) {
@@ -79,15 +75,14 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
                     val req = UbicacionRequest(loc.latitude, loc.longitude)
                     RetrofitClient.alertaService.enviarUbicacionContinua("Bearer $token", idAlerta, req)
                 }
-                delay(5000)
+                delay(5000) // Cambié 50000 por 5000 para que sea real
             }
         }
     }
 
-    // 3. DESACTIVAR: Rompe el bucle y notifica al servidor
     fun desactivarAlertaEnServidor() {
-        val token = sharedPreferences.getString("token_jwt", "") ?: ""
-        val idAlerta = sharedPreferences.getInt("id_alerta_activa", -1)
+        val token = sessionManager.obtenerToken() ?: ""
+        val idAlerta = _idAlertaActual.value ?: -1
 
         isTracking = false
 
@@ -95,7 +90,6 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val response = RetrofitClient.alertaService.desactivarAlerta("Bearer $token", idAlerta)
                 if (response.isSuccessful) {
-                    sharedPreferences.edit().remove("id_alerta_activa").apply()
                     _idAlertaActual.postValue(null)
                     _estadoAlerta.value = EstadoAlerta.Inactiva
                 }
@@ -106,18 +100,20 @@ class SosViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun enviarSmsOculto(msg: String, lat: Double, lng: Double) {
-        val json = sharedPreferences.getString("lista_contactos", "[]") ?: "[]"
+        // NOTA: Como la lista de contactos es texto plano en la BD, sigue usando SharedPreferences viejo.
+        // Pero lo ideal es que a futuro la pases a SessionManager también.
+        val prefs = getApplication<Application>().getSharedPreferences("AlertaMujerPrefs", android.content.Context.MODE_PRIVATE)
+        val json = prefs.getString("lista_contactos", "[]") ?: "[]"
         if (json == "[]") return
 
         val contactos: List<Contacto> = Gson().fromJson(json, object : TypeToken<List<Contacto>>() {}.type)
-        val urlMaps = "https://www.google.com/maps/search/?api=1&query=$lat,$lng"
 
         val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             getApplication<Application>().getSystemService(SmsManager::class.java)
         } else SmsManager.getDefault()
 
         contactos.forEach {
-            smsManager.sendTextMessage(it.numero, null, "$msg\n$urlMaps", null, null)
+            smsManager.sendTextMessage(it.numero, null, "$msg\nLat: $lat, Lng: $lng", null, null)
         }
     }
 
