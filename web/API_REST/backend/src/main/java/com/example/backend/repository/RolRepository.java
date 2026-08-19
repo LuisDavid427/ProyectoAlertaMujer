@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface RolRepository extends JpaRepository<RolModel, Integer> {
     Optional<RolModel> findByNombreRol(String nombreRol);
+    RolModel save(RolModel rolModel);
 }

@@ -1,6 +1,5 @@
 package com.example.alertamujer.ui.settings
 
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -28,14 +27,13 @@ class MensajeActivity : AppCompatActivity() {
         val etMensaje = findViewById<TextInputEditText>(R.id.et_mensaje_personalizado)
         val btnGuardar = findViewById<MaterialButton>(R.id.btn_guardar_mensaje)
 
-        // 1. Cargamos el mensaje que ya estaba guardado para mostrarlo en pantalla
-        val prefs = getSharedPreferences("AlertaMujerPrefs", Context.MODE_PRIVATE)
-        val mensajeGuardado = prefs.getString("mensaje_sos", "¡Auxilio! Alerta SOS iniciada")
+        // ✅ 1. Cargar el mensaje actual usando el ViewModel (almacenamiento cifrado)
+        val mensajeGuardado = viewModel.obtenerMensajeActual()
         etMensaje.setText(mensajeGuardado)
 
-        // 2. Evento para guardar el nuevo mensaje escrito
+        // ✅ 2. Guardar el nuevo mensaje escrito a través del ViewModel
         btnGuardar.setOnClickListener {
-            val nuevoMensaje = etMensaje.text.toString()
+            val nuevoMensaje = etMensaje.text.toString().trim()
             viewModel.guardarMensajeLocal(nuevoMensaje)
         }
     }
@@ -43,7 +41,7 @@ class MensajeActivity : AppCompatActivity() {
     private fun observarViewModel() {
         viewModel.estadoMensaje.observe(this) { mensajeEstado ->
             Toast.makeText(this, mensajeEstado, Toast.LENGTH_SHORT).show()
-            // Si se guardó con éxito, podemos cerrar la pantalla
+            // Si se guardó con éxito, cerramos la pantalla
             if (mensajeEstado == "Mensaje guardado en tu celular") {
                 finish()
             }

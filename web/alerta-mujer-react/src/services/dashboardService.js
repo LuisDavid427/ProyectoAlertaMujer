@@ -1,18 +1,27 @@
-const API_BASE_URL = 'http://localhost:8080/api/dashboard'; // Apuntamos al prefijo del dashboard
+const API_BASE_URL = 'http://192.168.1.22:8080/api/dashboard';
 
 export const obtenerDatosDashboard = async (vista, busqueda = '') => {
     try {
-        // Construimos la URL: ej. http://localhost:8080/api/dashboard/alertas?q=luis
-        const respuesta = await fetch(`${API_BASE_URL}/${vista}?q=${busqueda}`);
-        
-        if (!respuesta.ok) throw new Error(`Error al obtener ${vista}`);
-        
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        const qParam = encodeURIComponent(busqueda || '');
+
+        const respuesta = await fetch(`${API_BASE_URL}/${vista}?q=${qParam}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            }
+        });
+
+        if (!respuesta.ok) {
+            console.error(`Error HTTP ${respuesta.status} en ${vista}`);
+            return [];
+        }
+
         const datos = await respuesta.json();
-        
-        // Retornamos siempre un array para evitar que el .filter del front explote
         return Array.isArray(datos) ? datos : [];
     } catch (error) {
         console.error("Error en la conexión con Spring Boot:", error);
-        return []; // Retornamos array vacío en caso de error
+        return [];
     }
 };

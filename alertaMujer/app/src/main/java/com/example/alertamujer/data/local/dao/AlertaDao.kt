@@ -9,9 +9,9 @@ import com.example.alertamujer.data.local.entity.AlertaEntity
 
 @Dao
 interface AlertaDao {
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarAlerta(alerta: AlertaEntity)
 
-    @Query("SELECT * FROM tabla_alertas ORDER BY timestamp DESC")
+    @Query("select * from tabla_alertas order by timestamp desc")
     fun obtenerTodasLasAlertas(): LiveData<List<AlertaEntity>>
 }

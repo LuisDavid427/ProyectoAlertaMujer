@@ -24,9 +24,19 @@ class SessionManager(context: Context) {
     fun guardarIdUsuario(id: Int) { sharedPreferences.edit().putInt("id_usuario", id).apply() }
     fun obtenerIdUsuario(): Int { return sharedPreferences.getInt("id_usuario", -1) }
 
-    // Funciones nuevas para el Login
+    // Funciones de Login
     fun guardarEstadoLogin(estado: Boolean) { sharedPreferences.edit().putBoolean("isLoggedIn", estado).apply() }
     fun estaLogueado(): Boolean { return sharedPreferences.getBoolean("isLoggedIn", false) }
+
+    // 🟢 NUEVAS FUNCIONES PARA EL MENSAJE SOS 🟢
+    fun guardarMensajeSOS(mensaje: String) {
+        sharedPreferences.edit().putString("mensaje_sos", mensaje).apply()
+    }
+
+    fun obtenerMensajeSOS(): String {
+        return sharedPreferences.getString("mensaje_sos", "¡Auxilio! Necesito ayuda inmediata.")
+            ?: "¡Auxilio! Necesito ayuda inmediata."
+    }
 
     fun limpiarSesion() { sharedPreferences.edit().clear().apply() }
 }

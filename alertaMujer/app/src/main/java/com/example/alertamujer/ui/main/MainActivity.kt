@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.alertamujer.R
+import com.example.alertamujer.data.manager.SosManager
 import com.example.alertamujer.presentation.alerta.SosViewModel
 import com.example.alertamujer.presentation.main.MainViewModel
 import com.example.alertamujer.ui.alerta.AdjuntarActivity
@@ -21,6 +22,7 @@ import com.example.alertamujer.ui.contactos.ChatsActivity
 import com.example.alertamujer.ui.contactos.ContactosActivity
 import com.example.alertamujer.ui.settings.MensajeActivity
 import com.example.alertamujer.ui.settings.SettingsActivity
+import com.example.alertamujer.ui.historial.HistorialActivity
 import com.example.alertamujer.util.PermissionUtils
 import com.example.alertamujer.util.abrirActividad
 import com.google.android.material.button.MaterialButton
@@ -37,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSos: MaterialButton
     private lateinit var btnMensaje: MaterialButton
     private lateinit var btnChats: ImageButton
+    private lateinit var btnHistorial: MaterialButton
+
 
     private var currentUiMode: Int = 0
 
@@ -59,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         btnSos = findViewById(R.id.btn_sos_circular)
         btnChats = findViewById(R.id.btn_chats)
         btnMensaje = findViewById(R.id.btn_mensaje)
+        btnHistorial = findViewById(R.id.btn_historial)
 
         btnSosAdjuntar.visibility = View.GONE
 
@@ -71,19 +76,24 @@ class MainActivity : AppCompatActivity() {
         btnContactos.setOnClickListener { abrirActividad<ContactosActivity>() }
         btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
         btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
+        btnHistorial.setOnClickListener { abrirActividad<HistorialActivity>() }
+
 
         btnSosAdjuntar.setOnClickListener {
-            val idActual = sosViewModel.idAlertaActual.value
-            if (idActual != null) {
+            // Leemos directamente del Singleton para no depender del observador de LiveData
+            val idActual = SosManager.getInstance(this).idAlertaActual.value
+
+            if (idActual != null && idActual != -1) {
                 abrirActividad<AdjuntarActivity> { putExtra("EXTRA_ID_ALERTA", idActual) }
             } else {
-                Toast.makeText(this, "Esperando ID de alerta...", Toast.LENGTH_SHORT).show()
+                // Fallback: Abre AdjuntarActivity directamente, la cual volverá a consultar a SosManager
+                abrirActividad<AdjuntarActivity>()
             }
         }
 
         btnSos.setOnClickListener {
             when (sosViewModel.estadoAlerta.value) {
-                is SosViewModel.EstadoAlerta.Activa -> {
+                is SosManager.EstadoAlerta.Activa -> {
                     sosViewModel.desactivarAlertaEnServidor()
                 }
                 else -> {
@@ -104,17 +114,29 @@ class MainActivity : AppCompatActivity() {
     private fun observarEstadoSOS() {
         sosViewModel.estadoAlerta.observe(this) { estado ->
             when (estado) {
-                is SosViewModel.EstadoAlerta.Inactiva -> {
-                    btnSos.text = "S.O.S"
-                    btnSos.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
+                is SosManager.EstadoAlerta.Inactiva -> {
+                    btnSos.isEnabled = true
+                    btnSos.text = "ENVIAR ALERTA SOS"
+                    btnSosAdjuntar.visibility = View.GONE // Oculto mientras no hay alerta
+                }
+
+                is SosManager.EstadoAlerta.Procesando -> {
+                    btnSos.isEnabled = false
+                    btnSos.text = "Espera, enviando alerta..."
                     btnSosAdjuntar.visibility = View.GONE
                 }
-                is SosViewModel.EstadoAlerta.Activa -> {
-                    btnSos.text = "Alerta Activa\n(Presionar para cancelar)"
-                    btnSos.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_red))
-                    btnSosAdjuntar.visibility = View.VISIBLE
+
+                is SosManager.EstadoAlerta.Activa -> {
+                    btnSos.isEnabled = true
+                    btnSos.text = "CANCELAR ALERTA"
+                    btnSosAdjuntar.visibility = View.VISIBLE // 👈 AQUÍ SE HACE VISIBLE EN LA PANTALLA PRINCIPAL
+                    Toast.makeText(this, "¡Alerta enviada con éxito!", Toast.LENGTH_SHORT).show()
                 }
-                is SosViewModel.EstadoAlerta.Error -> {
+
+                is SosManager.EstadoAlerta.Error -> {
+                    btnSos.isEnabled = true
+                    btnSos.text = "ENVIAR ALERTA SOS"
+                    btnSosAdjuntar.visibility = View.GONE
                     Toast.makeText(this, estado.mensaje, Toast.LENGTH_LONG).show()
                 }
             }

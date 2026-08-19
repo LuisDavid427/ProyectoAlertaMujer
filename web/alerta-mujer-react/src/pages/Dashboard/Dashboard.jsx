@@ -34,16 +34,23 @@ export default function Dashboard() {
     }, [vistaActual, busqueda]); // Se dispara al cambiar de switch o buscar
 
     // --- LÓGICA DE FILTRADO CORREGIDA ---
+
     const datosFiltrados = useMemo(() => {
-        // Si no hay datos todavía, devolvemos lista vacía para no romper nada
         if (!datos || datos.length === 0) return [];
 
         return datos.filter(item => {
+            // Si el combo está en "Todos los registros", retorna todo
             if (filtroEstado === 'todos') return true;
 
             if (vistaActual === 'alertas') {
-                // El ?. asegura que si estado_alerta no existe, no rompa la app
-                return item.estado_alerta?.toLowerCase() === 'activa';
+                // Se evalúa 'estado' (o 'estado_alerta' por seguridad en caso de fallback)
+                const estadoItem = (item.estado || item.estado_alerta || '').toLowerCase();
+                
+                // Si seleccionó "activos", busca si el estado dice "activa" o "activo"
+                if (filtroEstado === 'activos') {
+                    return estadoItem === 'activa' || estadoItem === 'activo';
+                }
+                return true;
             }
 
             if (vistaActual === 'usuarios') {

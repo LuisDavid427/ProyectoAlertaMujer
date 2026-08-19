@@ -34,38 +34,43 @@ public class AlertaService {
 
     
 
-    // FASE 1: Crear la alerta inicial
+// FASE 1: Crear la alerta inicial
     @Transactional(rollbackFor = Exception.class)
     public AlertaModel procesarNuevaAlerta(AlertaRequest request) throws Exception {
         
-        // CORRECCIÓN AQUÍ: Casteamos a Integer para que coincida con el modelo de la BD
-        Integer idUsuario = Integer.valueOf(request.getIdUsuario().toString());
+        // 1. Validamos que el ID de usuario no venga nulo en la petición
+        if (request.getIdUsuario() == null) {
+            throw new Exception("El ID de usuario es obligatorio y llegó nulo desde la aplicación.");
+        }
+
+        // 2. Obtenemos directamente el ID sin conversiones innecesarias
+        Integer idUsuario = request.getIdUsuario();
+        
         Optional<UsuarioModel> usuarioOpt = usuarioRepository.findById(idUsuario);
         
         if (!usuarioOpt.isPresent()) {
             throw new Exception("Usuario no encontrado");
         }
 
-        // 1. Preparamos la Alerta
+        // 3. Preparamos la Alerta
         AlertaModel nuevaAlerta = new AlertaModel();
         nuevaAlerta.setUsuario(usuarioOpt.get());
         nuevaAlerta.setMensaje(request.getMensaje());
         nuevaAlerta.setEstadoAlerta("activa"); 
 
-        // 2. Preparamos la primera Ubicación GPS
+        // 4. Preparamos la primera Ubicación GPS
         UbicacionModel primeraUbicacion = new UbicacionModel();
         primeraUbicacion.setLatitud(BigDecimal.valueOf(request.getLatitud()));
         primeraUbicacion.setLongitud(BigDecimal.valueOf(request.getLongitud()));
         primeraUbicacion.setAlerta(nuevaAlerta);
 
-        // 3. Empacamos la ubicación dentro de la lista de la alerta
+        // 5. Empacamos la ubicación dentro de la lista de la alerta
         nuevaAlerta.setUbicaciones(new ArrayList<>());
         nuevaAlerta.getUbicaciones().add(primeraUbicacion);
 
-        // 4. Guardamos en MySQL y retornamos
+        // 6. Guardamos en MySQL y retornamos
         return alertaRepository.save(nuevaAlerta);
     }
-
     // FASE 2: Agregar nueva ubicación al rastreo (Cada 5 segundos)
     @Transactional(rollbackFor = Exception.class)
     public void agregarUbicacionContinua(Integer idAlerta, UbicacionRequest request) throws Exception {

@@ -1,5 +1,3 @@
-// src/services/authService.js
-
 const API_URL = 'http://192.168.1.22:8080/api/auth';
 
 export async function loginApp(email, password) {
@@ -18,7 +16,6 @@ export async function loginApp(email, password) {
         resultado = await respuesta.json();
     }
 
-    // Si el backend de Spring Boot responde con un error (ej. 401 Unauthorized)
     if (!respuesta.ok) {
         throw new Error(resultado?.error || resultado?.mensaje || "Credenciales incorrectas");
     }
@@ -26,7 +23,7 @@ export async function loginApp(email, password) {
     return resultado;
 }
 
-// Agrega esto a src/services/authService.js
 export function cerrarSesion() {
     sessionStorage.removeItem('sesionAlertaMujer');
+    sessionStorage.removeItem('token');
 }

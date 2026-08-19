@@ -1,5 +1,5 @@
 package com.example.alertamujer.data.dto
-
+import com.google.gson.annotations.SerializedName
 
 
 // Lo que el servidor te responde (te da el id_alerta para seguir mandando GPS)
@@ -25,12 +25,24 @@ data class AlertaRecibidaDTO(
     val fecha_hora: String // Fecha en la que se emitió
 )
 
+
+
+
 data class AlertaRequest(
-    val idUsuario: Int,
-    val mensaje: String,
+    @SerializedName("id_usuario") // <--- Si tu DTO backend usa id_usuario / @JsonProperty("id_usuario")
+    val idUsuario: Int?,
+
+    @SerializedName("mensaje")
+    val mensaje: String?,
+
+    @SerializedName("latitud")
     val latitud: Double,
+
+    @SerializedName("longitud")
     val longitud: Double,
-    val contactosNotificar: List<String> // <--- NUEVO: Lista de emails
+
+    @SerializedName("contactosNotificar") // O "contactos_notificar" según como esté en Java
+    val contactosNotificar: List<String>
 )
 
 // Asegúrate de que este archivo tenga exactamente los mismos parámetros

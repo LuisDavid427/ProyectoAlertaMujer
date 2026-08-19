@@ -47,7 +47,9 @@ public class DashboardService {
     }
 
     public List<AlertaDashboardDTO> listarAlertas(String busqueda) {
-        List<Object[]> resultados = alertaRepo.llamarSpAlertas(busqueda);
+        // Garantizamos que no llegue null al SP
+        String filtro = (busqueda == null) ? "" : busqueda;
+        List<Object[]> resultados = alertaRepo.llamarSpAlertas(filtro);
         
         return resultados.stream().map(obj -> {
             Integer id = ((Number) obj[0]).intValue();
@@ -55,8 +57,12 @@ public class DashboardService {
             String mensaje = (String) obj[2];
             String estado = (String) obj[3];
             
-            // Manejo seguro de la fecha que viene de la base de datos
-            java.time.LocalDateTime fecha = ((Timestamp) obj[4]).toLocalDateTime();
+            java.time.LocalDateTime fecha = null;
+            if (obj[4] instanceof Timestamp) {
+                fecha = ((Timestamp) obj[4]).toLocalDateTime();
+            } else if (obj[4] instanceof java.util.Date) {
+                fecha = new java.sql.Timestamp(((java.util.Date) obj[4]).getTime()).toLocalDateTime();
+            }
 
             return new AlertaDashboardDTO(id, victima, mensaje, estado, fecha);
         }).collect(Collectors.toList());
