@@ -14,7 +14,7 @@ import retrofit2.Response
 class RegistroViewModel(application: Application) : AndroidViewModel(application) {
 
     // Capa de Datos: Instanciamos el repositorio
-    private val repository = AuthRepository()
+    private val repository = AuthRepository(application)
 
     private val _registroExitoso = MutableLiveData<Boolean>()
     val registroExitoso: LiveData<Boolean> get() = _registroExitoso

@@ -7,9 +7,12 @@ import com.example.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 public class DashboardService {
@@ -45,26 +48,32 @@ public class DashboardService {
             return new UsuarioDashboardDTO(id, nombre, email, activo);
         }).collect(Collectors.toList());
     }
-
     public List<AlertaDashboardDTO> listarAlertas(String busqueda) {
-        // Garantizamos que no llegue null al SP
         String filtro = (busqueda == null) ? "" : busqueda;
         List<Object[]> resultados = alertaRepo.llamarSpAlertas(filtro);
-        
-        return resultados.stream().map(obj -> {
-            Integer id = ((Number) obj[0]).intValue();
-            String victima = (String) obj[1];
-            String mensaje = (String) obj[2];
-            String estado = (String) obj[3];
+        List<AlertaDashboardDTO> lista = new ArrayList<>();
+
+        for (Object[] fila : resultados) {
+            Integer idAlerta = (Integer) fila[0];
+            String nombreVictima = (String) fila[1];
+            String mensaje = (String) fila[2];
+            String estadoAlerta = (String) fila[3];
             
-            java.time.LocalDateTime fecha = null;
-            if (obj[4] instanceof Timestamp) {
-                fecha = ((Timestamp) obj[4]).toLocalDateTime();
-            } else if (obj[4] instanceof java.util.Date) {
-                fecha = new java.sql.Timestamp(((java.util.Date) obj[4]).getTime()).toLocalDateTime();
+            LocalDateTime fecha = null;
+            if (fila[4] != null) {
+                if (fila[4] instanceof java.sql.Timestamp) {
+                    fecha = ((java.sql.Timestamp) fila[4]).toLocalDateTime();
+                } else if (fila[4] instanceof java.sql.Date) {
+                    fecha = ((java.sql.Date) fila[4]).toLocalDate().atStartOfDay();
+                }
             }
 
-            return new AlertaDashboardDTO(id, victima, mensaje, estado, fecha);
-        }).collect(Collectors.toList());
+            BigDecimal latitud = fila[5] != null ? new BigDecimal(fila[5].toString()) : null;
+            BigDecimal longitud = fila[6] != null ? new BigDecimal(fila[6].toString()) : null;
+
+            lista.add(new AlertaDashboardDTO(idAlerta, nombreVictima, mensaje, estadoAlerta, fecha, latitud, longitud));
+        }
+
+        return lista;
     }
 }

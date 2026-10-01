@@ -9,6 +9,7 @@ import android.util.Log
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.UbicacionRequest
 import com.example.alertamujer.data.local.AppDatabase
+import com.example.alertamujer.data.local.entity.AlertaEntity
 import com.example.alertamujer.data.network.RetrofitClient
 import com.example.alertamujer.util.SessionManager
 import com.google.android.gms.location.*
@@ -32,7 +33,6 @@ class SosManager private constructor(private val context: Context) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var trackingJob: Job? = null
 
-    // ESTADOS REACTIVOS COMPARTIDOS EN TIEMPO REAL
     private val _estadoAlerta = MutableStateFlow<EstadoAlerta>(EstadoAlerta.Inactiva)
     val estadoAlerta: StateFlow<EstadoAlerta> = _estadoAlerta
 
@@ -55,13 +55,6 @@ class SosManager private constructor(private val context: Context) {
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
-    private fun obtenerAuthHeader(): String? {
-        val rawToken = sessionManager.obtenerToken() ?: return null
-        if (rawToken.isBlank()) return null
-        val tokenLimpio = rawToken.replace("Bearer", "", ignoreCase = true).trim()
-        return "Bearer $tokenLimpio"
-    }
-
     @SuppressLint("MissingPermission")
     fun procesarAlertaInicial() {
         if (!isGpsActivado()) {
@@ -69,10 +62,10 @@ class SosManager private constructor(private val context: Context) {
             return
         }
 
-        val authHeader = obtenerAuthHeader()
         val userId = sessionManager.obtenerIdUsuario()
+        val token = sessionManager.obtenerToken()
 
-        if (authHeader == null || userId == null || userId == -1) {
+        if (token.isNullOrBlank() || userId == null || userId == -1) {
             _estadoAlerta.value = EstadoAlerta.Error("Sesión expirada o invalida. Vuelve a iniciar sesión.")
             return
         }
@@ -102,11 +95,29 @@ class SosManager private constructor(private val context: Context) {
             )
 
             try {
-                val response = RetrofitClient.alertaService.enviarAlertaSOS(authHeader, request)
+                val response = RetrofitClient.getAlertaService(context).enviarAlertaSOS(request)
                 if (response.isSuccessful) {
                     val idAlerta = response.body()?.id_alerta ?: -1
                     _idAlertaActual.value = idAlerta
                     _estadoAlerta.value = EstadoAlerta.Activa
+
+                    try {
+                        val nombreUsuario = sessionManager.obtenerNombreUsuario() ?: "Usuario"
+                        val nuevaAlertaLocal = AlertaEntity(
+                            id_local = 0,
+                            id_alerta = idAlerta,
+                            nombre_usuario = nombreUsuario,
+                            mensaje = mensaje,
+                            latitud = loc.latitude,
+                            longitud = loc.longitude,
+                            timestamp = System.currentTimeMillis()
+                        )
+                        db.alertaDao().insertarAlerta(nuevaAlertaLocal)
+                        Log.d("ROOM_SOS", "✅ Alerta guardada en Room con id_alerta: $idAlerta")
+                    } catch (e: Exception) {
+                        Log.e("ROOM_SOS", "❌ Error guardando en Room: ${e.message}", e)
+                    }
+
                     iniciarRastreoContinuo(idAlerta)
                 } else {
                     _estadoAlerta.value = EstadoAlerta.Error("Error servidor: ${response.code()}")
@@ -120,12 +131,15 @@ class SosManager private constructor(private val context: Context) {
     private fun iniciarRastreoContinuo(idAlerta: Int) {
         trackingJob?.cancel()
         trackingJob = scope.launch {
-            val authHeader = obtenerAuthHeader() ?: return@launch
             while (isActive) {
                 val loc = obtenerUbicacionActual()
                 if (loc != null) {
                     val req = UbicacionRequest(loc.latitude, loc.longitude)
-                    RetrofitClient.alertaService.enviarUbicacionContinua(authHeader, idAlerta, req)
+                    try {
+                        RetrofitClient.getAlertaService(context).enviarUbicacionContinua(idAlerta, req)
+                    } catch (e: Exception) {
+                        Log.e("DEBUG_SOS", "Error en rastreo continuo: ${e.message}")
+                    }
                 }
                 delay(10000)
             }
@@ -134,13 +148,12 @@ class SosManager private constructor(private val context: Context) {
 
     fun desactivarAlertaEnServidor() {
         trackingJob?.cancel()
-        val authHeader = obtenerAuthHeader() ?: ""
         val idAlerta = _idAlertaActual.value ?: -1
 
         scope.launch {
             try {
                 if (idAlerta != -1) {
-                    RetrofitClient.alertaService.desactivarAlerta(authHeader, idAlerta)
+                    RetrofitClient.getAlertaService(context).desactivarAlerta(idAlerta)
                 }
             } catch (e: Exception) {
                 Log.e("DEBUG_SOS", "Error al desactivar: ${e.message}")

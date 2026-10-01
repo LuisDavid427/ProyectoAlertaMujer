@@ -110,3 +110,57 @@ begin
        or (p_busqueda regexp '^[0-9]+$' and a.id_alerta = cast(p_busqueda as unsigned))
     order by a.fecha desc;
 end //
+
+
+--changeset luis_david:4 enddelimiter://
+
+drop procedure if exists sp_listar_alertas_dashboard //
+
+create procedure sp_listar_alertas_dashboard(in p_busqueda varchar(255))
+begin
+    set p_busqueda = ifnull(trim(p_busqueda), '');
+
+    select 
+        a.id_alerta,
+        u.nombre,
+        a.mensaje,
+        a.estado_alerta,
+        a.fecha,
+        (select ub.latitud from ubicaciones ub where ub.id_alerta = a.id_alerta order by ub.id_ubicacion desc limit 1) as latitud,
+        (select ub.longitud from ubicaciones ub where ub.id_alerta = a.id_alerta order by ub.id_ubicacion desc limit 1) as longitud
+    from alertas a
+    join usuarios u on a.id_usuario = u.id_usuario
+    where p_busqueda = '' 
+       or u.nombre like concat('%', p_busqueda, '%') 
+       or a.mensaje like concat('%', p_busqueda, '%') 
+       or a.estado_alerta like concat('%', p_busqueda, '%')
+       or (p_busqueda regexp '^[0-9]+$' and a.id_alerta = cast(p_busqueda as unsigned))
+    order by a.fecha desc;
+end //
+
+--changeset luis_david:5 enddelimiter://
+
+drop procedure if exists sp_listar_alertas_dashboard //
+
+create procedure sp_listar_alertas_dashboard(in p_busqueda varchar(255))
+begin
+    set p_busqueda = ifnull(trim(p_busqueda), '');
+
+    select 
+        a.id_alerta,
+        u.nombre as nombre_victima,
+        a.mensaje,
+        a.estado_alerta,
+        a.fecha,
+        (select ub.latitud from ubicaciones ub where ub.id_alerta = a.id_alerta order by ub.id_ubicacion desc limit 1) as latitud,
+        (select ub.longitud from ubicaciones ub where ub.id_alerta = a.id_alerta order by ub.id_ubicacion desc limit 1) as longitud
+    from alertas a
+    join usuarios u on a.id_usuario = u.id_usuario
+    where p_busqueda = '' 
+       or u.nombre like concat('%', p_busqueda, '%') 
+       or a.mensaje like concat('%', p_busqueda, '%') 
+       or a.estado_alerta like concat('%', p_busqueda, '%')
+       or (p_busqueda regexp '^[0-9]+$' and a.id_alerta = cast(p_busqueda as unsigned))
+    order by a.fecha desc;
+end //
+

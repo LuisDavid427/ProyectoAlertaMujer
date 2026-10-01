@@ -16,9 +16,7 @@ import retrofit2.Response
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = AuthRepository()
-
-    // AHORA USAMOS LA BÓVEDA SEGURA PARA GUARDAR LA SESIÓN
+    private val repository = AuthRepository(application)
     private val sessionManager = SessionManager(application)
 
     private val _navegarAMain = MutableLiveData<Boolean>()
@@ -28,7 +26,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val mensajeError: LiveData<String> get() = _mensajeError
 
     init {
-        // Lee el estado desde la bóveda encriptada
         if (sessionManager.estaLogueado()) {
             _navegarAMain.value = true
         }
@@ -46,19 +43,22 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 val response: Response<AuthResponse> = repository.login(request)
 
                 if (response.isSuccessful && response.body() != null) {
-                    val data = response.body()
+                    val data = response.body()!!
 
-                    if (data?.success == true) {
+                    if (data.success) {
                         val id = data.id_usuario ?: -1
                         val tokenJwt = data.token ?: ""
+                        val nombreApi = data.nombre ?: "Usuario"
 
-                        // GUARDADO SEGURO
-                        guardarSesion(id, tokenJwt)
+                        Log.e("DEBUG_NOMBRE", "Nombre mapeado desde la API: '$nombreApi'")
+
+                        // Se eliminó el envío del refreshToken
+                        guardarSesion(id, tokenJwt, email, pass, nombreApi)
                         vincularDispositivoConFCM(id)
 
                         _navegarAMain.value = true
                     } else {
-                        _mensajeError.value = data?.mensaje ?: "Error en las credenciales"
+                        _mensajeError.value = data.mensaje ?: "Error en las credenciales"
                     }
                 } else {
                     _mensajeError.value = "Error en el servidor: ${response.code()}"
@@ -78,6 +78,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             val token = task.result
 
+            // 🟢 Guardamos el token en la sesión local a través de SessionManager
+            sessionManager.guardarFcmToken(token)
+
+            // Enviar al Backend
             viewModelScope.launch {
                 try {
                     repository.actualizarTokenFCM(idUsuario, token)
@@ -89,10 +93,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun guardarSesion(idUsuario: Int, token: String) {
-        // Todo se guarda a través del SessionManager
+    private fun guardarSesion(idUsuario: Int, token: String, email: String, pass: String, nombreUsuario: String) {
         sessionManager.guardarEstadoLogin(true)
         sessionManager.guardarIdUsuario(idUsuario)
         sessionManager.guardarToken(token)
+        sessionManager.guardarNombreUsuario(nombreUsuario)
+        sessionManager.guardarCredenciales(email, pass)
     }
 }

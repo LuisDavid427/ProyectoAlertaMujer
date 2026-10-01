@@ -32,18 +32,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // 1. Desbloquear peticiones pre-flight de React / Móvil
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // 2. Endpoints públicos
                 .requestMatchers("/api/auth/**", "/api/usuarios/guardar").permitAll()
-
-                // 3. Dashboard solo para Administradores
                 .requestMatchers("/api/dashboard/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN", "ROLE_ADMINISTRADOR", "ADMINISTRADOR")
-
-                // ⚠️ 4. PERMITIR ALERTAS PARA CUALQUIER USUARIO AUTENTICADO:
                 .requestMatchers("/api/alertas/**").authenticated()
-
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,8 +1,9 @@
 package com.example.alertamujer.presentation.alerta
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel // 👈 Cambiado de ViewModel a AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.alertamujer.data.repository.AlertaRepository
 import kotlinx.coroutines.launch
@@ -13,9 +14,10 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
-class AdjuntarViewModel : ViewModel() {
+class AdjuntarViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = AlertaRepository()
+    // 👈 Pasamos el applicationContext para que el repositorio use el cliente con token automático
+    private val repository = AlertaRepository(application.applicationContext)
 
     enum class TipoCaptura { FOTO, VIDEO, AUDIO, MOSTRAR_OPCIONES }
 
@@ -35,12 +37,12 @@ class AdjuntarViewModel : ViewModel() {
         }
     }
 
-    fun enviarArchivoAlServidor(tokenFormateado: String, idAlerta: Int, file: File, tipoMedia: String) {
+    // 👈 Ya NO recibe el tokenFormateado como parámetro
+    fun enviarArchivoAlServidor(idAlerta: Int, file: File, tipoMedia: String) {
         _estadoSubida.value = "Subiendo archivo..."
 
         viewModelScope.launch {
             try {
-                // Configura el MIME type exacto que necesita tu servidor Spring Boot
                 val mimeType = when (tipoMedia) {
                     "VIDEO" -> "video/mp4"
                     "AUDIO" -> "audio/mpeg"
@@ -51,7 +53,8 @@ class AdjuntarViewModel : ViewModel() {
                 val body: MultipartBody.Part = MultipartBody.Part.createFormData("archivo", file.name, requestFile)
                 val tipoBody: RequestBody = tipoMedia.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                val response = repository.subirEvidencia(tokenFormateado, idAlerta, body, tipoBody)
+                // 👈 Llamada limpia sin pasar tokens manuales
+                val response = repository.subirEvidencia(idAlerta, body, tipoBody)
 
                 if (response.isSuccessful) {
                     _estadoSubida.value = "Evidencia enviada con éxito"

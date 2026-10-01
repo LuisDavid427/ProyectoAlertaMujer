@@ -137,7 +137,6 @@ class AdjuntarActivity : AppCompatActivity() {
         try {
             when (tipoMediaActual) {
                 "FOTO" -> {
-                    // Fuerza la apertura de la cámara nativa
                     tomarFotoLauncher.launch(null)
                 }
                 "VIDEO" -> {
@@ -159,22 +158,18 @@ class AdjuntarActivity : AppCompatActivity() {
     }
 
     private fun procesarYEnviarFoto(bitmap: Bitmap) {
-        val token = sessionManager.obtenerToken() ?: ""
-        val tokenFormateado = "Bearer $token"
-
         if (validarIdAlerta()) {
             val file = guardarBitmapEnArchivo(bitmap)
-            viewModel.enviarArchivoAlServidor(tokenFormateado, idAlerta, file, "FOTO")
+            // 👈 Llamada limpia sin token manual
+            viewModel.enviarArchivoAlServidor(idAlerta, file, "FOTO")
         }
     }
 
     private fun procesarYEnviarMedia(uri: Uri, tipo: String) {
-        val token = sessionManager.obtenerToken() ?: ""
-        val tokenFormateado = "Bearer $token"
-
         if (validarIdAlerta()) {
             val file = uriToFile(uri, tipo)
-            viewModel.enviarArchivoAlServidor(tokenFormateado, idAlerta, file, tipo)
+            // 👈 Llamada limpia sin token manual
+            viewModel.enviarArchivoAlServidor(idAlerta, file, tipo)
         }
     }
 

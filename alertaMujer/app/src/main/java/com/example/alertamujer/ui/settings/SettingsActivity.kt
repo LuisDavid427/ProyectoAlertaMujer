@@ -1,14 +1,14 @@
 package com.example.alertamujer.ui.settings
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.alertamujer.R
 import com.example.alertamujer.presentation.settings.SettingsViewModel
+import com.example.alertamujer.ui.auth.LoginActivity // 🟢 Paquete correcto
 import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.switchmaterial.SwitchMaterial
 
@@ -20,37 +20,48 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val btnBack = findViewById<ImageButton>(R.id.btn_back)
-        val etUsername = findViewById<EditText>(R.id.et_username)
-        val etPassword = findViewById<EditText>(R.id.et_password)
-        val btnSave = findViewById<Button>(R.id.btn_save_account)
+        val tvUserName = findViewById<TextView>(R.id.tv_user_name)
+        val tvUserEmail = findViewById<TextView>(R.id.tv_user_email)
+        val btnLogout = findViewById<TextView>(R.id.btn_logout)
         val switchTheme = findViewById<SwitchMaterial>(R.id.switch_theme)
+
+        configurarBotonAtras()
+
+        // Observar datos de la sesión
+        viewModel.nombreUsuario.observe(this) { nombre ->
+            tvUserName.text = nombre
+        }
+
+        viewModel.emailUsuario.observe(this) { email ->
+            tvUserEmail.text = email
+        }
 
         viewModel.isDarkMode.observe(this) { isDark ->
             switchTheme.isChecked = isDark
         }
 
-        configurarBotonAtras()
+        // Evento de cierre de sesión
+        viewModel.cerrarSesionEvento.observe(this) { cerrado ->
+            if (cerrado) {
+                val intent = Intent(this, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
+                finish()
+            }
+        }
 
-        btnSave.setOnClickListener {
-            val user = etUsername.text.toString()
-            val pass = etPassword.text.toString()
-
-            // Le pasamos la tarea sucia al ViewModel
-            viewModel.saveCredentials(user, pass)
+        btnLogout.setOnClickListener {
+            viewModel.cerrarSesion()
         }
 
         switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            // La Actividad SOLO hace cosas visuales (cambiar los colores de Android)
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-
-            // Le avisa al ViewModel para que él guarde el dato en memoria
             viewModel.updateTheme(isChecked)
         }
     }
-
 }

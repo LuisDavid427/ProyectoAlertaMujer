@@ -1,5 +1,7 @@
 package com.example.alertamujer.data.dto
 
+import com.google.gson.annotations.SerializedName
+
 // Lo que envías para loguearte
 data class LoginRequest(
     val email: String,
@@ -14,10 +16,25 @@ data class RegistroRequest(
 )
 
 
+
+
 data class AuthResponse(
+    @SerializedName("success")
     val success: Boolean,
+
+    @SerializedName("mensaje")
+    val mensaje: String?,
+
+    @SerializedName("token")
+    val token: String?,
+
+    @SerializedName("refreshToken") // 👈 Asegúrate de que coincida con la clave que retorna tu backend (ej. "refreshToken" o "refresh_token")
+    val refreshToken: String?,
+
+    @SerializedName("id_usuario")
     val id_usuario: Int?,
-    val nombre: String?,
-    val token: String?, // <--- Esta es la propiedad que mapeará el JWT del backend
-    val mensaje: String?
+
+    @SerializedName("nombre")
+    val nombre: String?
+
 )

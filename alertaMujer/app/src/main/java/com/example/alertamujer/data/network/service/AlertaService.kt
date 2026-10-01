@@ -12,33 +12,28 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Multipart
 import retrofit2.http.Part
-import retrofit2.http.Header
 
 interface AlertaService {
 
     @POST("api/alertas/emitir")
     suspend fun enviarAlertaSOS(
-        @Header("Authorization") token: String,
         @Body alerta: AlertaRequest
     ): Response<AlertaResponse>
 
     @POST("api/alertas/{id}/ubicacion")
     suspend fun enviarUbicacionContinua(
-        @Header("Authorization") token: String,
         @Path("id") idAlerta: Int,
         @Body request: UbicacionRequest
     ): Response<Map<String, Any>>
 
     @PUT("api/alertas/{id}/desactivar")
     suspend fun desactivarAlerta(
-        @Header("Authorization") token: String,
         @Path("id") idAlerta: Int
     ): Response<Map<String, Any>>
 
     @Multipart
     @POST("api/alertas/{id}/evidencias")
     suspend fun subirEvidencia(
-        @Header("Authorization") token: String,
         @Path("id") idAlerta: Int,
         @Part archivo: MultipartBody.Part,
         @Part("tipo") tipo: RequestBody

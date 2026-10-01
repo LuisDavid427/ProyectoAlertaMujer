@@ -26,6 +26,9 @@ import com.example.alertamujer.ui.historial.HistorialActivity
 import com.example.alertamujer.util.PermissionUtils
 import com.example.alertamujer.util.abrirActividad
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.messaging.FirebaseMessaging
+import com.example.alertamujer.util.SessionManager
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -78,6 +81,19 @@ class MainActivity : AppCompatActivity() {
         btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
         btnHistorial.setOnClickListener { abrirActividad<HistorialActivity>() }
 
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Fallo al obtener el token FCM", task.exception)
+                return@addOnCompleteListener
+            }
+
+            val tokenFcm = task.result
+            Log.d("FCM", "Token FCM del dispositivo: $tokenFcm")
+
+            // Guardar en SessionManager para enviarlo al backend al autenticarse
+            val sessionManager = SessionManager(this)
+            sessionManager.guardarFcmToken(tokenFcm)
+        }
 
         btnSosAdjuntar.setOnClickListener {
             // Leemos directamente del Singleton para no depender del observador de LiveData

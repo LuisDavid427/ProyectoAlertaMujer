@@ -98,4 +98,22 @@ public class AuthController {
             ));
         }
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refrescarToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String tokenViejo = authHeader.substring(7);
+            try {
+                String nuevoToken = jwtUtil.refrescarToken(tokenViejo);
+                Map<String, String> respuesta = new HashMap<>();
+                respuesta.put("token", nuevoToken);
+                return ResponseEntity.ok(respuesta);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "INVALID_TOKEN", "mensaje", "No se pudo renovar el token"));
+            }
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "MISSING_HEADER", "mensaje", "Encabezado Authorization no presente o invalido"));
+    }
 }

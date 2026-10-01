@@ -10,7 +10,7 @@ import com.example.alertamujer.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.example.alertamujer.data.network.RetrofitClient
-import com.example.alertamujer.util.AesUtil // <-- Importa la clase utilitaria que creaste en Kotlin
+import com.example.alertamujer.util.AesUtil
 import com.example.alertamujer.data.dto.FcmTokenRequest
 import com.example.alertamujer.data.local.entity.AlertaEntity
 import com.example.alertamujer.data.local.AppDatabase
@@ -32,7 +32,6 @@ class AlertaFCMService : FirebaseMessagingService() {
                 val jsonDesencriptado = AesUtil.desencriptar(datosSeguros, LLAVE_SECRETA)
                 val jsonObject = JSONObject(jsonDesencriptado)
 
-                // Convertimos a Entidad de Room
                 val alertaEntity = AlertaEntity(
                     id_alerta = jsonObject.optInt("id_alerta"),
                     nombre_usuario = jsonObject.optString("nombre_victima", "Alguien"),
@@ -41,7 +40,6 @@ class AlertaFCMService : FirebaseMessagingService() {
                     longitud = jsonObject.optDouble("longitud")
                 )
 
-                // Guardamos en Room inmediatamente
                 val db = AppDatabase.getDatabase(applicationContext)
                 CoroutineScope(Dispatchers.IO).launch {
                     db.alertaDao().insertarAlerta(alertaEntity)
@@ -54,6 +52,7 @@ class AlertaFCMService : FirebaseMessagingService() {
             }
         }
     }
+
     private fun mostrarNotificacionEmergencia(titulo: String, contenido: String) {
         val channelId = "canal_emergencia_sos"
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -70,7 +69,7 @@ class AlertaFCMService : FirebaseMessagingService() {
         }
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_alert) // Asegúrate de tener este icono
+            .setSmallIcon(R.drawable.ic_alert)
             .setContentTitle("¡EMERGENCIA: $titulo!")
             .setContentText(contenido)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -85,8 +84,6 @@ class AlertaFCMService : FirebaseMessagingService() {
         guardarTokenEnServidor(token)
     }
 
-
-
     private fun guardarTokenEnServidor(token: String) {
         val sharedPreferences = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)
         val idUsuario = sharedPreferences.getInt("id_usuario", -1)
@@ -94,11 +91,10 @@ class AlertaFCMService : FirebaseMessagingService() {
         if (idUsuario != -1) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    // 1. Armamos el DTO con la estructura exacta que espera Spring Boot
                     val request = FcmTokenRequest(idUsuario = idUsuario, token = token)
 
-                    // 2. Usamos usuarioService (el nuevo que creamos) en lugar de authService
-                    val respuesta = RetrofitClient.usuarioService.actualizarToken(request)
+                    // Usamos applicationContext para construir el servicio protegido con el token actual
+                    val respuesta = RetrofitClient.getUsuarioService(applicationContext).actualizarToken(request)
 
                     if (respuesta.isSuccessful) {
                         Log.d("FCM_TOKEN", "Token sincronizado con éxito en MySQL")

@@ -2,11 +2,10 @@
 import React from 'react';
 
 export const TablaAlertas = ({ datos }) => {
-    // Si datos es undefined o null, evitamos que .map() rompa la app
     if (!datos || datos.length === 0) return <p>No hay alertas para mostrar.</p>;
 
     return (
-        <table className="table">
+        <table className="table align-middle">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -14,19 +13,50 @@ export const TablaAlertas = ({ datos }) => {
                     <th>Mensaje</th>
                     <th>Fecha</th>
                     <th>Estado</th>
+                    <th>Ubicación</th>
                 </tr>
             </thead>
             <tbody>
                 {datos.map((alerta) => (
-                    <tr key={alerta.id_alerta}>
-                        <td>#{alerta.id_alerta}</td>
-                        <td><strong>{alerta.nombre_victima}</strong></td>
+                    <tr key={alerta.idAlerta}>
+                        <td><strong>#{alerta.idAlerta}</strong></td>
+                        <td>{alerta.nombreVictima}</td>
                         <td>{alerta.mensaje}</td>
                         <td>{new Date(alerta.fecha).toLocaleString()}</td>
                         <td>
-                            <span className={`badge ${alerta.estado_alerta === 'activa' ? 'bg-danger' : 'bg-secondary'}`}>
-                                {alerta.estado_alerta.toUpperCase()}
+                            <span className={`badge ${alerta.estadoAlerta?.toLowerCase() === 'activa' ? 'bg-danger' : 'bg-secondary'}`}>
+                                {alerta.estadoAlerta ? alerta.estadoAlerta.toUpperCase() : 'DESCONOCIDO'}
                             </span>
+                        </td>
+                        <td>
+                            {alerta.latitud && alerta.longitud ? (
+                                <a 
+                                    href={`https://www.google.com/maps/search/?api=1&query=${alerta.latitud},${alerta.longitud}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '3px 8px',
+                                        backgroundColor: '#fff0f3',
+                                        color: '#d90429',
+                                        border: '1px solid #ffccd5',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        fontWeight: '500',
+                                        textDecoration: 'none',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#ffe3e8'}
+                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff0f3'}
+                                >
+                                    📍 Ver mapa
+                                </a>
+                            ) : (
+                                <span className="text-muted" style={{ fontSize: '13px' }}>Sin ubicación</span>
+                            )}
                         </td>
                     </tr>
                 ))}
