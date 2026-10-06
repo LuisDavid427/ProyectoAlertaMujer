@@ -46,11 +46,8 @@ export const TablaAlertas = ({ datos }) => {
                                         fontSize: '12px',
                                         fontWeight: '500',
                                         textDecoration: 'none',
-                                        whiteSpace: 'nowrap',
-                                        transition: 'all 0.2s ease'
+                                        whiteSpace: 'nowrap'
                                     }}
-                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#ffe3e8'}
-                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff0f3'}
                                 >
                                     📍 Ver mapa
                                 </a>
@@ -65,32 +62,53 @@ export const TablaAlertas = ({ datos }) => {
     );
 };
 
-export const TablaUsuarios = ({ datos }) => {
+export const TablaUsuarios = ({ datos, onBloquearLocal }) => {
     if (!datos || datos.length === 0) return <p>No hay usuarios registrados.</p>;
 
     return (
-        <table className="table">
+        <table className="table align-middle">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Estado</th>
+                    <th>Acciones (Visual)</th>
                 </tr>
             </thead>
             <tbody>
-                {datos.map((u) => (
-                    <tr key={u.idUsuario}>
-                        <td>{u.idUsuario}</td>
-                        <td>{u.nombre}</td>
-                        <td>{u.email}</td>
-                        <td>
-                            <span className={`badge ${u.activo ? 'bg-success' : 'bg-danger'}`}>
-                                {u.activo ? 'Activo' : 'Inactivo'}
-                            </span>
-                        </td>
-                    </tr>
-                ))}
+                {datos.map((u) => {
+                    // Verificamos si es activo (acepta 1, "1" o true por seguridad)
+                    const esActivo = u.activo === 1 || u.activo === "1" || u.activo === true;
+
+                    return (
+                        <tr key={u.idUsuario}>
+                            <td>{u.idUsuario}</td>
+                            <td>{u.nombre}</td>
+                            <td>{u.email}</td>
+                            <td>
+                                <span className={`badge ${esActivo ? 'bg-success' : 'bg-danger'}`}>
+                                    {esActivo ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button
+                                    onClick={() => onBloquearLocal(u.idUsuario, esActivo)}
+                                    className={`btn btn-sm ${esActivo ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                                    style={{ 
+                                        fontSize: '12px', 
+                                        padding: '5px 12px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    {esActivo ? '🔒 Bloquear' : '✅ Activar'}
+                                </button>
+                            </td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );

@@ -164,3 +164,18 @@ begin
     order by a.fecha desc;
 end //
 
+
+--changeset luis_david:6 enddelimiter://
+
+drop procedure if exists sp_obtener_tokens_por_emails //
+
+create procedure sp_obtener_tokens_por_emails(
+    in p_lista_emails text
+)
+begin
+    select distinct fcm_token 
+    from usuarios 
+    where find_in_set(email, p_lista_emails) > 0
+      and fcm_token is not null 
+      and fcm_token != '';
+end //

@@ -9,6 +9,7 @@ data class AlertaEntity(
     @PrimaryKey(autoGenerate = true) val id_local: Int = 0,
     val id_alerta: Int,
     val nombre_usuario: String,
+    val id_usuario: Int,
     val mensaje: String,
     val latitud: Double,
     val longitud: Double,

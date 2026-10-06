@@ -49,4 +49,16 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
     }
+
+    public void actualizarEstado(Integer id, boolean nuevoEstado) {
+        // Busca al usuario por su ID (asegúrate de que tu repositorio sea UsuarioRepository)
+        UsuarioModel usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        // Actualiza el campo activo (dependiendo si tu entidad usa int/Integer o boolean)
+        usuario.setEstadoUsuario(nuevoEstado); 
+        
+        // Guarda los cambios en MySQL
+        usuarioRepository.save(usuario);
+    }
 }

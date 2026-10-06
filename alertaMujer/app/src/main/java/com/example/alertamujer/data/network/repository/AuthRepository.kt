@@ -25,4 +25,22 @@ class AuthRepository(private val context: Context) {
         val request = FcmTokenRequest(idUsuario = idUsuario, token = token)
         return RetrofitClient.getUsuarioService(context).actualizarToken(request)
     }
+
+    suspend fun solicitarRecuperacion(email: String): Response<AuthResponse> {
+        val requestMap = mapOf("email" to email)
+        return RetrofitClient.authService.solicitarRecuperacion(requestMap)
+    }
+
+    suspend fun cambiarPassword(email: String, codigo: String, nuevaPassword: String): Response<AuthResponse> {
+        val requestMap = mapOf(
+            "email" to email,
+            "codigo" to codigo,
+            "nuevaPassword" to nuevaPassword
+        )
+        return RetrofitClient.authService.cambiarPassword(requestMap)
+    }
+    suspend fun verificarCodigo(email: String, codigo: String): Response<AuthResponse> {
+        val requestMap = mapOf("email" to email, "codigo" to codigo)
+        return RetrofitClient.authService.verificarCodigo(requestMap)
+    }
 }

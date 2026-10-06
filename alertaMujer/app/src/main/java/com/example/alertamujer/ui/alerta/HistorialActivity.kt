@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alertamujer.R
-import com.example.alertamujer.presentation.historial.HistorialViewModel
+import com.example.alertamujer.presentation.alerta.HistorialViewModel
 import com.example.alertamujer.util.configurarBotonAtras
 
 class HistorialActivity : AppCompatActivity() {

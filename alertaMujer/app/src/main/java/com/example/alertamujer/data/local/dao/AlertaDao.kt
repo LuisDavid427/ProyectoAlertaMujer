@@ -8,10 +8,14 @@ import com.example.alertamujer.data.local.entity.AlertaEntity
 
 @Dao
 interface AlertaDao {
-    // 🟢 Usamos @Insert normal para activar el autoincremento en id_local = 0
     @Insert
     suspend fun insertarAlerta(alerta: AlertaEntity)
 
-    @Query("SELECT * FROM tabla_alertas ORDER BY timestamp DESC")
-    fun obtenerTodasLasAlertas(): LiveData<List<AlertaEntity>>
+
+    @Query("SELECT * FROM tabla_alertas WHERE id_usuario = :idUsuarioActual ORDER BY timestamp DESC")
+    fun obtenerTodasMisAlertas(idUsuarioActual: Int): LiveData<List<AlertaEntity>>
+
+    // CHAT: Excluye las alertas cuyo id pertenezca al usuario de la sesión actual
+    @Query("SELECT * FROM tabla_alertas WHERE id_usuario != :idUsuarioActual ORDER BY timestamp DESC")
+    fun obtenerAlertasDeOtrosUsuarios(idUsuarioActual: Int): LiveData<List<AlertaEntity>>
 }

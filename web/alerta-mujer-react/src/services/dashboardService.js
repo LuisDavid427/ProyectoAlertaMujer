@@ -24,4 +24,6 @@ export const obtenerDatosDashboard = async (vista, busqueda = '') => {
         console.error("Error en la conexión con Spring Boot:", error);
         return [];
     }
+
+
 };

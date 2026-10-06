@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,52 +32,92 @@ public class AlertaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private FcmService fcmService;
 
-    
-
-// FASE 1: Crear la alerta inicial
+    // FASE 1: Registrar alerta y notificar a los contactos mediante el Stored Procedure
     @Transactional(rollbackFor = Exception.class)
     public AlertaModel procesarNuevaAlerta(AlertaRequest request) throws Exception {
-        
-        // 1. Validamos que el ID de usuario no venga nulo en la petición
+
         if (request.getIdUsuario() == null) {
-            throw new Exception("El ID de usuario es obligatorio y llegó nulo desde la aplicación.");
+            throw new Exception("El ID de usuario es obligatorio.");
         }
 
-        // 2. Obtenemos directamente el ID sin conversiones innecesarias
         Integer idUsuario = request.getIdUsuario();
-        
         Optional<UsuarioModel> usuarioOpt = usuarioRepository.findById(idUsuario);
-        
+
         if (!usuarioOpt.isPresent()) {
-            throw new Exception("Usuario no encontrado");
+            throw new Exception("Usuario emisor no encontrado.");
         }
 
-        // 3. Preparamos la Alerta
-        AlertaModel nuevaAlerta = new AlertaModel();
-        nuevaAlerta.setUsuario(usuarioOpt.get());
-        nuevaAlerta.setMensaje(request.getMensaje());
-        nuevaAlerta.setEstadoAlerta("activa"); 
+        UsuarioModel victima = usuarioOpt.get();
 
-        // 4. Preparamos la primera Ubicación GPS
+        AlertaModel nuevaAlerta = new AlertaModel();
+        nuevaAlerta.setUsuario(victima);
+        nuevaAlerta.setMensaje(request.getMensaje());
+        nuevaAlerta.setEstadoAlerta("activa");
+
         UbicacionModel primeraUbicacion = new UbicacionModel();
         primeraUbicacion.setLatitud(BigDecimal.valueOf(request.getLatitud()));
         primeraUbicacion.setLongitud(BigDecimal.valueOf(request.getLongitud()));
         primeraUbicacion.setAlerta(nuevaAlerta);
 
-        // 5. Empacamos la ubicación dentro de la lista de la alerta
         nuevaAlerta.setUbicaciones(new ArrayList<>());
         nuevaAlerta.getUbicaciones().add(primeraUbicacion);
 
-        // 6. Guardamos en MySQL y retornamos
-        return alertaRepository.save(nuevaAlerta);
+        AlertaModel alertaGuardada = alertaRepository.save(nuevaAlerta);
+
+        // FASE 1.1: Obtención de tokens FCM vía SP y envío de notificaciones push
+        try {
+            List<String> correosNotificar = request.getContactosNotificar();
+
+            if (correosNotificar != null && !correosNotificar.isEmpty()) {
+                
+                for (String correo : correosNotificar) {
+                    if (correo == null || correo.trim().isEmpty()) continue;
+
+                    String correoLimpio = correo.trim();
+                    System.out.println("🔍 Consultando token FCM para: " + correoLimpio);
+
+                    List<String> tokensFcm = usuarioRepository.obtenerTokensPorEmails(correoLimpio);
+
+                    if (tokensFcm != null && !tokensFcm.isEmpty()) {
+                        System.out.println("🟢 Tokens FCM encontrados (" + tokensFcm.size() + ") para: " + correoLimpio);
+
+                        for (String tokenFcm : tokensFcm) {
+                            if (tokenFcm != null && !tokenFcm.trim().isEmpty()) {
+                                fcmService.enviarAlertaSegura(
+                                        tokenFcm,
+                                        alertaGuardada.getId(),
+                                        victima.getId(),
+                                        victima.getNombre(),
+                                        request.getMensaje(),
+                                        request.getLatitud(),
+                                        request.getLongitud()
+                                );
+                            }
+                        }
+                    } else {
+                        System.err.println("⚠️ El correo " + correoLimpio + " no retornó un token FCM válido.");
+                    }
+                }
+            } else {
+                System.err.println("⚠️ La petición SOS fue procesada pero la lista 'contactosNotificar' llegó vacía.");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error durante la consulta del SP o envío de FCM: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+
+        return alertaGuardada;
     }
-    // FASE 2: Agregar nueva ubicación al rastreo (Cada 5 segundos)
+
+    // FASE 2: Rastreo continuo
     @Transactional(rollbackFor = Exception.class)
     public void agregarUbicacionContinua(Integer idAlerta, UbicacionRequest request) throws Exception {
-        
         Optional<AlertaModel> alertaOpt = alertaRepository.findById(idAlerta);
-        
+
         if (!alertaOpt.isPresent()) {
             throw new Exception("La alerta especificada no existe.");
         }
@@ -96,27 +137,27 @@ public class AlertaService {
         alertaRepository.save(alerta);
     }
 
-    @Transactional 
+    // FASE 3: Desactivar alerta
+    @Transactional
     public void desactivarAlerta(Integer idAlerta) throws Exception {
         AlertaModel alerta = alertaRepository.findById(idAlerta)
                 .orElseThrow(() -> new Exception("La alerta especificada no existe."));
-        
+
         alerta.setEstadoAlerta("inactiva");
         alertaRepository.save(alerta);
-        alertaRepository.flush(); 
+        alertaRepository.flush();
     }
-    // FASE 4: Recibir y guardar archivos físicos (Fotos y Audios)
+
+    // FASE 4: Evidencias multimedia
     @Transactional(rollbackFor = Exception.class)
     public void guardarEvidencia(Integer idAlerta, MultipartFile archivo, String tipo) throws Exception {
-        
         Optional<AlertaModel> alertaOpt = alertaRepository.findById(idAlerta);
         if (!alertaOpt.isPresent()) {
             throw new Exception("La alerta especificada no existe.");
         }
         AlertaModel alerta = alertaOpt.get();
 
-        // Directorio local para guardar los archivos
-        String carpetaDestino = "C://AlertaMujer//evidencias//"; 
+        String carpetaDestino = "C://AlertaMujer//evidencias//";
         Path rutaDirectorio = Paths.get(carpetaDestino);
 
         if (!Files.exists(rutaDirectorio)) {
@@ -126,10 +167,8 @@ public class AlertaService {
         String nombreUnico = UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename();
         Path rutaCompleta = rutaDirectorio.resolve(nombreUnico);
 
-        // Copiar el archivo al disco duro
         Files.copy(archivo.getInputStream(), rutaCompleta);
 
-        // Preparar el registro para la BD
         EvidenciaModel nuevaEvidencia = new EvidenciaModel();
         nuevaEvidencia.setAlerta(alerta);
         nuevaEvidencia.setUrl(rutaCompleta.toString());

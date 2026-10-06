@@ -3,6 +3,7 @@ package com.example.alertamujer.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 
 data class GpsVisualConfig(
@@ -69,13 +70,5 @@ object PermissionUtils {
         }
         context.startActivity(intent)
     }
-    fun obtenerDialogoPermisoManual(context: Context): androidx.appcompat.app.AlertDialog.Builder {
-        return androidx.appcompat.app.AlertDialog.Builder(context)
-            .setTitle("Permiso denegado")
-            .setMessage("Para que la Alerta de Pánico funcione, necesitas activar el GPS manualmente en los ajustes de la aplicación.")
-            .setPositiveButton("IR A AJUSTES") { _, _ ->
-                abrirAjustesSistema(context)
-            }
-            .setNegativeButton("CANCELAR", null)
-    }
+
 }

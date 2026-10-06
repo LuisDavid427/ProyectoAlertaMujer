@@ -3,10 +3,12 @@ package com.example.alertamujer.ui.main
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -28,6 +30,7 @@ import com.example.alertamujer.util.abrirActividad
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.alertamujer.util.SessionManager
+import com.example.alertamujer.ui.alerta.AutoridadesActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,6 +46,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnMensaje: MaterialButton
     private lateinit var btnChats: ImageButton
     private lateinit var btnHistorial: MaterialButton
+    private lateinit var btnAutoridades: MaterialButton
+    private lateinit var txtSaludo: TextView
+
+    private lateinit var sessionManager: SessionManager
+
 
 
     private var currentUiMode: Int = 0
@@ -50,6 +58,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        sessionManager = SessionManager(this)
+
 
         currentUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
@@ -67,11 +77,15 @@ class MainActivity : AppCompatActivity() {
         btnChats = findViewById(R.id.btn_chats)
         btnMensaje = findViewById(R.id.btn_mensaje)
         btnHistorial = findViewById(R.id.btn_historial)
+        btnAutoridades = findViewById(R.id.btn_autoridades)
+        txtSaludo = findViewById(R.id.txt_saludo)
 
         btnSosAdjuntar.visibility = View.GONE
 
         observarViewModel()
         observarEstadoSOS()
+
+
 
         // Listeners
         btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
@@ -80,6 +94,16 @@ class MainActivity : AppCompatActivity() {
         btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
         btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
         btnHistorial.setOnClickListener { abrirActividad<HistorialActivity>() }
+        btnAutoridades.setOnClickListener { abrirActividad<AutoridadesActivity>() }
+
+        val nombreUsuario = sessionManager.obtenerNombreUsuario()
+        val primerNombre = nombreUsuario?.trim()?.split(" ")?.firstOrNull() ?: ""
+        // Si existe un nombre guardado, lo concatenas con un saludo personalizado
+        if (!nombreUsuario.isNullOrEmpty()) {
+            txtSaludo.text = "Hola, $primerNombre"
+        } else {
+            txtSaludo.text = "¡Hola, Usuario!" // Texto por defecto si no hay sesión activa
+        }
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -126,6 +150,7 @@ class MainActivity : AppCompatActivity() {
             if (currentUiMode != expectedUiMode) recreate()
         }
     }
+
 
     private fun observarEstadoSOS() {
         sosViewModel.estadoAlerta.observe(this) { estado ->
@@ -190,4 +215,6 @@ class MainActivity : AppCompatActivity() {
         actualizarEstadoBotonUbicacion()
         viewModel.cargarDatosGenerales()
     }
+
+
 }

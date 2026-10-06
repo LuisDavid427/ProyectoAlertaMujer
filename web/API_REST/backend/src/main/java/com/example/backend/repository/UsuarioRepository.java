@@ -17,6 +17,8 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Integer> 
     // Extrae el usuario para que Spring Boot valide el Hash
     Optional<UsuarioModel> findByEmail(String email);
 
+    Optional<UsuarioModel> findById(Integer id);
+
     // Mantenemos el SP que no involucra contraseñas
     @Query(value = "CALL sp_listar_usuarios_dashboard(:busqueda)", nativeQuery = true)
     List<Object[]> llamarSpUsuarios(@Param("busqueda") String busqueda);
@@ -25,4 +27,8 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Integer> 
     @Modifying
     @Query("UPDATE UsuarioModel u SET u.fcmToken = :fcmToken WHERE u.id = :idUsuario")
     int actualizarFcmToken(@Param("idUsuario") Integer idUsuario, @Param("fcmToken") String fcmToken);
+
+    // Obtiene los tokens FCM pasando la lista de correos separada por comas al SP
+    @Query(value = "CALL sp_obtener_tokens_por_emails(:listaEmails)", nativeQuery = true)
+    List<String> obtenerTokensPorEmails(@Param("listaEmails") String listaEmails);
 }

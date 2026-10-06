@@ -20,6 +20,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var etPassword: TextInputEditText
     private lateinit var btnLogin: MaterialButton
     private lateinit var tvIrARegistro: TextView
+    private lateinit var tvRecuperarPassword: TextView // Declarado aquí
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,18 +36,26 @@ class LoginActivity : AppCompatActivity() {
         etPassword = findViewById(R.id.et_password)
         btnLogin = findViewById(R.id.btn_login)
         tvIrARegistro = findViewById(R.id.btn_ir_a_registro)
+
+        // Enlazado con el ID de tu XML (asegúrate de que en tu activity_login.xml se llame tv_olvido_password o ajústalo al ID correcto)
+        tvRecuperarPassword = findViewById(R.id.tv_olvide_password)
     }
 
     private fun configurarListeners() {
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
-            // Le pasamos el trabajo pesado al ViewModel
             viewModel.intentarLogin(email, pass)
         }
 
         tvIrARegistro.setOnClickListener {
             val intent = Intent(this, RegistroActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Listener para abrir la pantalla de recuperación de contraseña
+        tvRecuperarPassword.setOnClickListener {
+            val intent = Intent(this, RecuperarPasswordActivity::class.java)
             startActivity(intent)
         }
     }

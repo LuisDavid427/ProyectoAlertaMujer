@@ -83,21 +83,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/actualizar-token")
-    public ResponseEntity<?> actualizarToken(@RequestBody FcmTokenRequest request) {
-        try {
-            usuarioService.actualizarTokenFcm(request.getIdUsuario(), request.getToken());
-            return ResponseEntity.ok(Map.of(
-                "success", true, 
-                "mensaje", "Token de FCM actualizado correctamente"
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false, 
-                "error", e.getMessage()
-            ));
-        }
-    }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refrescarToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
@@ -115,5 +101,77 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", "MISSING_HEADER", "mensaje", "Encabezado Authorization no presente o invalido"));
+    }
+
+    // POST: http://localhost:8080/api/auth/forgot-password
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> solicitarRecuperacion(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "error", "El correo electrónico es obligatorio"
+            ));
+        }
+
+        // Llamamos al servicio para buscar el correo y generar el código
+        boolean enviado = authService.procesarRecuperacionPassword(email);
+
+        // CORRECCIÓN: Si el servicio retorna false (el correo no existe), frenamos aquí y mandamos 404
+        if (!enviado) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "success", false,
+                "mensaje", "El correo ingresado no está registrado en el sistema"
+            ));
+        }
+
+        // Si el correo sí existe, responde con éxito y envía el código
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "mensaje", "Código enviado con éxito"
+        ));
+    }
+
+    // POST: http://localhost:8080/api/auth/reset-password
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> cambiarPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String codigo = request.get("codigo");
+        String nuevaPassword = request.get("nuevaPassword");
+
+        if (email == null || codigo == null || nuevaPassword == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "error", "Todos los campos son obligatorios"
+            ));
+        }
+
+        boolean actualizado = authService.actualizarPasswordConCodigo(email, codigo, nuevaPassword);
+
+        if (actualizado) {
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "mensaje", "Contraseña actualizada exitosamente"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "error", "Código inválido o expirado"
+            ));
+        }
+    }
+
+    @PostMapping("/verificar-codigo")
+    public ResponseEntity<?> verificarCodigo(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String codigo = request.get("codigo");
+        
+        boolean esValido = authService.verificarCodigoRecuperacion(email, codigo);
+        if (esValido) {
+            return ResponseEntity.ok(Map.of("success", true, "mensaje", "Código válido"));
+        } else {
+            return ResponseEntity.status(400).body(Map.of("success", false, "mensaje", "Código inválido o expirado"));
+        }
     }
 }

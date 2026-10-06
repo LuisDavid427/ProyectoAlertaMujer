@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.alertamujer.R
-
 import com.example.alertamujer.data.local.entity.ContactoEntity
 import com.example.alertamujer.presentation.contactos.ContactosViewModel
 import com.example.alertamujer.util.abrirActividad
@@ -57,6 +56,16 @@ class ContactosActivity : AppCompatActivity() {
 
                 contactView.findViewById<TextView>(R.id.tv_nombre_contacto).text = contacto.nombre
                 contactView.findViewById<TextView>(R.id.tv_numero_contacto).text = contacto.numero
+
+                contactView.findViewById<ImageButton>(R.id.btn_editar_contacto).setOnClickListener {
+                    // Puedes abrir tu actividad de edición enviando el ID o los datos del contacto
+                    abrirActividad<AddContactoActivity> {
+                        putExtra("EXTRA_ID_CONTACTO", contacto.id)
+                        putExtra("EXTRA_NOMBRE_CONTACTO", contacto.nombre)
+                        putExtra("EXTRA_NUMERO_CONTACTO", contacto.numero)
+                        putExtra("EXTRA_EMAIL_CONTACTO", contacto.email)
+                    }
+                }
 
                 // Eliminar usando el ID real de la base de datos
                 contactView.findViewById<ImageButton>(R.id.btn_eliminar_contacto).setOnClickListener {

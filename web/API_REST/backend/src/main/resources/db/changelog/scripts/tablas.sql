@@ -182,3 +182,12 @@ create table usuarios_contactos (
 -- FASE 4: ACTUALIZACIONES DE MODELO
 -- ==========================================
 ALTER TABLE usuarios ADD COLUMN fcm_token VARCHAR(255);
+
+
+
+-- changeset luisdavid:5
+-- ==========================================
+-- FASE 5: ACTUALIZACIONES DE MODELO
+-- ==========================================
+ALTER TABLE usuarios ADD COLUMN codigo_recuperacion VARCHAR(10);
+ALTER TABLE usuarios ADD COLUMN expiracion_codigo DATETIME;
