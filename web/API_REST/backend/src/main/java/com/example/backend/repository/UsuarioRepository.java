@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +32,11 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Integer> 
     // Obtiene los tokens FCM pasando la lista de correos separada por comas al SP
     @Query(value = "CALL sp_obtener_tokens_por_emails(:listaEmails)", nativeQuery = true)
     List<String> obtenerTokensPorEmails(@Param("listaEmails") String listaEmails);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE UsuarioModel u SET u.codigoRecuperacion = :codigo, u.expiracionCodigo = :expiracion WHERE u.email = :email")
+    void actualizarCodigoRecuperacion(@Param("email") String email, 
+                                    @Param("codigo") String codigo, 
+                                    @Param("expiracion") LocalDateTime expiracion);
 }

@@ -8,6 +8,7 @@ import com.example.backend.model.UbicacionModel;
 import com.example.backend.model.UsuarioModel;
 import com.example.backend.repository.AlertaRepository;
 import com.example.backend.repository.UsuarioRepository;
+import com.example.backend.util.InterfaceUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,9 @@ public class AlertaService {
         }
 
         UsuarioModel victima = usuarioOpt.get();
+
+        // 🛑 VALIDACIÓN DE ESTADO: Si la usuaria está bloqueada (false), se rechaza la alerta
+        InterfaceUtil.validarEstadoActivo(victima);
 
         AlertaModel nuevaAlerta = new AlertaModel();
         nuevaAlerta.setUsuario(victima);

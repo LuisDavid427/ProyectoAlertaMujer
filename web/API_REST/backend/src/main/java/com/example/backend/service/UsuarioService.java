@@ -18,6 +18,9 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailService emailService;
+
     // Listar todos los usuarios
     public List<UsuarioModel> listarTodos() {
         return usuarioRepository.findAll();
@@ -61,4 +64,6 @@ public class UsuarioService {
         // Guarda los cambios en MySQL
         usuarioRepository.save(usuario);
     }
+
+    
 }

@@ -2,8 +2,12 @@ package com.example.alertamujer.util
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 
 data class GpsVisualConfig(
@@ -44,7 +48,7 @@ object PermissionUtils {
         }
     }
 
-    fun obtenerVisualGps(context: Context): GpsVisualConfig{
+    fun obtenerVisualGps(context: Context): GpsVisualConfig {
         return when (tienePermisoUbicacion(context)) {
             UBICACION_PRECISA -> GpsVisualConfig(
                 "GPS: ALTA PRECISIÓN",
@@ -58,17 +62,38 @@ object PermissionUtils {
 
             else -> GpsVisualConfig(
                 "GPS: OFF",
-                android.R.color.holo_red_dark)
+                android.R.color.holo_red_dark
+            )
         }
     }
+
+    // 🔔 Valida si las notificaciones están permitidas a nivel de sistema operativo (Android 8+)
+    fun areNotificationsEnabled(context: Context): Boolean {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
     fun abrirAjustesSistema(context: Context) {
-        val intent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            val uri = android.net.Uri.fromParts("package", context.packageName, null)
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            val uri = Uri.fromParts("package", context.packageName, null)
             data = uri
-            // Si llamamos esto desde fuera de una actividad, necesitamos este flag
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     }
 
+    // 🔔 Abre directamente la configuración de notificaciones de la app
+    fun abrirAjustesNotificaciones(context: Context) {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        }
+        context.startActivity(intent)
+    }
 }

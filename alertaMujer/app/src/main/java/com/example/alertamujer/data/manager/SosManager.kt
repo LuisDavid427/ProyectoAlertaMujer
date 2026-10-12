@@ -130,7 +130,12 @@ class SosManager private constructor(private val context: Context) {
 
                     iniciarRastreoContinuo(idAlerta)
                 } else {
-                    _estadoAlerta.value = EstadoAlerta.Error("Error servidor: ${response.code()}")
+                    val codigoError = response.code()
+                    if (codigoError == 400 || codigoError == 403) {
+                        _estadoAlerta.value = EstadoAlerta.Error("Tu cuenta se encuentra bloqueada por la administración. No puedes enviar alertas.")
+                    } else {
+                        _estadoAlerta.value = EstadoAlerta.Error("Error servidor: $codigoError")
+                    }
                 }
             } catch (e: Exception) {
                 _estadoAlerta.value = EstadoAlerta.Error("Error de conexión: ${e.message}")

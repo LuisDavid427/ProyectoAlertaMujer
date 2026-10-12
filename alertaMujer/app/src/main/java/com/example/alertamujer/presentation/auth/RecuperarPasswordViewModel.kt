@@ -1,6 +1,7 @@
 package com.example.alertamujer.presentation.auth
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,15 +29,20 @@ class RecuperarPasswordViewModel(application: Application) : AndroidViewModel(ap
             try {
                 val response = repository.solicitarRecuperacion(email)
                 val body = response.body()
+                val code = response.code()
 
-                if (response.isSuccessful && body?.success == true) {
+                Log.d("RecuperarPassVM", "HTTP Code: $code")
+                Log.d("RecuperarPassVM", "Response Body: $body")
+
+                if (response.isSuccessful && body != null && body.success == true) {
                     _navegarAVerificar.value = email
                 } else {
-                    // Intentamos extraer el mensaje exacto que mandó el backend (404)
-                    // O usamos uno por defecto si el cuerpo viene vacío
-                    _mensajeError.value = "El correo no está registrado en el sistema"
+                    // Extraemos el mensaje del error si el backend lo mandó estructurado
+                    val errorMsg = body?.mensaje ?: "El correo no está registrado en el sistema"
+                    _mensajeError.value = errorMsg
                 }
             } catch (e: Exception) {
+                Log.e("RecuperarPassVM", "Excepción de red: ${e.message}", e)
                 _mensajeError.value = "Error de conexión. Verifica tu internet."
             }
         }

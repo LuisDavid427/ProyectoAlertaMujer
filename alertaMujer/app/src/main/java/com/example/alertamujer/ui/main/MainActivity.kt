@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
 
-
     private var currentUiMode: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         observarEstadoSOS()
 
 
-
         // Listeners
         btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
         btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
@@ -104,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             txtSaludo.text = "¡Hola, Usuario!" // Texto por defecto si no hay sesión activa
         }
+        verificarYPedirPermisoNotificaciones()
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -118,6 +117,8 @@ class MainActivity : AppCompatActivity() {
             val sessionManager = SessionManager(this)
             sessionManager.guardarFcmToken(tokenFcm)
         }
+
+
 
         btnSosAdjuntar.setOnClickListener {
             // Leemos directamente del Singleton para no depender del observador de LiveData
@@ -136,6 +137,7 @@ class MainActivity : AppCompatActivity() {
                 is SosManager.EstadoAlerta.Activa -> {
                     sosViewModel.desactivarAlertaEnServidor()
                 }
+
                 else -> {
                     dispararAlerta()
                 }
@@ -146,7 +148,8 @@ class MainActivity : AppCompatActivity() {
     private fun observarViewModel() {
         viewModel.numeroContactos.observe(this) { btnContactos.text = "$it\nContactos" }
         viewModel.isDarkModeOn.observe(this) { isDark ->
-            val expectedUiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            val expectedUiMode =
+                if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
             if (currentUiMode != expectedUiMode) recreate()
         }
     }
@@ -170,7 +173,8 @@ class MainActivity : AppCompatActivity() {
                 is SosManager.EstadoAlerta.Activa -> {
                     btnSos.isEnabled = true
                     btnSos.text = "CANCELAR ALERTA"
-                    btnSosAdjuntar.visibility = View.VISIBLE // 👈 AQUÍ SE HACE VISIBLE EN LA PANTALLA PRINCIPAL
+                    btnSosAdjuntar.visibility =
+                        View.VISIBLE // 👈 AQUÍ SE HACE VISIBLE EN LA PANTALLA PRINCIPAL
                     Toast.makeText(this, "¡Alerta enviada con éxito!", Toast.LENGTH_SHORT).show()
                 }
 
@@ -180,27 +184,53 @@ class MainActivity : AppCompatActivity() {
                     btnSosAdjuntar.visibility = View.GONE
                     Toast.makeText(this, estado.mensaje, Toast.LENGTH_LONG).show()
                 }
+
+                is SosManager.EstadoAlerta.Error -> {
+                    btnSos.isEnabled = true
+                    btnSos.text = "ENVIAR ALERTA SOS"
+                    btnSosAdjuntar.visibility = View.GONE
+
+                    // 🛑 Anuncio emergente para la usuaria bloqueada o con error
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("⚠️ Cuenta Bloqueada")
+                        .setMessage(estado.mensaje) // Aquí mostrará el mensaje que envíe el backend ("Acceso denegado...")
+                        .setPositiveButton("Aceptar") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .setCancelable(false)
+                        .show()
+                }
             }
         }
     }
 
     private fun dispararAlerta() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             sosViewModel.procesarAlertaInicial()
         } else {
             verificarPermisosUbicacion()
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-        actualizarEstadoBotonUbicacion()
-    }
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            actualizarEstadoBotonUbicacion()
+        }
 
     private fun verificarPermisosUbicacion() {
         if (PermissionUtils.obtenerEstadoUbicacion(this) == "CONFIGURACION") {
             PermissionUtils.abrirAjustesSistema(this)
         } else {
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         }
     }
 
@@ -216,5 +246,41 @@ class MainActivity : AppCompatActivity() {
         viewModel.cargarDatosGenerales()
     }
 
+    // 🔔 Lanzador para pedir el permiso de notificaciones de forma interactiva (Android 13+)
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Toast.makeText(this, "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    this,
+                    "⚠️ Las alertas de emergencia no podrán mostrarse en pantalla sin este permiso.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
+    private fun verificarYPedirPermisoNotificaciones() {
+        // Android 13 (TIRAMISU) en adelante exige pedir el permiso explícitamente en tiempo de ejecución
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    Log.d("NOTIFICACIONES", "🟢 El permiso ya fue concedido previamente.")
+                }
+                else -> {
+                    // Lanza el diálogo nativo del sistema operativo
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            // Para Android 8 hasta 12: Las notificaciones están permitidas por defecto.
+            // Solo validamos opcionalmente si el usuario las desactivó manualmente en ajustes del sistema.
+            if (!PermissionUtils.areNotificationsEnabled(this)) {
+                Log.w("NOTIFICACIONES", "⚠️ Las notificaciones están desactivadas a nivel de sistema en este Android 8+")
+            }
+        }
+    }
 }

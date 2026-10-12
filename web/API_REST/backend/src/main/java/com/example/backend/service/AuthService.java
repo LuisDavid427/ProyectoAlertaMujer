@@ -1,11 +1,15 @@
 package com.example.backend.service;
 
 import com.example.backend.model.UsuarioModel;
-import com.example.backend.security.JwtUtil; 
+import com.example.backend.security.JwtUtil;
+import com.example.backend.util.InterfaceUtil;
+import com.example.backend.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // <-- AGREGAR ESTA IMPORTACIÓN
+import org.threeten.bp.LocalDateTime;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +27,28 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     // LOGIN MÓVIL (Android)
-    @Transactional(readOnly = true)
+@Transactional(readOnly = true)
     public Map<String, Object> validarMovil(String email, String passwordPlano) {
         Optional<UsuarioModel> userOpt = usuarioService.buscarPorEmail(email);
         
         if (userOpt.isPresent() && passwordEncoder.matches(passwordPlano, userOpt.get().getContrasena_hash())) {
             UsuarioModel usuario = userOpt.get();
+            
+            try {
+                InterfaceUtil.validarEstadoActivo(usuario);
+            } catch (Exception e) {
+                // Si la cuenta está bloqueada, puedes relanzarla como una excepción en runtime 
+                // o manejarla según lo requiera tu controlador de autenticación.
+                throw new RuntimeException(e.getMessage());
+            }
+
             Map<String, Object> datos = new HashMap<>();
             datos.put("id_usuario", usuario.getId());
             datos.put("nombre", usuario.getNombre());
@@ -45,7 +64,6 @@ public class AuthService {
         }
         return null;
     }
-
     // AÑADIR @Transactional PARA MANTENER LA SESIÓN JPA ABIERTA Y CARGAR ROLES
     @Transactional(readOnly = true)
     public String autenticarAdmin(String email, String passwordPlano) {
@@ -87,24 +105,41 @@ public class AuthService {
         return jwtUtil.generarToken(usuario.getEmail(), "ROLE_ADMIN");
     }
 
-    // 5. PASO 1: Procesar solicitud de recuperación (Generar código)
+// 5. PASO 1: Procesar solicitud de recuperación (Generar código)
     @Transactional
     public boolean procesarRecuperacionPassword(String email) {
         Optional<UsuarioModel> userOpt = usuarioService.buscarPorEmail(email);
         
         if (userOpt.isPresent()) {
             UsuarioModel usuario = userOpt.get();
+            
+            try {
+
+                InterfaceUtil.validarEstadoActivo(usuario);
+
+            } catch (Exception e) {
+
+                throw new RuntimeException(e.getMessage());
+
+            }
             String codigo = String.format("%06d", new java.util.Random().nextInt(999999));
+            java.time.LocalDateTime expiracion = java.time.LocalDateTime.now().plusMinutes(15);
             
-            usuario.setCodigoRecuperacion(codigo);
-            usuario.setExpiracionCodigo(java.time.LocalDateTime.now().plusMinutes(15));
-            usuarioService.guardar(usuario);
+            // 🛑 Actualizamos ÚNICAMENTE el código y la expiración sin tocar la contraseña
+            usuarioRepository.actualizarCodigoRecuperacion(email, codigo, expiracion);
             
-            System.out.println("--- CÓDIGO DE RECUPERACIÓN PARA " + email + ": " + codigo + " ---");
-            return true; // El usuario sí existe y se generó el código
+            // Envío del correo real
+            try {
+                emailService.enviarCorreoCodigo(email, codigo);
+            } catch (Exception e) {
+                System.err.println("Error al enviar el correo: " + e.getMessage());
+                return false;
+            }
+            
+            return true;
         }
         
-        return false; // El usuario NO existe en la base de datos
+        return false;
     }
 
 
