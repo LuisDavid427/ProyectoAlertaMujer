@@ -1,5 +1,6 @@
 package com.example.alertamujer.data.dto
 
+import android.R
 import com.google.gson.annotations.SerializedName
 
 // Lo que envías para loguearte
@@ -12,7 +13,8 @@ data class LoginRequest(
 data class RegistroRequest(
     val nombre: String,
     val email: String,
-    val contrasena: String
+    val contrasena: String,
+    val fechaNacimiento: String
 )
 
 

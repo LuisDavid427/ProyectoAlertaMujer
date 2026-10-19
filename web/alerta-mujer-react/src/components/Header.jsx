@@ -33,7 +33,6 @@ export default function Header({ vistaAdmin = false, onLogout, onDescargarPdf })
                         </>
                     ) : (
                         <>
-                            <a href="#" className="btn-top">Descargar APK</a>
                             <Link to="/login" className="btn-secondary">Acceder</Link>
                         </>
                     )}

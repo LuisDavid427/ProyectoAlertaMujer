@@ -65,6 +65,23 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- NUEVO CAMPO: Fecha de Nacimiento -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_fecha_nacimiento"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Fecha de nacimiento (DD-MM_AAAA)"
+        app:layout_constraintTop_toBottomOf="@id/til_reg_password">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_fecha_nacimiento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="date" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- BOTÓN ACTUALIZADO: Ahora su parte superior está anclada a til_fecha_nacimiento -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_registrar_usuario"
         android:layout_width="match_parent"
@@ -73,6 +90,6 @@
         android:text="Registrarme"
         app:backgroundTint="#E91E63"
         app:cornerRadius="12dp"
-        app:layout_constraintTop_toBottomOf="@id/til_reg_password" />
+        app:layout_constraintTop_toBottomOf="@id/til_fecha_nacimiento" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

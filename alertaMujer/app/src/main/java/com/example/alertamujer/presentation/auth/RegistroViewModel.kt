@@ -22,9 +22,9 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     private val _mensajeError = MutableLiveData<String>()
     val mensajeError: LiveData<String> get() = _mensajeError
 
-    fun intentarRegistro(nombre: String, email: String, pass: String) {
-        // 1. Validación de campos (Lógica de presentación)
-        if (nombre.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+    fun intentarRegistro(nombre: String, email: String, pass: String, fechaNacimiento: String) { // <-- 1. Añade el parámetro
+        // 2. Validación de campos
+        if (nombre.isEmpty() || email.isEmpty() || pass.isEmpty() || fechaNacimiento.isEmpty()) {
             _mensajeError.value = "Completa todos los campos"
             return
         }
@@ -34,8 +34,10 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                 val request = RegistroRequest(
                     nombre = nombre,
                     email = email,
-                    contrasena = pass
+                    contrasena = pass,
+                    fechaNacimiento = fechaNacimiento // <-- 3. Añádelo al objeto
                 )
+                // ... resto del código igual
 
                 // 2. Llamada al Repositorio (Capa de Datos)
                 val response: Response<AuthResponse> = repository.registrar(request)

@@ -4,13 +4,13 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import './home.css'; // Importamos el CSS exclusivo de esta pantalla
 
-// En React, las imágenes locales se importan así para que Vite las optimice
+// Importación optimizada de imagen de héroe
 import heroImg from '../../assets/woman-hero.jpg';
 
 export default function Home() {
     return (
         <>
-            {/* Llamamos al componente Header. vistaAdmin={false} porque estamos en la vista pública */}
+            {/* Componente Header público (vistaAdmin = false) */}
             <Header vistaAdmin={false} />
 
             <main>
@@ -26,8 +26,15 @@ export default function Home() {
                         </p>
                         
                         <div className="hero-btns">
-                            {/* Respetando tus directrices: La app es para Android 8+ */}
-                            <a href="#" className="btn-primary">Descargar APK (v1.0.1)</a>
+                            {/* Enlace directo a la versión v1.0.1 alojada en GitHub Releases */}
+                            <a 
+                                href="https://github.com/LuisDavid427/ProyectoAlertaMujer/releases/download/v1.0.1/app-debug.apk" 
+                                className="btn-primary"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Descargar APK (v1.0.1)
+                            </a>
                             <a href="#caracteristicas" className="btn-secondary">Ver Características</a>
                         </div>
                         
@@ -87,7 +94,7 @@ export default function Home() {
                 </section>
             </main>
 
-            {/* Llamamos al componente Footer */}
+            {/* Componente Footer */}
             <Footer />
         </>
     );
