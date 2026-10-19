@@ -25,11 +25,8 @@
     <!-- Permisos para la Burbuja Flotante y Servicios en Primer Plano -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-
-
     <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <!-- 🛑 REQUERIDO PARA VISIBILIDAD DE CÁMARA Y GRABADORA EN ANDROID 11+ 🛑 -->
@@ -120,12 +117,7 @@
             android:name=".service.BubbleService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Burbuja flotante de acceso rápido para situaciones de emergencia SOS" />
-        </service>
-
+            android:foregroundServiceType="location" />
 
     </application>
 </manifest>

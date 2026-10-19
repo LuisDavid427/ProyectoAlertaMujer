@@ -1,8 +1,6 @@
 const API_BASE_URL = 'http://192.168.1.22:8080/api/usuarios';
 
 
-
-
 export async function cambiarEstadoUsuarioApi(idUsuario, nuevoEstado) {
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
     

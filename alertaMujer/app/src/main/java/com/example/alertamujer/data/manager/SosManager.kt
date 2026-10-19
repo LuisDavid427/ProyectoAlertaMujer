@@ -17,7 +17,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
-import org.json.JSONArray
 
 class SosManager private constructor(private val context: Context) {
 
@@ -66,7 +65,7 @@ class SosManager private constructor(private val context: Context) {
         val token = sessionManager.obtenerToken()
 
         if (token.isNullOrBlank() || userId == null || userId == -1) {
-            _estadoAlerta.value = EstadoAlerta.Error("Sesión expirada o invalida. Vuelve a iniciar sesión.")
+            _estadoAlerta.value = EstadoAlerta.Error("Sesión expirada o inválida. Vuelve a iniciar sesión.")
             return
         }
 
@@ -82,7 +81,7 @@ class SosManager private constructor(private val context: Context) {
             val mensaje = sessionManager.obtenerMensajeSOS()
             val db = AppDatabase.getDatabase(context)
 
-            // 🟢 1. Cargar contactos desde Room (Fuente única)
+            // 1. Cargar contactos desde Room (Fuente única)
             val listaContactos = db.contactoDao().obtenerTodosLosContactosSincrono()
 
             // Filtrar correos no vacíos/nulos para el Backend
@@ -90,10 +89,10 @@ class SosManager private constructor(private val context: Context) {
 
             Log.d("DEBUG_SOS", "🟢 Contactos encontrados en Room: ${listaContactos.size}. Emails a enviar: $listaEmails")
 
-            // 🟢 2. Enviar SMS usando directamente los números de Room
+            // 2. Enviar SMS usando directamente los números de Room
             enviarSmsOcultoDesdeRoom(listaContactos, mensaje, loc.latitude, loc.longitude)
 
-            // 🟢 3. Enviar petición al Backend con la lista de correos
+            // 3. Enviar petición al Backend con la lista de correos
             val request = AlertaRequest(
                 idUsuario = userId,
                 mensaje = mensaje,
@@ -111,11 +110,10 @@ class SosManager private constructor(private val context: Context) {
 
                     try {
                         val nombreUsuario = sessionManager.obtenerNombreUsuario() ?: "Usuario"
-                        val idUsuario = sessionManager.obtenerIdUsuario()
                         val nuevaAlertaLocal = AlertaEntity(
                             id_local = 0,
                             id_alerta = idAlerta,
-                            id_usuario = idUsuario,
+                            id_usuario = userId,
                             nombre_usuario = nombreUsuario,
                             mensaje = mensaje,
                             latitud = loc.latitude,
@@ -152,11 +150,12 @@ class SosManager private constructor(private val context: Context) {
                     val req = UbicacionRequest(loc.latitude, loc.longitude)
                     try {
                         RetrofitClient.getAlertaService(context).enviarUbicacionContinua(idAlerta, req)
+                        Log.d("DEBUG_SOS", "📍 Ubicación continua enviada: ${loc.latitude}, ${loc.longitude}")
                     } catch (e: Exception) {
                         Log.e("DEBUG_SOS", "Error en rastreo continuo: ${e.message}")
                     }
                 }
-                delay(10000)
+                delay(10000) // Cada 10 segundos
             }
         }
     }
@@ -182,9 +181,14 @@ class SosManager private constructor(private val context: Context) {
     @SuppressLint("MissingPermission")
     private suspend fun obtenerUbicacionActual(): android.location.Location? {
         return try {
-            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
-                ?: fusedLocationClient.lastLocation.await()
-        } catch (e: Exception) { null }
+            // Usamos un timeout de 7 segundos para evitar bloqueos si la pantalla está apagada
+            withTimeoutOrNull(7000L) {
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
+            } ?: fusedLocationClient.lastLocation.await()
+        } catch (e: Exception) {
+            Log.e("DEBUG_SOS", "🔴 Error obteniendo ubicación: ${e.message}")
+            null
+        }
     }
 
     private fun enviarSmsOcultoDesdeRoom(contactos: List<com.example.alertamujer.data.local.entity.ContactoEntity>, msg: String, lat: Double, lng: Double) {

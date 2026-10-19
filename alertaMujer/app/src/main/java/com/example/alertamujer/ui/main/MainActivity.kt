@@ -3,7 +3,6 @@ package com.example.alertamujer.ui.main
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.alertamujer.R
 import com.example.alertamujer.data.manager.SosManager
@@ -32,7 +30,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.example.alertamujer.util.SessionManager
 import com.example.alertamujer.ui.alerta.AutoridadesActivity
 
-
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
@@ -50,25 +47,32 @@ class MainActivity : AppCompatActivity() {
     private lateinit var txtSaludo: TextView
 
     private lateinit var sessionManager: SessionManager
-
-
     private var currentUiMode: Int = 0
+
+    // 🟢 Único lanzador unificado que pide todos los permisos esenciales de la app con PermissionUtils
+    private val requestAllPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val cameraGranted = permissions[Manifest.permission.CAMERA] ?: true
+            val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: true
+
+            if (!cameraGranted || !audioGranted) {
+                Toast.makeText(
+                    this,
+                    "⚠️ Se requieren cámara y micrófono para las funciones de emergencia.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sessionManager = SessionManager(this)
 
-
         currentUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
         // Enlaces de Vistas
         btnContactos = findViewById(R.id.btn_real_contactos)
-
-        // Observamos el número de contactos que viene de Room
-        viewModel.numeroContactos.observe(this) { count ->
-            btnContactos.text = "$count\nContactos"
-        }
         btnUserProfile = findViewById(R.id.btn_user_profile)
         btnUbicacion = findViewById(R.id.btn_ubicacion)
         btnSosAdjuntar = findViewById(R.id.btn_sos_adjuntar)
@@ -84,7 +88,6 @@ class MainActivity : AppCompatActivity() {
         observarViewModel()
         observarEstadoSOS()
 
-
         // Listeners
         btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
         btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
@@ -96,13 +99,14 @@ class MainActivity : AppCompatActivity() {
 
         val nombreUsuario = sessionManager.obtenerNombreUsuario()
         val primerNombre = nombreUsuario?.trim()?.split(" ")?.firstOrNull() ?: ""
-        // Si existe un nombre guardado, lo concatenas con un saludo personalizado
         if (!nombreUsuario.isNullOrEmpty()) {
             txtSaludo.text = "Hola, $primerNombre"
         } else {
-            txtSaludo.text = "¡Hola, Usuario!" // Texto por defecto si no hay sesión activa
+            txtSaludo.text = "¡Hola, Usuario!"
         }
-        verificarYPedirPermisoNotificaciones()
+
+        // 🟢 Solicitud unificada mediante PermissionUtils al arrancar la pantalla
+        requestAllPermissionsLauncher.launch(PermissionUtils.obtenerPermisosApp())
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -111,23 +115,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             val tokenFcm = task.result
-            Log.d("FCM", "Token FCM del dispositivo: $tokenFcm")
-
-            // Guardar en SessionManager para enviarlo al backend al autenticarse
-            val sessionManager = SessionManager(this)
             sessionManager.guardarFcmToken(tokenFcm)
         }
 
-
-
         btnSosAdjuntar.setOnClickListener {
-            // Leemos directamente del Singleton para no depender del observador de LiveData
             val idActual = SosManager.getInstance(this).idAlertaActual.value
 
             if (idActual != null && idActual != -1) {
                 abrirActividad<AdjuntarActivity> { putExtra("EXTRA_ID_ALERTA", idActual) }
             } else {
-                // Fallback: Abre AdjuntarActivity directamente, la cual volverá a consultar a SosManager
                 abrirActividad<AdjuntarActivity>()
             }
         }
@@ -137,7 +133,6 @@ class MainActivity : AppCompatActivity() {
                 is SosManager.EstadoAlerta.Activa -> {
                     sosViewModel.desactivarAlertaEnServidor()
                 }
-
                 else -> {
                     dispararAlerta()
                 }
@@ -154,46 +149,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun observarEstadoSOS() {
         sosViewModel.estadoAlerta.observe(this) { estado ->
             when (estado) {
                 is SosManager.EstadoAlerta.Inactiva -> {
                     btnSos.isEnabled = true
                     btnSos.text = "ENVIAR ALERTA SOS"
-                    btnSosAdjuntar.visibility = View.GONE // Oculto mientras no hay alerta
+                    btnSosAdjuntar.visibility = View.GONE
                 }
-
                 is SosManager.EstadoAlerta.Procesando -> {
                     btnSos.isEnabled = false
                     btnSos.text = "Espera, enviando alerta..."
                     btnSosAdjuntar.visibility = View.GONE
                 }
-
                 is SosManager.EstadoAlerta.Activa -> {
                     btnSos.isEnabled = true
                     btnSos.text = "CANCELAR ALERTA"
-                    btnSosAdjuntar.visibility =
-                        View.VISIBLE // 👈 AQUÍ SE HACE VISIBLE EN LA PANTALLA PRINCIPAL
+                    btnSosAdjuntar.visibility = View.VISIBLE
                     Toast.makeText(this, "¡Alerta enviada con éxito!", Toast.LENGTH_SHORT).show()
                 }
-
-                is SosManager.EstadoAlerta.Error -> {
-                    btnSos.isEnabled = true
-                    btnSos.text = "ENVIAR ALERTA SOS"
-                    btnSosAdjuntar.visibility = View.GONE
-                    Toast.makeText(this, estado.mensaje, Toast.LENGTH_LONG).show()
-                }
-
                 is SosManager.EstadoAlerta.Error -> {
                     btnSos.isEnabled = true
                     btnSos.text = "ENVIAR ALERTA SOS"
                     btnSosAdjuntar.visibility = View.GONE
 
-                    // 🛑 Anuncio emergente para la usuaria bloqueada o con error
                     androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("⚠️ Cuenta Bloqueada")
-                        .setMessage(estado.mensaje) // Aquí mostrará el mensaje que envíe el backend ("Acceso denegado...")
+                        .setTitle("⚠️ Cuenta Bloqueada o Error")
+                        .setMessage(estado.mensaje)
                         .setPositiveButton("Aceptar") { dialog, _ ->
                             dialog.dismiss()
                         }
@@ -244,43 +226,5 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         actualizarEstadoBotonUbicacion()
         viewModel.cargarDatosGenerales()
-    }
-
-    // 🔔 Lanzador para pedir el permiso de notificaciones de forma interactiva (Android 13+)
-    private val requestNotificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                Toast.makeText(this, "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(
-                    this,
-                    "⚠️ Las alertas de emergencia no podrán mostrarse en pantalla sin este permiso.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-
-    private fun verificarYPedirPermisoNotificaciones() {
-        // Android 13 (TIRAMISU) en adelante exige pedir el permiso explícitamente en tiempo de ejecución
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    Log.d("NOTIFICACIONES", "🟢 El permiso ya fue concedido previamente.")
-                }
-                else -> {
-                    // Lanza el diálogo nativo del sistema operativo
-                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        } else {
-            // Para Android 8 hasta 12: Las notificaciones están permitidas por defecto.
-            // Solo validamos opcionalmente si el usuario las desactivó manualmente en ajustes del sistema.
-            if (!PermissionUtils.areNotificationsEnabled(this)) {
-                Log.w("NOTIFICACIONES", "⚠️ Las notificaciones están desactivadas a nivel de sistema en este Android 8+")
-            }
-        }
     }
 }

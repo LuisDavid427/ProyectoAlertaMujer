@@ -1,18 +1,28 @@
 // src/pages/Dashboard/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
+import MapaRiesgo from '../../components/Dashboard/MapaRiesgo';
 import Header from '../../components/Header';
 import { cerrarSesion } from '../../services/authService';
 import { obtenerDatosDashboard } from '../../services/dashboardService';
+import { cambiarEstadoUsuarioApi } from '../../services/usuarioService';
 import { TablaAlertas, TablaUsuarios } from '../../components/Dashboard/Tablas'; 
+import html2pdf from 'html2pdf.js';
+
+import EstadisticasView from './EstadisticasView.jsx';
+import ReportePdfTemplate from './ReportePdfTemplate';
 import './dashboard.css';
 
+// 🟢 Importamos la lógica geoespacial y el custom hook que extrajimos
+import { agruparAlertasPorZona } from '../../utils/geoUtils';
+import { useZonasGeocoding } from '../../hooks/useZonasGeocoding';
+
 export default function Dashboard() {
-    // --- 1. SEGURIDAD Y ESTADOS ---
     const [datos, setDatos] = useState([]);
-    const [vistaActual, setVistaActual] = useState('alertas'); // 'alertas' o 'usuarios'
+    const [vistaActual, setVistaActual] = useState('alertas');
     const [busqueda, setBusqueda] = useState('');
     const [filtroEstado, setFiltroEstado] = useState('todos');
     const [cargando, setCargando] = useState(false);
+    const [mostrarEstadisticas, setMostrarEstadisticas] = useState(false);
 
     useEffect(() => {
         if (sessionStorage.getItem('sesionAlertaMujer') !== 'activa') {
@@ -20,33 +30,25 @@ export default function Dashboard() {
         }
     }, []);
 
-    // --- 2. CARGA DE DATOS (API) ---
     const cargarDatos = async () => {
         setCargando(true);
         const resultado = await obtenerDatosDashboard(vistaActual, busqueda);
-        
         setDatos(resultado);
         setCargando(false);
     };
 
     useEffect(() => {
         cargarDatos();
-    }, [vistaActual, busqueda]); // Se dispara al cambiar de switch o buscar
-
-    // --- LÓGICA DE FILTRADO CORREGIDA ---
+    }, [vistaActual, busqueda]);
 
     const datosFiltrados = useMemo(() => {
         if (!datos || datos.length === 0) return [];
 
         return datos.filter(item => {
-            // Si el combo está en "Todos los registros", retorna todo
             if (filtroEstado === 'todos') return true;
 
             if (vistaActual === 'alertas') {
-                // Se evalúa 'estado' (o 'estado_alerta' por seguridad en caso de fallback)
                 const estadoItem = (item.estado || item.estado_alerta || '').toLowerCase();
-                
-                // Si seleccionó "activos", busca si el estado dice "activa" o "activo"
                 if (filtroEstado === 'activos') {
                     return estadoItem === 'activa' || estadoItem === 'activo';
                 }
@@ -61,21 +63,63 @@ export default function Dashboard() {
         });
     }, [datos, filtroEstado, vistaActual]);
 
-    // --- 4. HANDLERS ---
+    const handleBloquearLocal = async (idUsuario, estadoActual) => {
+        const nuevoEstado = !estadoActual;
+        try {
+            const respuesta = await cambiarEstadoUsuarioApi(idUsuario, nuevoEstado);
+            if (respuesta) {
+                setDatos(prevDatos => 
+                    prevDatos.map(user => {
+                        const currentId = user.id_usuario || user.idUsuario || user.id;
+                        if (currentId === idUsuario) {
+                            return { ...user, activo: nuevoEstado };
+                        }
+                        return user;
+                    })
+                );
+            } else {
+                alert("El servidor no pudo actualizar el estado.");
+            }
+        } catch (error) {
+            console.error("Error crítico al cambiar estado en backend:", error);
+        }
+    };
+
     const manejarCambioVista = (e) => {
-        setDatos([]); // <--- ESTO ES CLAVE: Limpia los datos viejos
+        setDatos([]);
         setVistaActual(e.target.checked ? 'usuarios' : 'alertas');
         setBusqueda('');
         setFiltroEstado('todos');
     };
 
+    const descargarReportePdf = () => {
+        const elemento = document.getElementById('reporte-estadisticas-pdf');
+        const opciones = {
+            margin:       10,
+            filename:     'Reporte_Zonas_AlertaMujer.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().from(elemento).set(opciones).save();
+    };
+
+    // 🟢 Uso limpio de la agrupación y el hook de geocodificación en una sola línea cada uno
+    const zonasAgrupadas = useMemo(() => agruparAlertasPorZona(datosFiltrados), [datosFiltrados]);
+    const nombresZonas = useZonasGeocoding(zonasAgrupadas);
+
     return (
         <>
-            <Header vistaAdmin={true} onLogout={() => { cerrarSesion(); window.location.replace('/login'); }} />
+            <Header 
+                vistaAdmin={true} 
+                onLogout={() => { cerrarSesion(); window.location.replace('/login'); }} 
+                onDescargarPdf={descargarReportePdf}
+            />
 
             <main className="container">
                 <div className="dashboard-header">
-                        <h2>Administrar</h2>
+                    <h2>{mostrarEstadisticas ? 'Análisis Estadístico Global' : 'Administrar'}</h2>
+                    {!mostrarEstadisticas && (
                         <div className={`toggle-container ${vistaActual === 'usuarios' ? 'usuarios-active' : ''}`}>
                             <span className={`toggle-label ${vistaActual === 'alertas' ? 'active-alertas' : ''}`}>Alertas</span>
                             <label className="switch">
@@ -84,45 +128,68 @@ export default function Dashboard() {
                             </label>
                             <span className={`toggle-label ${vistaActual === 'usuarios' ? 'active-usuarios' : ''}`}>Usuarios</span>
                         </div>
+                    )}
                 </div>
 
-                <div className="toolbar card">
-                    <input 
-                        type="text" className="input-field search-bar" 
-                        placeholder={vistaActual === 'alertas' ? "Buscar por código o víctima..." : "Buscar por nombre o correo..."}
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                    />
-                    <select className="input-field" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-                        <option value="todos">Todos los registros</option>
-                        <option value="activos">
-                            {vistaActual === 'alertas' ? '🔴 Solo Activ@s' : '✅ Solo Activos'}
-                        </option>
-                        {vistaActual === 'usuarios' && <option value="inactivos">❌ Solo Inactivos</option>}
-                    </select>
-                </div>
-
-                <div className="card shadow-sm">
-                    <div style={{ marginBottom: '15px' }}>
-                        <span className="badge" style={{ 
-                            background: vistaActual === 'alertas' ? 'var(--secondary-color, #f44336)' : '#4caf50',
-                            color: 'white'
-                        }}>
-                            {vistaActual === 'alertas' ? '🔴 Registro SOS' : '👥 Directorio'}
-                        </span>
-                    </div>
-                    
-                    <div className="table-container">
-                        {cargando ? (
-                            <div className="text-center p-5">Consultando base de datos...</div>
-                        ) : vistaActual === 'alertas' ? (
-                            <TablaAlertas datos={datosFiltrados} />
-                        ) : (
-                            <TablaUsuarios datos={datosFiltrados} />
+                <div className="toolbar card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '280px', alignItems: 'center' }}>
+                        {!mostrarEstadisticas && (
+                            <>
+                                <input 
+                                    type="text" className="input-field search-bar" 
+                                    placeholder={vistaActual === 'alertas' ? "Buscar por código o víctima..." : "Buscar por nombre o correo..."}
+                                    value={busqueda}
+                                    onChange={(e) => setBusqueda(e.target.value)}
+                                />
+                                <select className="input-field" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+                                    <option value="todos">Todos los registros</option>
+                                    <option value="activos">{vistaActual === 'alertas' ? '🔴 Solo Activ@s' : '✅ Solo Activos'}</option>
+                                    {vistaActual === 'usuarios' && <option value="inactivos">❌ Solo Inactivos</option>}
+                                </select>
+                            </>
+                        )}
+                        
+                        {vistaActual === 'alertas' && (
+                            <button 
+                                onClick={() => setMostrarEstadisticas(!mostrarEstadisticas)}
+                                style={{
+                                    background: mostrarEstadisticas ? '#afa8a8' : '#fcc1de',
+                                    color: 'white', border: 'none', padding: '10px 20px',
+                                    borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginLeft: 'auto'
+                                }}
+                            >
+                                {mostrarEstadisticas ? '← Volver a las Alertas' : '📊 Ver Estadísticas Globales'}
+                            </button>
                         )}
                     </div>
                 </div>
+
+                {!mostrarEstadisticas ? (
+                    <div className="card shadow-sm">
+                        <div style={{ marginBottom: '15px' }}>
+                            <span className="badge" style={{ background: vistaActual === 'alertas' ? 'var(--secondary-color, #f44336)' : '#4caf50', color: 'white' }}>
+                                {vistaActual === 'alertas' ? '🔴 Registro SOS' : '👥 Directorio'}
+                            </span>
+                        </div>
+                        <div className="table-container">
+                            {cargando ? (
+                                <div className="text-center p-5">Consultando base de datos...</div>
+                            ) : vistaActual === 'alertas' ? (
+                                <>
+                                    {datosFiltrados.length > 0 && <MapaRiesgo alertas={datosFiltrados} />}
+                                    <TablaAlertas datos={datosFiltrados} />
+                                </>
+                            ) : (
+                                <TablaUsuarios datos={datosFiltrados} onBloquearLocal={handleBloquearLocal} />
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <EstadisticasView zonasAgrupadas={zonasAgrupadas} nombresZonas={nombresZonas} />
+                )}
             </main>
+
+            <ReportePdfTemplate zonasAgrupadas={zonasAgrupadas} nombresZonas={nombresZonas} />
         </>
     );
 }

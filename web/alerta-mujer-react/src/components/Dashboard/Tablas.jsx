@@ -93,15 +93,18 @@ export const TablaUsuarios = ({ datos, onBloquearLocal }) => {
                             </td>
                             <td>
                                 <button
-                                    onClick={() => onBloquearLocal(u.idUsuario, esActivo)}
-                                    className={`btn btn-sm ${esActivo ? 'btn-outline-danger' : 'btn-outline-success'}`}
-                                    style={{ 
-                                        fontSize: '12px', 
-                                        padding: '5px 12px',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        fontWeight: '600'
+                                    onClick={() => {
+                                        // Obtenemos el ID probando todas las posibles variantes que envía tu backend
+                                        const idReal = u.id_usuario || u.idUsuario || u.id;
+                                        console.log("Usuaria seleccionada:", u, "ID detectado:", idReal, "Estado actual:", esActivo);
+                                        
+                                        if (onBloquearLocal && idReal) {
+                                            onBloquearLocal(idReal, esActivo);
+                                        } else {
+                                            console.error("Falta la función onBloquearLocal o el ID es inválido");
+                                        }
                                     }}
+                                    className={`btn-usuario-accion ${esActivo ? 'bloquear' : 'activar'}`}
                                 >
                                     {esActivo ? '🔒 Bloquear' : '✅ Activar'}
                                 </button>

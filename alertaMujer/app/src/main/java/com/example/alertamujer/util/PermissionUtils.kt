@@ -20,6 +20,28 @@ object PermissionUtils {
     const val UBICACION_APROXIMADA = "APROXIMADA"
     const val SIN_PERMISO = "NO"
 
+    val PERMISOS_MULTIMEDIA = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO
+    )
+
+    // 🟢 Ahora incluye también la ubicación precisa y aproximada
+    fun obtenerPermisosApp(): Array<String> {
+        val permisos = mutableListOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+
+        // Android 13+ (API 33) requiere permiso explícito de notificaciones
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permisos.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        return permisos.toTypedArray()
+    }
+
     fun tienePermisoUbicacion(context: Context): String {
         val fineLocation = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -67,7 +89,20 @@ object PermissionUtils {
         }
     }
 
-    // 🔔 Valida si las notificaciones están permitidas a nivel de sistema operativo (Android 8+)
+    fun tienePermisosMultimedia(context: Context): Boolean {
+        val camera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        val audio = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+        return camera == PackageManager.PERMISSION_GRANTED && audio == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun obtenerPermisoParaTipo(tipo: String): String {
+        return if (tipo == "AUDIO") {
+            Manifest.permission.RECORD_AUDIO
+        } else {
+            Manifest.permission.CAMERA
+        }
+    }
+
     fun areNotificationsEnabled(context: Context): Boolean {
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
@@ -81,7 +116,6 @@ object PermissionUtils {
         context.startActivity(intent)
     }
 
-    // 🔔 Abre directamente la configuración de notificaciones de la app
     fun abrirAjustesNotificaciones(context: Context) {
         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {

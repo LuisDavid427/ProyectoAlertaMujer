@@ -5,53 +5,108 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clipChildren="false"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:padding="12dp">
 
-    <!-- BOTONES SECUNDARIOS (Opciones desplegables) -->
+    <!-- BOTÓN SECUNDARIO: LLAMADAS (Azul) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_opcion_calls"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
         android:visibility="gone"
+        android:text="📞"
+        android:textSize="20sp"
         app:backgroundTint="#0288D1"
-        app:cornerRadius="24dp" />
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        app:cornerRadius="26dp"
+        app:elevation="6dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2dp" />
 
+    <!-- BOTÓN SECUNDARIO: AUDIO (Verde) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_opcion_audio"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
         android:visibility="gone"
+        android:text="🎤"
+        android:textSize="20sp"
         app:backgroundTint="#388E3C"
-        app:cornerRadius="24dp" />
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        app:cornerRadius="26dp"
+        app:elevation="6dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2dp" />
 
+    <!-- BOTÓN SECUNDARIO: FOTO (Naranja) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_opcion_foto"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
         android:visibility="gone"
+        android:text="📷"
+        android:textSize="20sp"
         app:backgroundTint="#F57C00"
-        app:cornerRadius="24dp" />
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        app:cornerRadius="26dp"
+        app:elevation="6dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2dp" />
 
+    <!-- BOTÓN SECUNDARIO: VIDEO (Morado) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_opcion_video"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
         android:visibility="gone"
+        android:text="🎥"
+        android:textSize="20sp"
         app:backgroundTint="#7B1FA2"
-        app:cornerRadius="24dp" />
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        app:cornerRadius="26dp"
+        app:elevation="6dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2dp" />
 
-    <!-- BOTÓN PRINCIPAL DE LA BURBUJA -->
+    <!-- BOTÓN PRINCIPAL DE LA BURBUJA (SOS) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_center"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
         android:layout_gravity="center"
         android:text="SOS"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"
+        android:textSize="15sp"
         android:textStyle="bold"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
         app:backgroundTint="#D32F2F"
-        app:cornerRadius="33dp"
-        app:elevation="8dp" />
+        app:cornerRadius="34dp"
+        app:elevation="10dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2.5dp" />
 
 </FrameLayout>

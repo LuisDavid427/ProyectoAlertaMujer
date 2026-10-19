@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.alertamujer.util.SessionManager
 
-
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val sessionManager = SessionManager(application)
@@ -15,6 +14,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _isDarkMode = MutableLiveData<Boolean>()
     val isDarkMode: LiveData<Boolean> get() = _isDarkMode
+
+    // 🟢 Propiedad para la burbuja flotante
+    private val _isBubbleActive = MutableLiveData<Boolean>()
+    val isBubbleActive: LiveData<Boolean> get() = _isBubbleActive
 
     private val _nombreUsuario = MutableLiveData<String>()
     val nombreUsuario: LiveData<String> get() = _nombreUsuario
@@ -27,6 +30,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         _isDarkMode.value = sharedPreferences.getBoolean("dark_mode", false)
+        _isBubbleActive.value = sharedPreferences.getBoolean("bubble_active", false)
         cargarDatosUsuario()
     }
 
@@ -38,6 +42,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateTheme(isDark: Boolean) {
         sharedPreferences.edit().putBoolean("dark_mode", isDark).apply()
         _isDarkMode.value = isDark
+    }
+
+    // 🟢 Método para actualizar el estado guardado de la burbuja
+    fun updateBubbleState(isActive: Boolean) {
+        sharedPreferences.edit().putBoolean("bubble_active", isActive).apply()
+        _isBubbleActive.value = isActive
     }
 
     fun cerrarSesion() {

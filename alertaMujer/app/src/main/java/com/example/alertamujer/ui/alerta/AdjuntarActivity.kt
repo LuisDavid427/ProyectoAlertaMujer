@@ -1,6 +1,5 @@
 package com.example.alertamujer.ui.alerta
 
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -16,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.example.alertamujer.R
 import com.example.alertamujer.data.manager.SosManager
 import com.example.alertamujer.presentation.alerta.AdjuntarViewModel
+import com.example.alertamujer.util.PermissionUtils
 import com.example.alertamujer.util.SessionManager
 import com.example.alertamujer.util.configurarBotonAtras
 import com.google.android.material.button.MaterialButton
@@ -30,7 +30,7 @@ class AdjuntarActivity : AppCompatActivity() {
     private var idAlerta: Int = -1
     private var tipoMediaActual: String = "FOTO"
 
-    // Launcher para pedir permisos en tiempo de ejecución
+    // Launcher para pedir permisos individuales en tiempo de ejecución
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -120,11 +120,8 @@ class AdjuntarActivity : AppCompatActivity() {
 
     private fun verificarPermisoYCapturar(tipo: String) {
         tipoMediaActual = tipo
-        val permisoRequerido = if (tipo == "AUDIO") {
-            Manifest.permission.RECORD_AUDIO
-        } else {
-            Manifest.permission.CAMERA
-        }
+        // 🟢 Obtenemos el permiso requerido limpiamente desde PermissionUtils
+        val permisoRequerido = PermissionUtils.obtenerPermisoParaTipo(tipo)
 
         if (ContextCompat.checkSelfPermission(this, permisoRequerido) == PackageManager.PERMISSION_GRANTED) {
             lanzarCapturaDirecta()
@@ -160,7 +157,6 @@ class AdjuntarActivity : AppCompatActivity() {
     private fun procesarYEnviarFoto(bitmap: Bitmap) {
         if (validarIdAlerta()) {
             val file = guardarBitmapEnArchivo(bitmap)
-            // 👈 Llamada limpia sin token manual
             viewModel.enviarArchivoAlServidor(idAlerta, file, "FOTO")
         }
     }
@@ -168,7 +164,6 @@ class AdjuntarActivity : AppCompatActivity() {
     private fun procesarYEnviarMedia(uri: Uri, tipo: String) {
         if (validarIdAlerta()) {
             val file = uriToFile(uri, tipo)
-            // 👈 Llamada limpia sin token manual
             viewModel.enviarArchivoAlServidor(idAlerta, file, tipo)
         }
     }
