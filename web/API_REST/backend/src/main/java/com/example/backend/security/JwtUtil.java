@@ -1,6 +1,7 @@
 package com.example.backend.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -38,6 +39,18 @@ public class JwtUtil {
         return generarToken(email, "ROLE_USUARIO");
     }
 
+    public String refrescarToken(String tokenViejo) {
+        Claims claims = extraerClaimsAunqueEsteExpirado(tokenViejo);
+        String email = claims.getSubject();
+        String rol = (String) claims.get("role");
+
+        if (rol == null || rol.trim().isEmpty()) {
+            rol = "ROLE_USUARIO";
+        }
+
+        return generarToken(email, rol);
+    }
+
     public String extraerEmail(String token) {
         return obtenerClaims(token).getSubject();
     }
@@ -61,5 +74,13 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private Claims extraerClaimsAunqueEsteExpirado(String token) {
+        try {
+            return obtenerClaims(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }
