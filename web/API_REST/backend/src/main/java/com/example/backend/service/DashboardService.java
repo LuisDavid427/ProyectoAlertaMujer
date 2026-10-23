@@ -4,76 +4,102 @@ import com.example.backend.dto.AlertaDashboardDTO;
 import com.example.backend.dto.UsuarioDashboardDTO;
 import com.example.backend.repository.AlertaRepository;
 import com.example.backend.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 
 @Service
 public class DashboardService {
 
-    @Autowired 
-    private UsuarioRepository usuarioRepo;
-    
-    @Autowired 
-    private AlertaRepository alertaRepo;
+    private final UsuarioRepository usuarioRepo;
+    private final AlertaRepository alertaRepo;
+
+    public DashboardService(UsuarioRepository usuarioRepo, AlertaRepository alertaRepo) {
+        this.usuarioRepo = usuarioRepo;
+        this.alertaRepo = alertaRepo;
+    }
 
     public List<UsuarioDashboardDTO> listarUsuarios(String busqueda) {
-        String filtro = (busqueda == null) ? "" : busqueda;
+        String filtro = busqueda == null ? "" : busqueda;
         List<Object[]> resultados = usuarioRepo.llamarSpUsuarios(filtro);
 
-        return resultados.stream().map(row -> {
-            // 1. Mapeo de campos básicos
-            Integer id = (Integer) row[0];
-            String nombre = (String) row[1];
-            String email = (String) row[2];
-            
-            // 2. Manejo SEGURO del booleano (Evita el ClassCastException)
-            Object valorActivo = row[3];
-            boolean activo = false;
+        List<UsuarioDashboardDTO> usuarios = new ArrayList<>();
+        for (Object[] row : resultados) {
+            Integer id = obtenerInteger(row, 0);
+            String nombre = obtenerString(row, 1);
+            String email = obtenerString(row, 2);
+            boolean activo = obtenerBoolean(row, 3);
 
-            if (valorActivo instanceof Boolean) {
-                // Si Hibernate ya lo mandó como Boolean
-                activo = (Boolean) valorActivo;
-            } else if (valorActivo instanceof Number) {
-                // Si Hibernate lo mandó como 1 o 0 (Number/Integer/Byte)
-                activo = ((Number) valorActivo).intValue() == 1;
-            }
-
-            return new UsuarioDashboardDTO(id, nombre, email, activo);
-        }).collect(Collectors.toList());
-    }
-    public List<AlertaDashboardDTO> listarAlertas(String busqueda) {
-        String filtro = (busqueda == null) ? "" : busqueda;
-        List<Object[]> resultados = alertaRepo.llamarSpAlertas(filtro);
-        List<AlertaDashboardDTO> lista = new ArrayList<>();
-
-        for (Object[] fila : resultados) {
-            Integer idAlerta = (Integer) fila[0];
-            String nombreVictima = (String) fila[1];
-            String mensaje = (String) fila[2];
-            String estadoAlerta = (String) fila[3];
-            
-            LocalDateTime fecha = null;
-            if (fila[4] != null) {
-                if (fila[4] instanceof java.sql.Timestamp) {
-                    fecha = ((java.sql.Timestamp) fila[4]).toLocalDateTime();
-                } else if (fila[4] instanceof java.sql.Date) {
-                    fecha = ((java.sql.Date) fila[4]).toLocalDate().atStartOfDay();
-                }
-            }
-
-            BigDecimal latitud = fila[5] != null ? new BigDecimal(fila[5].toString()) : null;
-            BigDecimal longitud = fila[6] != null ? new BigDecimal(fila[6].toString()) : null;
-
-            lista.add(new AlertaDashboardDTO(idAlerta, nombreVictima, mensaje, estadoAlerta, fecha, latitud, longitud));
+            usuarios.add(new UsuarioDashboardDTO(id, nombre, email, activo));
         }
 
-        return lista;
+        return usuarios;
+    }
+
+    public List<AlertaDashboardDTO> listarAlertas(String busqueda) {
+        String filtro = busqueda == null ? "" : busqueda;
+        List<Object[]> resultados = alertaRepo.llamarSpAlertas(filtro);
+
+        List<AlertaDashboardDTO> alertas = new ArrayList<>();
+        for (Object[] fila : resultados) {
+            Integer idAlerta = obtenerInteger(fila, 0);
+            String nombreVictima = obtenerString(fila, 1);
+            String mensaje = obtenerString(fila, 2);
+            String estadoAlerta = obtenerString(fila, 3);
+            LocalDateTime fecha = convertirFecha(fila[4]);
+            BigDecimal latitud = convertirBigDecimal(fila[5]);
+            BigDecimal longitud = convertirBigDecimal(fila[6]);
+
+            alertas.add(new AlertaDashboardDTO(idAlerta, nombreVictima, mensaje, estadoAlerta, fecha, latitud, longitud));
+        }
+
+        return alertas;
+    }
+
+    private Integer obtenerInteger(Object[] fila, int index) {
+        Object valor = fila[index];
+        if (valor == null) return null;
+        if (valor instanceof Number numero) {
+            return numero.intValue();
+        }
+        return Integer.valueOf(valor.toString());
+    }
+
+    private String obtenerString(Object[] fila, int index) {
+        Object valor = fila[index];
+        return valor == null ? null : valor.toString();
+    }
+
+    private boolean obtenerBoolean(Object[] fila, int index) {
+        Object valor = fila[index];
+        if (valor instanceof Boolean bool) {
+            return bool;
+        }
+        if (valor instanceof Number numero) {
+            return numero.intValue() == 1;
+        }
+        if (valor != null) {
+            return Boolean.parseBoolean(valor.toString());
+        }
+        return false;
+    }
+
+    private LocalDateTime convertirFecha(Object valor) {
+        if (valor == null) return null;
+        if (valor instanceof java.sql.Timestamp timestamp) {
+            return timestamp.toLocalDateTime();
+        }
+        if (valor instanceof java.sql.Date fecha) {
+            return fecha.toLocalDate().atStartOfDay();
+        }
+        return null;
+    }
+
+    private BigDecimal convertirBigDecimal(Object valor) {
+        if (valor == null) return null;
+        return new BigDecimal(valor.toString());
     }
 }
