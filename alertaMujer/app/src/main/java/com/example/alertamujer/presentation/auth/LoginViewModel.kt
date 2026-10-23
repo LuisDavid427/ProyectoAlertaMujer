@@ -1,3 +1,4 @@
+// LoginViewModel.kt
 package com.example.alertamujer.presentation.auth
 
 import android.app.Application
@@ -28,7 +29,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val mensajeError: LiveData<String> get() = _mensajeError
 
     init {
-        // Sincroniza FCM si la sesión ya estaba activa previamente al abrir la app
         if (sessionManager.estaLogueado()) {
             FcmUtil.sincronizarTokenSesion(getApplication())
             _navegarAMain.value = true
@@ -56,15 +56,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                         Log.e("DEBUG_NOMBRE", "Nombre mapeado desde la API: '$nombreApi'")
 
-                        // 1. Guardar la sesión de forma sincrónica en memoria/disco
                         guardarSesion(id, tokenJwt, email, pass, nombreApi)
 
-                        // 2. Ejecutar la sincronización del token FCM garantizando que el JWT ya existe
                         withContext(Dispatchers.Main) {
                             FcmUtil.sincronizarTokenSesion(getApplication())
                         }
 
-                        // 3. Redirigir a MainActivity
                         _navegarAMain.value = true
                     } else {
                         _mensajeError.value = data.mensaje ?: "Error en las credenciales"

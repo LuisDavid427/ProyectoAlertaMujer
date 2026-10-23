@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel // 👈 Cambiado de ViewModel a Andro
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.alertamujer.data.repository.AlertaRepository
+import com.example.alertamujer.data.network.repository.AlertaRepository
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody

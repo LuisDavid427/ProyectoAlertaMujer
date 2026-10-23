@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.alertamujer.data.dto.ResetPasswordRequest
 import com.example.alertamujer.data.network.repository.AuthRepository
 import kotlinx.coroutines.launch
 
@@ -36,11 +37,17 @@ class CambiarPasswordViewModel(application: Application) : AndroidViewModel(appl
 
         viewModelScope.launch {
             try {
-                val response = repository.cambiarPassword(email, codigo, pass)
+                val request = ResetPasswordRequest(
+                    email = email,
+                    codigo = codigo,
+                    nuevaPassword = pass
+                )
+
+                val response = repository.cambiarPassword(request)
+
                 if (response.isSuccessful && response.body()?.success == true) {
                     _cambioExitoso.value = true
                 } else {
-                    // Corregido: se asigna un mensaje directo sin buscar .error o .mensaje inexistentes
                     _mensajeError.value = "Código inválido o expirado"
                 }
             } catch (e: Exception) {

@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.alertamujer.data.dto.ForgotPasswordRequest
 import com.example.alertamujer.data.network.repository.AuthRepository
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,8 @@ class RecuperarPasswordViewModel(application: Application) : AndroidViewModel(ap
 
         viewModelScope.launch {
             try {
-                val response = repository.solicitarRecuperacion(email)
+                val request = ForgotPasswordRequest(email)
+                val response = repository.solicitarRecuperacion(request)
                 val body = response.body()
                 val code = response.code()
 
@@ -37,7 +39,6 @@ class RecuperarPasswordViewModel(application: Application) : AndroidViewModel(ap
                 if (response.isSuccessful && body != null && body.success == true) {
                     _navegarAVerificar.value = email
                 } else {
-                    // Extraemos el mensaje del error si el backend lo mandó estructurado
                     val errorMsg = body?.mensaje ?: "El correo no está registrado en el sistema"
                     _mensajeError.value = errorMsg
                 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.alertamujer.data.dto.VerifyCodeRequest
 import com.example.alertamujer.data.network.repository.AuthRepository
 import kotlinx.coroutines.launch
 
@@ -26,15 +27,14 @@ class VerificarCodigoViewModel(application: Application) : AndroidViewModel(appl
 
         viewModelScope.launch {
             try {
-                // Consulta real al backend para validar el código de 6 dígitos
-                val response = repository.verificarCodigo(email, codigo)
+                val request = VerifyCodeRequest(email, codigo)
+                val response = repository.verificarCodigo(request)
+
                 val body = response.body()
 
                 if (response.isSuccessful && body != null && body.success) {
-                    // Si el backend lo aprueba, avanzamos a la pantalla de cambiar contraseña
                     _navegarACambiarPass.value = Pair(email, codigo)
                 } else {
-                    // Si el backend lo rechaza (código falso o expirado), frena el flujo aquí mismo
                     _mensajeError.value = "Código inválido o expirado"
                 }
             } catch (e: Exception) {
