@@ -9,6 +9,10 @@ android {
     namespace = "com.example.alertamujer"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.example.alertamujer"
         minSdk = 26
@@ -20,7 +24,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", '"http://192.168.1.22:8080/"')
+        }
         release {
+            buildConfigField("String", "BASE_URL", '"https://api.tu-dominio.com/"')
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
