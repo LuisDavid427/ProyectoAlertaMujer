@@ -18,17 +18,17 @@ import com.example.alertamujer.data.manager.SosManager
 import com.example.alertamujer.presentation.alerta.SosViewModel
 import com.example.alertamujer.presentation.main.MainViewModel
 import com.example.alertamujer.ui.alerta.AdjuntarActivity
+import com.example.alertamujer.ui.alerta.AutoridadesActivity
 import com.example.alertamujer.ui.contactos.ChatsActivity
 import com.example.alertamujer.ui.contactos.ContactosActivity
+import com.example.alertamujer.ui.historial.HistorialActivity
 import com.example.alertamujer.ui.settings.MensajeActivity
 import com.example.alertamujer.ui.settings.SettingsActivity
-import com.example.alertamujer.ui.historial.HistorialActivity
 import com.example.alertamujer.util.PermissionUtils
+import com.example.alertamujer.util.SessionManager
 import com.example.alertamujer.util.abrirActividad
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.messaging.FirebaseMessaging
-import com.example.alertamujer.util.SessionManager
-import com.example.alertamujer.ui.alerta.AutoridadesActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private var currentUiMode: Int = 0
 
-    // 🟢 Único lanzador unificado que pide todos los permisos esenciales de la app con PermissionUtils
     private val requestAllPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val cameraGranted = permissions[Manifest.permission.CAMERA] ?: true
@@ -67,11 +66,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        initialSetup()
+        bindViews()
+        setupObservers()
+        setupListeners()
+        updateGreeting()
+        requestInitialPermissions()
+    }
+
+    private fun initialSetup() {
         sessionManager = SessionManager(this)
-
         currentUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+    }
 
-        // Enlaces de Vistas
+    private fun bindViews() {
         btnContactos = findViewById(R.id.btn_real_contactos)
         btnUserProfile = findViewById(R.id.btn_user_profile)
         btnUbicacion = findViewById(R.id.btn_ubicacion)
@@ -82,74 +91,19 @@ class MainActivity : AppCompatActivity() {
         btnHistorial = findViewById(R.id.btn_historial)
         btnAutoridades = findViewById(R.id.btn_autoridades)
         txtSaludo = findViewById(R.id.txt_saludo)
-
         btnSosAdjuntar.visibility = View.GONE
-
-        observarViewModel()
-        observarEstadoSOS()
-
-        // Listeners
-        btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
-        btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
-        btnContactos.setOnClickListener { abrirActividad<ContactosActivity>() }
-        btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
-        btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
-        btnHistorial.setOnClickListener { abrirActividad<HistorialActivity>() }
-        btnAutoridades.setOnClickListener { abrirActividad<AutoridadesActivity>() }
-
-        val nombreUsuario = sessionManager.obtenerNombreUsuario()
-        val primerNombre = nombreUsuario?.trim()?.split(" ")?.firstOrNull() ?: ""
-        if (!nombreUsuario.isNullOrEmpty()) {
-            txtSaludo.text = "Hola, $primerNombre"
-        } else {
-            txtSaludo.text = "¡Hola, Usuario!"
-        }
-
-        // 🟢 Solicitud unificada mediante PermissionUtils al arrancar la pantalla
-        requestAllPermissionsLauncher.launch(PermissionUtils.obtenerPermisosApp())
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM", "Fallo al obtener el token FCM", task.exception)
-                return@addOnCompleteListener
-            }
-
-            val tokenFcm = task.result
-            sessionManager.guardarFcmToken(tokenFcm)
-        }
-
-        btnSosAdjuntar.setOnClickListener {
-            val idActual = SosManager.getInstance(this).idAlertaActual.value
-
-            if (idActual != null && idActual != -1) {
-                abrirActividad<AdjuntarActivity> { putExtra("EXTRA_ID_ALERTA", idActual) }
-            } else {
-                abrirActividad<AdjuntarActivity>()
-            }
-        }
-
-        btnSos.setOnClickListener {
-            when (sosViewModel.estadoAlerta.value) {
-                is SosManager.EstadoAlerta.Activa -> {
-                    sosViewModel.desactivarAlertaEnServidor()
-                }
-                else -> {
-                    dispararAlerta()
-                }
-            }
-        }
     }
 
-    private fun observarViewModel() {
-        viewModel.numeroContactos.observe(this) { btnContactos.text = "$it\nContactos" }
+    private fun setupObservers() {
+        viewModel.numeroContactos.observe(this) { count ->
+            btnContactos.text = "$count\nContactos"
+        }
+
         viewModel.isDarkModeOn.observe(this) { isDark ->
-            val expectedUiMode =
-                if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            val expectedUiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
             if (currentUiMode != expectedUiMode) recreate()
         }
-    }
 
-    private fun observarEstadoSOS() {
         sosViewModel.estadoAlerta.observe(this) { estado ->
             when (estado) {
                 is SosManager.EstadoAlerta.Inactiva -> {
@@ -176,13 +130,58 @@ class MainActivity : AppCompatActivity() {
                     androidx.appcompat.app.AlertDialog.Builder(this)
                         .setTitle("⚠️ Cuenta Bloqueada o Error")
                         .setMessage(estado.mensaje)
-                        .setPositiveButton("Aceptar") { dialog, _ ->
-                            dialog.dismiss()
-                        }
+                        .setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
                         .setCancelable(false)
                         .show()
                 }
             }
+        }
+    }
+
+    private fun setupListeners() {
+        btnUbicacion.setOnClickListener { verificarPermisosUbicacion() }
+        btnMensaje.setOnClickListener { abrirActividad<MensajeActivity>() }
+        btnContactos.setOnClickListener { abrirActividad<ContactosActivity>() }
+        btnUserProfile.setOnClickListener { abrirActividad<SettingsActivity>() }
+        btnChats.setOnClickListener { abrirActividad<ChatsActivity>() }
+        btnHistorial.setOnClickListener { abrirActividad<HistorialActivity>() }
+        btnAutoridades.setOnClickListener { abrirActividad<AutoridadesActivity>() }
+
+        btnSosAdjuntar.setOnClickListener {
+            val idActual = SosManager.getInstance(this).idAlertaActual.value
+            if (idActual != null && idActual != -1) {
+                abrirActividad<AdjuntarActivity> { putExtra("EXTRA_ID_ALERTA", idActual) }
+            } else {
+                abrirActividad<AdjuntarActivity>()
+            }
+        }
+
+        btnSos.setOnClickListener {
+            when (sosViewModel.estadoAlerta.value) {
+                is SosManager.EstadoAlerta.Activa -> sosViewModel.desactivarAlertaEnServidor()
+                else -> dispararAlerta()
+            }
+        }
+    }
+
+    private fun updateGreeting() {
+        val nombreUsuario = sessionManager.obtenerNombreUsuario()
+        val primerNombre = nombreUsuario?.trim()?.split(" ")?.firstOrNull() ?: ""
+        txtSaludo.text = if (!nombreUsuario.isNullOrEmpty()) "Hola, $primerNombre" else "¡Hola, Usuario!"
+    }
+
+    private fun requestInitialPermissions() {
+        requestAllPermissionsLauncher.launch(PermissionUtils.obtenerPermisosApp())
+        registerFcmToken()
+    }
+
+    private fun registerFcmToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Fallo al obtener el token FCM", task.exception)
+                return@addOnCompleteListener
+            }
+            sessionManager.guardarFcmToken(task.result)
         }
     }
 
