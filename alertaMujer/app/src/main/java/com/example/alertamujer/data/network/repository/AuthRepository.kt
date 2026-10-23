@@ -3,20 +3,24 @@ package com.example.alertamujer.data.network.repository
 import android.content.Context
 import com.example.alertamujer.data.dto.AuthResponse
 import com.example.alertamujer.data.dto.FcmTokenRequest
+import com.example.alertamujer.data.dto.ForgotPasswordRequest
 import com.example.alertamujer.data.dto.LoginRequest
-import com.example.alertamujer.data.dto.RegistroRequest
+import com.example.alertamujer.data.dto.RegisterRequest
+import com.example.alertamujer.data.dto.ResetPasswordRequest
+import com.example.alertamujer.data.dto.VerifyCodeRequest
 import com.example.alertamujer.data.network.RetrofitClient
+import com.example.alertamujer.data.network.services.AuthService
 import retrofit2.Response
 
 class AuthRepository(private val context: Context) {
 
-    private val authService = RetrofitClient.getAuthService(context)
+    private val authService: AuthService = RetrofitClient.getAuthService(context)
 
     suspend fun login(request: LoginRequest): Response<AuthResponse> {
         return authService.login(request)
     }
 
-    suspend fun registrar(request: RegistroRequest): Response<AuthResponse> {
+    suspend fun registrar(request: RegisterRequest): Response<AuthResponse> {
         return authService.registrar(request)
     }
 
@@ -25,22 +29,15 @@ class AuthRepository(private val context: Context) {
         return RetrofitClient.getUsuarioService(context).actualizarToken(request)
     }
 
-    suspend fun solicitarRecuperacion(email: String): Response<AuthResponse> {
-        val requestMap = mapOf("email" to email)
-        return authService.solicitarRecuperacion(requestMap)
+    suspend fun solicitarRecuperacion(request: ForgotPasswordRequest): Response<AuthResponse> {
+        return authService.solicitarRecuperacion(request)
     }
 
-    suspend fun cambiarPassword(email: String, codigo: String, nuevaPassword: String): Response<AuthResponse> {
-        val requestMap = mapOf(
-            "email" to email,
-            "codigo" to codigo,
-            "nuevaPassword" to nuevaPassword
-        )
-        return authService.cambiarPassword(requestMap)
+    suspend fun cambiarPassword(request: ResetPasswordRequest): Response<AuthResponse> {
+        return authService.cambiarPassword(request)
     }
 
-    suspend fun verificarCodigo(email: String, codigo: String): Response<AuthResponse> {
-        val requestMap = mapOf("email" to email, "codigo" to codigo)
-        return authService.verificarCodigo(requestMap)
+    suspend fun verificarCodigo(request: VerifyCodeRequest): Response<AuthResponse> {
+        return authService.verificarCodigo(request)
     }
 }
