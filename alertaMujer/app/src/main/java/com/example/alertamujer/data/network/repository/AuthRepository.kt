@@ -5,11 +5,12 @@ import com.example.alertamujer.data.dto.AuthResponse
 import com.example.alertamujer.data.dto.FcmTokenRequest
 import com.example.alertamujer.data.dto.ForgotPasswordRequest
 import com.example.alertamujer.data.dto.LoginRequest
-import com.example.alertamujer.data.dto.RegisterRequest
+import com.example.alertamujer.data.dto.RegistroRequest
 import com.example.alertamujer.data.dto.ResetPasswordRequest
 import com.example.alertamujer.data.dto.VerifyCodeRequest
 import com.example.alertamujer.data.network.RetrofitClient
 import com.example.alertamujer.data.network.services.AuthService
+
 import retrofit2.Response
 
 class AuthRepository(private val context: Context) {
@@ -20,7 +21,7 @@ class AuthRepository(private val context: Context) {
         return authService.login(request)
     }
 
-    suspend fun registrar(request: RegisterRequest): Response<AuthResponse> {
+    suspend fun registrar(request: RegistroRequest): Response<AuthResponse> {
         return authService.registrar(request)
     }
 

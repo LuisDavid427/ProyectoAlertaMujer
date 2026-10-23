@@ -104,7 +104,7 @@ class SosManager private constructor(private val context: Context) {
             try {
                 val response = RetrofitClient.getAlertaService(context).enviarAlertaSOS(request)
                 if (response.isSuccessful) {
-                    val idAlerta = response.body()?.id_alerta ?: -1
+                    val idAlerta = response.body()?.idAlerta ?: -1
                     _idAlertaActual.value = idAlerta
                     _estadoAlerta.value = EstadoAlerta.Activa
 
