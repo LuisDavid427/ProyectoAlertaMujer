@@ -1,8 +1,11 @@
 package com.example.alertamujer.data.network.services
 
-import com.example.alertamujer.data.dto.LoginRequest
-import com.example.alertamujer.data.dto.RegistroRequest
 import com.example.alertamujer.data.dto.AuthResponse
+import com.example.alertamujer.data.dto.ForgotPasswordRequest
+import com.example.alertamujer.data.dto.LoginRequest
+import com.example.alertamujer.data.dto.RegisterRequest
+import com.example.alertamujer.data.dto.ResetPasswordRequest
+import com.example.alertamujer.data.dto.VerifyCodeRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -13,7 +16,7 @@ interface AuthService {
     suspend fun login(@Body datos: LoginRequest): Response<AuthResponse>
 
     @POST("api/usuarios/guardar")
-    suspend fun registrar(@Body datos: RegistroRequest): Response<AuthResponse>
+    suspend fun registrar(@Body datos: RegisterRequest): Response<AuthResponse>
 
     @POST("api/usuarios/actualizar-token")
     suspend fun actualizarToken(
@@ -22,11 +25,11 @@ interface AuthService {
     ): Response<Void>
 
     @POST("api/auth/forgot-password")
-    suspend fun solicitarRecuperacion(@Body request: Map<String, String>): Response<AuthResponse>
+    suspend fun solicitarRecuperacion(@Body request: ForgotPasswordRequest): Response<AuthResponse>
 
     @POST("api/auth/reset-password")
-    suspend fun cambiarPassword(@Body request: Map<String, String>): Response<AuthResponse>
+    suspend fun cambiarPassword(@Body request: ResetPasswordRequest): Response<AuthResponse>
 
     @POST("api/auth/verificar-codigo")
-    suspend fun verificarCodigo(@Body request: Map<String, String>): Response<AuthResponse>
+    suspend fun verificarCodigo(@Body request: VerifyCodeRequest): Response<AuthResponse>
 }
