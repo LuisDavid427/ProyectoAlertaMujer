@@ -1,13 +1,13 @@
-package com.example.alertamujer.data.repository
+package com.example.alertamujer.data.network.repository
 
 import android.content.Context
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.AlertaResponse
 import com.example.alertamujer.data.dto.UbicacionRequest
 import com.example.alertamujer.data.network.RetrofitClient
-import retrofit2.Response
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Response
 
 class AlertaRepository(private val context: Context) {
 
@@ -30,9 +30,7 @@ class AlertaRepository(private val context: Context) {
         return RetrofitClient.getAlertaService(context).enviarUbicacionContinua(idAlerta, request)
     }
 
-    suspend fun desactivarAlerta(
-        idAlerta: Int
-    ): Response<Map<String, Any>> {
+    suspend fun desactivarAlerta(idAlerta: Int): Response<Map<String, Any>> {
         return RetrofitClient.getAlertaService(context).desactivarAlerta(idAlerta)
     }
 }
