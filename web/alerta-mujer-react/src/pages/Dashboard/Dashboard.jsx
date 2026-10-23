@@ -1,20 +1,20 @@
-// src/pages/Dashboard/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MapaRiesgo from '../../components/Dashboard/MapaRiesgo';
 import Header from '../../components/Header';
 import { cerrarSesion } from '../../services/authService';
 import { obtenerDatosDashboard } from '../../services/dashboardService';
 import { cambiarEstadoUsuarioApi } from '../../services/usuarioService';
-import { TablaAlertas, TablaUsuarios } from '../../components/Dashboard/Tablas'; 
+import { TablaAlertas, TablaUsuarios } from '../../components/Dashboard/Tablas';
 import html2pdf from 'html2pdf.js';
 
 import EstadisticasView from './EstadisticasView.jsx';
 import ReportePdfTemplate from './ReportePdfTemplate';
 import './dashboard.css';
 
-// 🟢 Importamos la lógica geoespacial y el custom hook que extrajimos
 import { agruparAlertasPorZona } from '../../utils/geoUtils';
 import { useZonasGeocoding } from '../../hooks/useZonasGeocoding';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Dashboard() {
     const [datos, setDatos] = useState([]);
@@ -24,11 +24,8 @@ export default function Dashboard() {
     const [cargando, setCargando] = useState(false);
     const [mostrarEstadisticas, setMostrarEstadisticas] = useState(false);
 
-    useEffect(() => {
-        if (sessionStorage.getItem('sesionAlertaMujer') !== 'activa') {
-            window.location.replace('/login');
-        }
-    }, []);
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const cargarDatos = async () => {
         setCargando(true);
@@ -68,7 +65,7 @@ export default function Dashboard() {
         try {
             const respuesta = await cambiarEstadoUsuarioApi(idUsuario, nuevoEstado);
             if (respuesta) {
-                setDatos(prevDatos => 
+                setDatos(prevDatos =>
                     prevDatos.map(user => {
                         const currentId = user.id_usuario || user.idUsuario || user.id;
                         if (currentId === idUsuario) {
@@ -78,10 +75,10 @@ export default function Dashboard() {
                     })
                 );
             } else {
-                alert("El servidor no pudo actualizar el estado.");
+                alert('El servidor no pudo actualizar el estado.');
             }
         } catch (error) {
-            console.error("Error crítico al cambiar estado en backend:", error);
+            console.error('Error crítico al cambiar estado en backend:', error);
         }
     };
 
@@ -95,24 +92,29 @@ export default function Dashboard() {
     const descargarReportePdf = () => {
         const elemento = document.getElementById('reporte-estadisticas-pdf');
         const opciones = {
-            margin:       10,
-            filename:     'Reporte_Zonas_AlertaMujer.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            margin: 10,
+            filename: 'Reporte_Zonas_AlertaMujer.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().from(elemento).set(opciones).save();
     };
 
-    // 🟢 Uso limpio de la agrupación y el hook de geocodificación en una sola línea cada uno
     const zonasAgrupadas = useMemo(() => agruparAlertasPorZona(datosFiltrados), [datosFiltrados]);
     const nombresZonas = useZonasGeocoding(zonasAgrupadas);
 
+    const manejarCierreSesion = () => {
+        cerrarSesion();
+        logout();
+        navigate('/login');
+    };
+
     return (
         <>
-            <Header 
-                vistaAdmin={true} 
-                onLogout={() => { cerrarSesion(); window.location.replace('/login'); }} 
+            <Header
+                vistaAdmin={true}
+                onLogout={manejarCierreSesion}
                 onDescargarPdf={descargarReportePdf}
             />
 
@@ -135,9 +137,10 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '280px', alignItems: 'center' }}>
                         {!mostrarEstadisticas && (
                             <>
-                                <input 
-                                    type="text" className="input-field search-bar" 
-                                    placeholder={vistaActual === 'alertas' ? "Buscar por código o víctima..." : "Buscar por nombre o correo..."}
+                                <input
+                                    type="text"
+                                    className="input-field search-bar"
+                                    placeholder={vistaActual === 'alertas' ? 'Buscar por código o víctima...' : 'Buscar por nombre o correo...'}
                                     value={busqueda}
                                     onChange={(e) => setBusqueda(e.target.value)}
                                 />
@@ -148,9 +151,9 @@ export default function Dashboard() {
                                 </select>
                             </>
                         )}
-                        
+
                         {vistaActual === 'alertas' && (
-                            <button 
+                            <button
                                 onClick={() => setMostrarEstadisticas(!mostrarEstadisticas)}
                                 style={{
                                     background: mostrarEstadisticas ? '#afa8a8' : '#fcc1de',
