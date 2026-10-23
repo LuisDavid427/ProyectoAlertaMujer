@@ -1,6 +1,5 @@
 package com.example.alertamujer.data.dto
 
-import android.R
 import com.google.gson.annotations.SerializedName
 
 // Lo que envías para loguearte
@@ -17,9 +16,6 @@ data class RegistroRequest(
     val fechaNacimiento: String
 )
 
-
-
-
 data class AuthResponse(
     @SerializedName("success")
     val success: Boolean,
@@ -30,7 +26,7 @@ data class AuthResponse(
     @SerializedName("token")
     val token: String?,
 
-    @SerializedName("refreshToken") // 👈 Asegúrate de que coincida con la clave que retorna tu backend (ej. "refreshToken" o "refresh_token")
+    @SerializedName("refreshToken")
     val refreshToken: String?,
 
     @SerializedName("id_usuario")
@@ -38,5 +34,19 @@ data class AuthResponse(
 
     @SerializedName("nombre")
     val nombre: String?
+)
 
+data class ForgotPasswordRequest(
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    val email: String,
+    val codigo: String,
+    val nuevaPassword: String
+)
+
+data class VerifyCodeRequest(
+    val email: String,
+    val codigo: String
 )
