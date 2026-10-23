@@ -1,8 +1,9 @@
 package com.example.alertamujer.data.network
 
 import android.content.Context
-import com.example.alertamujer.data.network.services.AuthService
+import com.example.alertamujer.BuildConfig
 import com.example.alertamujer.data.network.services.AlertaService
+import com.example.alertamujer.data.network.services.AuthService
 import com.example.alertamujer.data.network.services.UsuarioService
 import com.example.alertamujer.util.SessionManager
 import okhttp3.OkHttpClient
@@ -10,58 +11,47 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.22:8080/"
 
-    private val clientWithoutAuth = OkHttpClient.Builder().build()
-    private val retrofitWithoutAuth = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(clientWithoutAuth)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    private fun buildClient(context: Context): OkHttpClient {
+        val appContext = context.applicationContext
+        val sessionManager = SessionManager(appContext)
 
-    val authService: AuthService = retrofitWithoutAuth.create(AuthService::class.java)
-
-    private fun getRetrofitWithAuth(context: Context): Retrofit {
-        val okHttpClient = OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val sessionManager = SessionManager(context)
                 val token = sessionManager.obtenerToken()
+                val originalRequest = chain.request()
 
-                val requestBuilder = chain.request().newBuilder()
-                if (!token.isNullOrBlank()) {
-                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                val request = if (!token.isNullOrBlank()) {
+                    originalRequest.newBuilder()
+                        .header("Authorization", "Bearer $token")
+                        .build()
+                } else {
+                    originalRequest
                 }
 
-                var response = chain.proceed(requestBuilder.build())
-
-                // Captura el 403 (o 401) cuando el token expira y fuerza la renovación
-                if (response.code == 403 || response.code == 401) {
-                    response.close() // Liberar recursos de la respuesta fallida
-
-                    val authenticator = TokenAuthenticator(context, sessionManager)
-                    val nuevaPeticion = authenticator.authenticate(null, response)
-
-                    if (nuevaPeticion != null) {
-                        response = chain.proceed(nuevaPeticion)
-                    }
-                }
-
-                response
+                chain.proceed(request)
             }
+            .authenticator(TokenAuthenticator(appContext, sessionManager))
             .build()
+    }
 
+    private fun buildRetrofit(context: Context): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
+            .baseUrl(BuildConfig.BASE_URL)
+            .client(buildClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
+    fun getAuthService(context: Context): AuthService {
+        return buildRetrofit(context).create(AuthService::class.java)
+    }
+
     fun getAlertaService(context: Context): AlertaService {
-        return getRetrofitWithAuth(context).create(AlertaService::class.java)
+        return buildRetrofit(context).create(AlertaService::class.java)
     }
 
     fun getUsuarioService(context: Context): UsuarioService {
-        return getRetrofitWithAuth(context).create(UsuarioService::class.java)
+        return buildRetrofit(context).create(UsuarioService::class.java)
     }
 }
