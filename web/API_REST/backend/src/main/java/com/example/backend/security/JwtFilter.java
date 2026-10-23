@@ -1,11 +1,9 @@
 package com.example.backend.security;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,12 +16,16 @@ import java.util.List;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+
+    public JwtFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -35,30 +37,33 @@ public class JwtFilter extends OncePerRequestFilter {
                     String email = jwtUtil.extraerEmail(token);
                     String rol = jwtUtil.extraerRol(token);
 
-                    if (rol == null || rol.trim().isEmpty()) {
+                    if (rol == null || rol.isBlank()) {
                         rol = "ROLE_USUARIO";
-                    } else if (!rol.startsWith("ROLE_")) {
+                    }
+
+                    if (!rol.startsWith("ROLE_")) {
                         rol = "ROLE_" + rol;
                     }
 
-                    List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(rol));
-
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(email, null, authorities);
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    var authorities = List.of(new SimpleGrantedAuthority(rol));
+                    var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                } else {
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"TOKEN_INVALIDO\",\"mensaje\":\"Token JWT inválido o expirado\"}");
+                    return;
                 }
-            } catch (ExpiredJwtException e) {
-                // Si el token expiro, se retorna HTTP 401 directo a Android/Web
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"TOKEN_EXPIRED\", \"mensaje\": \"El token JWT ha expirado\"}");
-                return; 
-            } catch (Exception e) {
-                System.err.println("--> ERROR VALIDANDO TOKEN JWT: " + e.getMessage());
+                response.getWriter().write("{\"error\":\"TOKEN_INVALIDO\",\"mensaje\":\"Token JWT inválido o expirado\"}");
+                return;
             }
         }
 
-        chain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 }
