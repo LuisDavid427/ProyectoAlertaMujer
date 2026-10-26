@@ -166,14 +166,19 @@ class SosManager private constructor(private val context: Context) {
             try {
                 if (idAlerta != -1) {
                     val listaContactos = alertaRepository.obtenerContactosLocales()
-                    val listaEmails = listaContactos.map { it.email }.filter { it.isNotBlank() }
-                    val body = mapOf("contactosNotificar" to listaEmails)
+                    val listaEmails = listaContactos.map { id -> id.email }.filter { it.isNotBlank() }
 
-                    alertaRepository.desactivarAlerta(idAlerta, body)
-                    Log.d("DEBUG_SOS", "🟢 Alerta desactivada correctamente.")
+                    // Llamamos pasando directamente la lista
+                    val response = alertaRepository.desactivarAlerta(idAlerta, listaEmails)
+
+                    if (response.isSuccessful) {
+                        Log.d("DEBUG_SOS", "🟢 ¡Alerta desactivada con éxito en el servidor y BD actualizada!")
+                    } else {
+                        Log.e("DEBUG_SOS", "🔴 Error del servidor: ${response.code()} - ${response.errorBody()?.string()}")
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("DEBUG_SOS", "Error al desactivar: ${e.message}")
+                Log.e("DEBUG_SOS", "🔴 Excepción al desactivar: ${e.message}")
             } finally {
                 _idAlertaActual.value = null
                 _estadoAlerta.value = EstadoAlerta.Inactiva

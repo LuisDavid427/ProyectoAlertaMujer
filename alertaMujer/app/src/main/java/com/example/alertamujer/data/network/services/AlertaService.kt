@@ -2,6 +2,7 @@ package com.example.alertamujer.data.network.services
 
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.AlertaResponse
+import com.example.alertamujer.data.dto.DesactivarAlertaRequest
 import com.example.alertamujer.data.dto.UbicacionRequest
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -29,7 +30,7 @@ interface AlertaService {
     @PUT("api/alertas/{id}/desactivar")
     suspend fun desactivarAlerta(
         @Path("id") idAlerta: Int,
-        @Body body: Map<String, List<String>>? = null
+        @Body request: DesactivarAlertaRequest? = null
     ): Response<Map<String, Any>>
 
     @Multipart

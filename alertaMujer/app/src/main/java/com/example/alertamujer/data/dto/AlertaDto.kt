@@ -46,3 +46,6 @@ data class NotificacionEvidenciaDto(
     @SerializedName("url_evidencia") val urlEvidencia: String,
     @SerializedName("accion") val accion: String
 )
+data class DesactivarAlertaRequest(
+    @SerializedName("contactosNotificar") val contactosNotificar: List<String>
+)

@@ -99,9 +99,18 @@
         <activity
             android:name=".ui.alerta.AutoridadesActivity"
             android:exported="false"/>
-        <activity android:name=".ui.auth.RecuperarPasswordActivity" android:exported="false" />
-        <activity android:name=".ui.auth.VerificarCodigoActivity" android:exported="false" />
-        <activity android:name=".ui.auth.CambiarPasswordActivity" android:exported="false" />
+
+        <activity
+            android:name=".ui.auth.RecuperarPasswordActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.auth.VerificarCodigoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.auth.CambiarPasswordActivity"
+            android:exported="false" />
 
         <!-- Servicio de Notificaciones Push FCM -->
         <service
@@ -119,5 +128,17 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <!-- 📂 FileProvider para abrir las evidencias descargadas de forma segura -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
+
 </manifest>

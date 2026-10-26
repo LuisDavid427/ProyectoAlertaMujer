@@ -25,9 +25,8 @@ class ChatsActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
-        // Observamos la base de datos local
+        // Observamos la base de datos local de forma reactiva
         viewModel.listaAlertas.observe(this) { alertas ->
-            // Mapeamos de Entity a lo que espera tu adaptador
             adapter.actualizarMensajes(alertas.map { it.toMensajeAlerta() })
         }
 
@@ -36,21 +35,34 @@ class ChatsActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adapter = ChatAdapter(mutableListOf()) { alerta ->
-            val gmmIntentUri = Uri.parse("geo:${alerta.latitud},${alerta.longitud}?q=${alerta.latitud},${alerta.longitud}")
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            mapIntent.setPackage("com.google.android.apps.maps")
+            try {
+                val lat = alerta.latitud
+                val lng = alerta.longitud
 
-            if (mapIntent.resolveActivity(packageManager) != null) {
-                startActivity(mapIntent)
-            } else {
-                Toast.makeText(this, "Google Maps no instalado", Toast.LENGTH_SHORT).show()
+                // Intent para la app de Google Maps
+                val gmmIntentUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(Alerta)")
+                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
+                    setPackage("com.google.android.apps.maps")
+                }
+
+                if (mapIntent.resolveActivity(packageManager) != null) {
+                    startActivity(mapIntent)
+                } else {
+                    // Si la app nativa falla, se abre vía navegador web como respaldo seguro
+                    val webIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng")
+                    )
+                    startActivity(webIntent)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "No se pudo abrir el mapa", Toast.LENGTH_SHORT).show()
             }
         }
 
         findViewById<RecyclerView>(R.id.rv_chat_alertas).apply {
-            layoutManager = LinearLayoutManager(this@ChatsActivity).apply {
-                stackFromEnd = true // Esto hace que los mensajes nuevos aparezcan abajo como en WhatsApp
-            }
+            layoutManager = LinearLayoutManager(this@ChatsActivity)
             adapter = this@ChatsActivity.adapter
         }
     }

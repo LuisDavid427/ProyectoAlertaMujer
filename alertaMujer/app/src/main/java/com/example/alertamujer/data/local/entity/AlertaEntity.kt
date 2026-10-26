@@ -13,14 +13,19 @@ data class AlertaEntity(
     val mensaje: String,
     val latitud: Double,
     val longitud: Double,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val tipo_evidencia: String? = null,
+    val url_evidencia: String? = null
 )
 
+// Función de extensión para convertir Entity a Modelo
 // Función de extensión para convertir Entity a Modelo
 fun AlertaEntity.toMensajeAlerta() = MensajeAlerta(
     id_alerta = this.id_alerta,
     nombre_usuario = this.nombre_usuario,
     mensaje = this.mensaje,
     latitud = this.latitud,
-    longitud = this.longitud
+    longitud = this.longitud,
+    tipo_evidencia = this.tipo_evidencia,
+    url_evidencia = this.url_evidencia
 )

@@ -5,5 +5,7 @@ data class MensajeAlerta(
     val nombre_usuario: String,
     val mensaje: String,
     val latitud: Double,
-    val longitud: Double
+    val longitud: Double,
+    val tipo_evidencia: String?,
+    val url_evidencia: String?
 )

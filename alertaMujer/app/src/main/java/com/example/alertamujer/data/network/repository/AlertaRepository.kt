@@ -3,6 +3,7 @@ package com.example.alertamujer.data.network.repository
 import android.content.Context
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.AlertaResponse
+import com.example.alertamujer.data.dto.DesactivarAlertaRequest
 import com.example.alertamujer.data.dto.UbicacionRequest
 import com.example.alertamujer.data.local.AppDatabase
 import com.example.alertamujer.data.local.entity.AlertaEntity
@@ -62,8 +63,9 @@ class AlertaRepository(private val context: Context) {
 
     suspend fun desactivarAlerta(
         idAlerta: Int,
-        body: Map<String, List<String>>? = null
+        contactosNotificar: List<String>? = null
     ): Response<Map<String, Any>> {
+        val body = contactosNotificar?.let { DesactivarAlertaRequest(it) }
         return alertaService.desactivarAlerta(idAlerta, body)
     }
 }

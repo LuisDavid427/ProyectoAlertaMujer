@@ -41,6 +41,26 @@ class FcmMessageProcessor(private val context: Context) {
         val nombreVictima = json.optString("nombre_victima", "Alguien")
         val tipoEvidencia = json.optString("tipo_evidencia", "archivo")
 
+        // Capturamos la URL probando diferentes nombres comunes que mande el backend
+        val urlEvidencia = json.optString("url_evidencia").ifEmpty {
+            json.optString("url").ifEmpty {
+                json.optString("path", "")
+            }
+        }
+
+        withContext(Dispatchers.IO) {
+            val alertaExistente = db.alertaDao().obtenerAlertaPorIdAlerta(idAlerta)
+            if (alertaExistente != null) {
+                val alertaActualizada = alertaExistente.copy(
+                    tipo_evidencia = tipoEvidencia,
+                    url_evidencia = urlEvidencia,
+                    mensaje = "${alertaExistente.mensaje}\n📎 [Evidencia adjunta: $tipoEvidencia] (Pulsa aquí para ver)"
+                )
+                db.alertaDao().insertarAlerta(alertaActualizada)
+                Log.d("FCM_DEBUG", "📎 Evidencia guardada con URL: $urlEvidencia")
+            }
+        }
+
         withContext(Dispatchers.Main) {
             notificationUtils.showNotification(
                 "canal_evidencia",
@@ -55,7 +75,6 @@ class FcmMessageProcessor(private val context: Context) {
         val idAlerta = json.optInt("id_alerta")
         val nombreUsuario = json.optString("nombre_victima", "Alguien")
 
-        // Actualizamos la base de datos local para que el chat refleje que está a salvo
         withContext(Dispatchers.IO) {
             val alertaExistente = db.alertaDao().obtenerAlertaPorIdAlerta(idAlerta)
             if (alertaExistente != null) {
@@ -63,6 +82,18 @@ class FcmMessageProcessor(private val context: Context) {
                     mensaje = "🟢 Alerta finalizada: $nombreUsuario se encuentra a salvo."
                 )
                 db.alertaDao().insertarAlerta(alertaActualizada)
+            } else {
+                val alertaNueva = AlertaEntity(
+                    id_local = 0,
+                    id_alerta = idAlerta,
+                    id_usuario = -99,
+                    nombre_usuario = nombreUsuario,
+                    mensaje = "🟢 Alerta finalizada: $nombreUsuario se encuentra a salvo.",
+                    latitud = 0.0,
+                    longitud = 0.0,
+                    timestamp = System.currentTimeMillis()
+                )
+                db.alertaDao().insertarAlerta(alertaNueva)
             }
         }
 

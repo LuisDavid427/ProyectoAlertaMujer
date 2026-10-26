@@ -10,11 +10,9 @@ import com.example.alertamujer.util.SessionManager
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getDatabase(application)
-
-    // Obtenemos el ID de usuario directamente desde el SessionManager seguro
     private val sessionManager = SessionManager(application)
 
-    // ChatViewModel renovado consultando únicamente las alertas ajenas mediante el ID de sesión
+    // Consulta únicamente las alertas ajenas filtrando por el ID de la sesión actual
     val listaAlertas: LiveData<List<AlertaEntity>> = run {
         val idUsuarioActual = sessionManager.obtenerIdUsuario()
         db.alertaDao().obtenerAlertasDeOtrosUsuarios(idUsuarioActual)
