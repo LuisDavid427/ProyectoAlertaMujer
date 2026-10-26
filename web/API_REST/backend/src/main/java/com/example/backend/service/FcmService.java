@@ -7,7 +7,6 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -52,24 +51,19 @@ public class FcmService {
         }
 
         try {
-            // 1. Garantizamos que Firebase esté inicializado antes de obtener la instancia
             inicializarFirebaseSiEsNecesario();
 
-            // 2. Formato forzado con Locale.US para asegurar el punto decimal (.) en las coordenadas
             String jsonPayload = String.format(
                 Locale.US,
                 "{\"id_alerta\":%d,\"id_usuario\":%d,\"nombre_victima\":\"%s\",\"mensaje\":\"%s\",\"latitud\":%f,\"longitud\":%f}",
                 idAlerta, idUsuario, nombreVictima, mensaje, lat, lng
             );
 
-            // 3. Cifrado mediante AesUtil
             String datosSegurosCifrados = AesUtil.encriptar(jsonPayload, LLAVE_SECRETA);
 
             Message message = Message.builder()
                     .setToken(targetFcmToken)
-                    // Únicamente mandamos los datos seguros cifrados
                     .putData("datos_seguros", datosSegurosCifrados)
-                    // Prioridad Alta para asegurar que Android despierte la app inmediatamente en segundo plano
                     .setAndroidConfig(AndroidConfig.builder()
                             .setPriority(AndroidConfig.Priority.HIGH)
                             .build())
@@ -80,6 +74,77 @@ public class FcmService {
             return true;
         } catch (Exception e) {
             System.err.println("🔴 Error al enviar notificación FCM cifrada: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean enviarNotificacionEvidencia(String targetFcmToken, Integer idAlerta, String nombreVictima, String tipoEvidencia, String urlEvidencia) {
+        if (targetFcmToken == null || targetFcmToken.isBlank()) {
+            System.err.println("⚠️ No se puede enviar notificación de evidencia: El token FCM es nulo o vacío.");
+            return false;
+        }
+
+        try {
+            inicializarFirebaseSiEsNecesario();
+
+            String jsonPayload = String.format(
+                Locale.US,
+                "{\"id_alerta\":%d,\"nombre_victima\":\"%s\",\"tipo_evidencia\":\"%s\",\"url_evidencia\":\"%s\",\"accion\":\"nueva_evidencia\"}",
+                idAlerta, nombreVictima, tipoEvidencia, urlEvidencia
+            );
+
+            String datosSegurosCifrados = AesUtil.encriptar(jsonPayload, LLAVE_SECRETA);
+
+            Message message = Message.builder()
+                    .setToken(targetFcmToken)
+                    .putData("datos_seguros", datosSegurosCifrados)
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setPriority(AndroidConfig.Priority.HIGH)
+                            .build())
+                    .build();
+
+            String response = FirebaseMessaging.getInstance().send(message);
+            System.out.println("🟢 Notificación push de evidencia enviada con éxito. ID: " + response);
+            return true;
+        } catch (Exception e) {
+            System.err.println("🔴 Error al enviar notificación FCM cifrada de evidencia: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // NUEVO: Método para notificar cambios de estado (ej. alerta_desactivada, alerta_activada)
+    public boolean enviarNotificacionEstado(String targetFcmToken, Integer idAlerta, String nombreVictima, String accion) {
+        if (targetFcmToken == null || targetFcmToken.isBlank()) {
+            System.err.println("⚠️ No se puede enviar notificación de estado: El token FCM es nulo o vacío.");
+            return false;
+        }
+
+        try {
+            inicializarFirebaseSiEsNecesario();
+
+            String jsonPayload = String.format(
+                Locale.US,
+                "{\"id_alerta\":%d,\"nombre_victima\":\"%s\",\"accion\":\"%s\"}",
+                idAlerta, nombreVictima, accion
+            );
+
+            String datosSegurosCifrados = AesUtil.encriptar(jsonPayload, LLAVE_SECRETA);
+
+            Message message = Message.builder()
+                    .setToken(targetFcmToken)
+                    .putData("datos_seguros", datosSegurosCifrados)
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setPriority(AndroidConfig.Priority.HIGH)
+                            .build())
+                    .build();
+
+            String response = FirebaseMessaging.getInstance().send(message);
+            System.out.println("🟢 Notificación push de estado (" + accion + ") enviada con éxito. ID: " + response);
+            return true;
+        } catch (Exception e) {
+            System.err.println("🔴 Error al enviar notificación FCM de estado: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

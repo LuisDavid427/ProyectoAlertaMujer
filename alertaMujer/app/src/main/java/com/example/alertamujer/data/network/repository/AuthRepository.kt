@@ -30,25 +30,15 @@ class AuthRepository(private val context: Context) {
         return RetrofitClient.getUsuarioService(context).actualizarToken(request)
     }
 
-    suspend fun solicitarRecuperacion(email: String): Response<AuthResponse> {
-        return solicitarRecuperacion(ForgotPasswordRequest(email))
-    }
 
     suspend fun solicitarRecuperacion(request: ForgotPasswordRequest): Response<AuthResponse> {
         return authService.solicitarRecuperacion(request)
-    }
-
-    suspend fun cambiarPassword(email: String, codigo: String, nuevaPassword: String): Response<AuthResponse> {
-        return cambiarPassword(ResetPasswordRequest(email, codigo, nuevaPassword))
     }
 
     suspend fun cambiarPassword(request: ResetPasswordRequest): Response<AuthResponse> {
         return authService.cambiarPassword(request)
     }
 
-    suspend fun verificarCodigo(email: String, codigo: String): Response<AuthResponse> {
-        return verificarCodigo(VerifyCodeRequest(email, codigo))
-    }
 
     suspend fun verificarCodigo(request: VerifyCodeRequest): Response<AuthResponse> {
         return authService.verificarCodigo(request)

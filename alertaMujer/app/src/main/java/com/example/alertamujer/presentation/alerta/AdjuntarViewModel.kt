@@ -53,8 +53,12 @@ class AdjuntarViewModel(application: Application) : AndroidViewModel(application
                 val body: MultipartBody.Part = MultipartBody.Part.createFormData("archivo", file.name, requestFile)
                 val tipoBody: RequestBody = tipoMedia.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                // 👈 Llamada limpia sin pasar tokens manuales
-                val response = repository.subirEvidencia(idAlerta, body, tipoBody)
+                // 1. El ViewModel consulta Room (Responsabilidad de negocio/datos de la pantalla)
+                val contactosLocales = repository.obtenerContactosLocales()
+                val listaEmails = contactosLocales.map { it.email }.filter { it.isNotBlank() }
+
+                // 2. Le pasamos la lista limpia al repositorio, sin conversiones extrañas en el medio
+                val response = repository.subirEvidencia(idAlerta, body, tipoBody, listaEmails)
 
                 if (response.isSuccessful) {
                     _estadoSubida.value = "Evidencia enviada con éxito"

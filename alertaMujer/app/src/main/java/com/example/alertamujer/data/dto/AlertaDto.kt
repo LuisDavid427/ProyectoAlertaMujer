@@ -38,3 +38,11 @@ data class MensajeAlerta(
     @SerializedName("latitud") val latitud: Double,
     @SerializedName("longitud") val longitud: Double
 )
+
+data class NotificacionEvidenciaDto(
+    @SerializedName("id_alerta") val idAlerta: Int,
+    @SerializedName("nombre_victima") val nombreVictima: String,
+    @SerializedName("tipo_evidencia") val tipoEvidencia: String,
+    @SerializedName("url_evidencia") val urlEvidencia: String,
+    @SerializedName("accion") val accion: String
+)

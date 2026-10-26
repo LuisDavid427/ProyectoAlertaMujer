@@ -28,7 +28,8 @@ interface AlertaService {
 
     @PUT("api/alertas/{id}/desactivar")
     suspend fun desactivarAlerta(
-        @Path("id") idAlerta: Int
+        @Path("id") idAlerta: Int,
+        @Body body: Map<String, List<String>>? = null
     ): Response<Map<String, Any>>
 
     @Multipart
@@ -36,6 +37,7 @@ interface AlertaService {
     suspend fun subirEvidencia(
         @Path("id") idAlerta: Int,
         @Part archivo: MultipartBody.Part,
-        @Part("tipo") tipo: RequestBody
+        @Part("tipo") tipo: RequestBody,
+        @Part("contactosNotificar") contactosNotificar: RequestBody? = null // 👈 Debe ser RequestBody
     ): Response<Map<String, Any>>
 }

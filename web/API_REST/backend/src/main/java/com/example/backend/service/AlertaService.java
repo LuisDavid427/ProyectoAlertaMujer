@@ -113,7 +113,6 @@ public class AlertaService {
             e.printStackTrace();
         }
 
-
         return alertaGuardada;
     }
 
@@ -141,25 +140,46 @@ public class AlertaService {
         alertaRepository.save(alerta);
     }
 
-    // FASE 3: Desactivar alerta
+    // FASE 3: Desactivar alerta y notificar a los receptores
     @Transactional
-    public void desactivarAlerta(Integer idAlerta) throws Exception {
+    public void desactivarAlerta(Integer idAlerta, List<String> correosNotificar) throws Exception {
         AlertaModel alerta = alertaRepository.findById(idAlerta)
                 .orElseThrow(() -> new Exception("La alerta especificada no existe."));
 
         alerta.setEstadoAlerta("inactiva");
         alertaRepository.save(alerta);
         alertaRepository.flush();
+
+        // 🚨 Notificar a los contactos que la alerta ha sido desactivada (A salvo)
+        try {
+            if (correosNotificar != null && !correosNotificar.isEmpty()) {
+                for (String correo : correosNotificar) {
+                    if (correo == null || correo.trim().isEmpty()) continue;
+                    List<String> tokensFcm = usuarioRepository.obtenerTokensPorEmails(correo.trim());
+                    if (tokensFcm != null) {
+                        for (String token : tokensFcm) {
+                            if (token != null && !token.isBlank()) {
+                                // Llamamos al método en FcmService para la desactivación (asegúrate de tenerlo o crearlo)
+                                fcmService.enviarNotificacionEstado(token, alerta.getId(), alerta.getUsuario().getNombre(), "alerta_desactivada");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error al notificar desactivación de alerta: " + e.getMessage());
+        }
     }
 
-    // FASE 4: Evidencias multimedia
+    // FASE 4: Evidencias multimedia y notificación FCM al receptor correcto (contactos)
     @Transactional(rollbackFor = Exception.class)
-    public void guardarEvidencia(Integer idAlerta, MultipartFile archivo, String tipo) throws Exception {
+    public void guardarEvidencia(Integer idAlerta, MultipartFile archivo, String tipo, List<String> correosNotificar) throws Exception {
         Optional<AlertaModel> alertaOpt = alertaRepository.findById(idAlerta);
         if (!alertaOpt.isPresent()) {
             throw new Exception("La alerta especificada no existe.");
         }
         AlertaModel alerta = alertaOpt.get();
+        UsuarioModel victima = alerta.getUsuario();
 
         String carpetaDestino = "C://AlertaMujer//evidencias//";
         Path rutaDirectorio = Paths.get(carpetaDestino);
@@ -175,10 +195,45 @@ public class AlertaService {
 
         EvidenciaModel nuevaEvidencia = new EvidenciaModel();
         nuevaEvidencia.setAlerta(alerta);
-        nuevaEvidencia.setUrl(rutaCompleta.toString());
+        nuevaEvidencia.setUrl("/archivos/" + nombreUnico);
         nuevaEvidencia.setTipo(tipo);
 
         alerta.getEvidencias().add(nuevaEvidencia);
         alertaRepository.save(alerta);
+
+        // 🚨 NOTIFICAR POR FCM A LOS CONTACTOS DE CONFIANZA Y NO A LA VÍCTIMA
+        try {
+            System.out.println("🟢 Evidencia guardada (" + tipo + "). Buscando tokens de contactos para notificar...");
+            String urlEvidencia = "/archivos/" + nombreUnico;
+
+            if (correosNotificar != null && !correosNotificar.isEmpty()) {
+                for (String correo : correosNotificar) {
+                    if (correo == null || correo.trim().isEmpty()) continue;
+
+                    List<String> tokensContactos = usuarioRepository.obtenerTokensPorEmails(correo.trim());
+
+                    if (tokensContactos != null && !tokensContactos.isEmpty()) {
+                        for (String tokenFcm : tokensContactos) {
+                            if (tokenFcm != null && !tokenFcm.trim().isEmpty()) {
+                                fcmService.enviarNotificacionEvidencia(
+                                        tokenFcm, 
+                                        alerta.getId(), 
+                                        victima.getNombre(), 
+                                        tipo, 
+                                        urlEvidencia
+                                );
+                            }
+                        }
+                    }
+                }
+                System.out.println("🟢 Notificaciones de evidencia enviadas a los contactos de confianza.");
+            } else {
+                System.err.println("⚠️ No se proporcionó la lista de contactos para notificar la evidencia.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Error al enviar FCM de evidencia: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

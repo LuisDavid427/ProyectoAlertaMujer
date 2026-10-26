@@ -8,9 +8,8 @@ import android.telephony.SmsManager
 import android.util.Log
 import com.example.alertamujer.data.dto.AlertaRequest
 import com.example.alertamujer.data.dto.UbicacionRequest
-import com.example.alertamujer.data.local.AppDatabase
 import com.example.alertamujer.data.local.entity.AlertaEntity
-import com.example.alertamujer.data.network.RetrofitClient
+import com.example.alertamujer.data.network.repository.AlertaRepository // 👈 Usamos el AlertaRepository unificado
 import com.example.alertamujer.util.SessionManager
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
@@ -28,6 +27,7 @@ class SosManager private constructor(private val context: Context) {
     }
 
     private val sessionManager = SessionManager(context)
+    private val alertaRepository = AlertaRepository(context) // 👈 Instanciamos el repositorio único
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var trackingJob: Job? = null
@@ -79,20 +79,17 @@ class SosManager private constructor(private val context: Context) {
             }
 
             val mensaje = sessionManager.obtenerMensajeSOS()
-            val db = AppDatabase.getDatabase(context)
 
-            // 1. Cargar contactos desde Room (Fuente única)
-            val listaContactos = db.contactoDao().obtenerTodosLosContactosSincrono()
-
-            // Filtrar correos no vacíos/nulos para el Backend
+            // 1. Cargamos contactos locales a través del repositorio[cite: 5]
+            val listaContactos = alertaRepository.obtenerContactosLocales()
             val listaEmails = listaContactos.map { it.email }.filter { it.isNotBlank() }
 
-            Log.d("DEBUG_SOS", "🟢 Contactos encontrados en Room: ${listaContactos.size}. Emails a enviar: $listaEmails")
+            Log.d("DEBUG_SOS", "🟢 Contactos encontrados: ${listaContactos.size}. Emails: $listaEmails")
 
-            // 2. Enviar SMS usando directamente los números de Room
+            // 2. Enviamos SMS locales
             enviarSmsOcultoDesdeRoom(listaContactos, mensaje, loc.latitude, loc.longitude)
 
-            // 3. Enviar petición al Backend con la lista de correos
+            // 3. Petición al backend mediante el repositorio
             val request = AlertaRequest(
                 idUsuario = userId,
                 mensaje = mensaje,
@@ -102,7 +99,7 @@ class SosManager private constructor(private val context: Context) {
             )
 
             try {
-                val response = RetrofitClient.getAlertaService(context).enviarAlertaSOS(request)
+                val response = alertaRepository.enviarAlertaSOS(request)
                 if (response.isSuccessful) {
                     val idAlerta = response.body()?.idAlerta ?: -1
                     _idAlertaActual.value = idAlerta
@@ -120,17 +117,18 @@ class SosManager private constructor(private val context: Context) {
                             longitud = loc.longitude,
                             timestamp = System.currentTimeMillis()
                         )
-                        db.alertaDao().insertarAlerta(nuevaAlertaLocal)
-                        Log.d("ROOM_SOS", "✅ Alerta guardada en Room con id_alerta: $idAlerta")
+                        // 4. Guardado local en Room a través del repositorio[cite: 4]
+                        alertaRepository.guardarAlertaLocal(nuevaAlertaLocal)
+                        Log.d("ROOM_SOS", "✅ Alerta guardada localmente con ID: $idAlerta")
                     } catch (e: Exception) {
-                        Log.e("ROOM_SOS", "❌ Error guardando en Room: ${e.message}", e)
+                        Log.e("ROOM_SOS", "❌ Error guardando local: ${e.message}", e)
                     }
 
                     iniciarRastreoContinuo(idAlerta)
                 } else {
                     val codigoError = response.code()
                     if (codigoError == 400 || codigoError == 403) {
-                        _estadoAlerta.value = EstadoAlerta.Error("Tu cuenta se encuentra bloqueada por la administración. No puedes enviar alertas.")
+                        _estadoAlerta.value = EstadoAlerta.Error("Tu cuenta se encuentra bloqueada por la administración.")
                     } else {
                         _estadoAlerta.value = EstadoAlerta.Error("Error servidor: $codigoError")
                     }
@@ -149,7 +147,7 @@ class SosManager private constructor(private val context: Context) {
                 if (loc != null) {
                     val req = UbicacionRequest(loc.latitude, loc.longitude)
                     try {
-                        RetrofitClient.getAlertaService(context).enviarUbicacionContinua(idAlerta, req)
+                        alertaRepository.enviarUbicacionContinua(idAlerta, req)
                         Log.d("DEBUG_SOS", "📍 Ubicación continua enviada: ${loc.latitude}, ${loc.longitude}")
                     } catch (e: Exception) {
                         Log.e("DEBUG_SOS", "Error en rastreo continuo: ${e.message}")
@@ -167,7 +165,12 @@ class SosManager private constructor(private val context: Context) {
         scope.launch {
             try {
                 if (idAlerta != -1) {
-                    RetrofitClient.getAlertaService(context).desactivarAlerta(idAlerta)
+                    val listaContactos = alertaRepository.obtenerContactosLocales()
+                    val listaEmails = listaContactos.map { it.email }.filter { it.isNotBlank() }
+                    val body = mapOf("contactosNotificar" to listaEmails)
+
+                    alertaRepository.desactivarAlerta(idAlerta, body)
+                    Log.d("DEBUG_SOS", "🟢 Alerta desactivada correctamente.")
                 }
             } catch (e: Exception) {
                 Log.e("DEBUG_SOS", "Error al desactivar: ${e.message}")
@@ -181,7 +184,6 @@ class SosManager private constructor(private val context: Context) {
     @SuppressLint("MissingPermission")
     private suspend fun obtenerUbicacionActual(): android.location.Location? {
         return try {
-            // Usamos un timeout de 7 segundos para evitar bloqueos si la pantalla está apagada
             withTimeoutOrNull(7000L) {
                 fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
             } ?: fusedLocationClient.lastLocation.await()
