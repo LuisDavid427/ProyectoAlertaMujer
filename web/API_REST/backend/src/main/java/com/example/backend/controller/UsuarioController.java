@@ -39,7 +39,7 @@ public class UsuarioController {
     private RolRepository rolRepository;
 
     @PostMapping("/guardar")
-    public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioModel usuario) {
+    public ResponseEntity<?> guardar(@RequestBody UsuarioModel usuario) {
         try {
             RolModel rolUsuaria = rolRepository.findByNombreRol("usuaria")
                 .orElseThrow(() -> new RuntimeException("Error: El rol 'USUARIA' no existe en la DB. ¡Ejecuta el INSERT!"));

@@ -12,7 +12,7 @@ data class LoginRequest(
 data class RegistroRequest(
     @SerializedName("nombre") val nombre: String,
     @SerializedName("email") val email: String,
-    @SerializedName("contrasena") val contrasena: String,
+    @SerializedName("contrasena") val contrasena: String, // Debe llamarse igual a la variable de Java
     @SerializedName("fechaNacimiento") val fechaNacimiento: String
 )
 
