@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.22:8080/\"")
+            buildConfigField("String", "BASE_URL", "\"https://backend-alerta-mujer.onrender.com/\"")
         }
         release {
             buildConfigField("String", "BASE_URL", "\"https://backend-alerta-mujer.onrender.com/\"")

@@ -57,7 +57,7 @@ class TokenAuthenticator(
 
         val client = OkHttpClient()
 
-        
+
         val urlRefresh = "${BuildConfig.BASE_URL}api/auth/refresh"
 
         val request = Request.Builder()

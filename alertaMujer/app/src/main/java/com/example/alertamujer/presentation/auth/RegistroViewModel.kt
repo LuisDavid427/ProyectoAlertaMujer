@@ -47,27 +47,16 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                     if (body?.success == true) {
                         _registroExitoso.value = true
                     } else {
-                        // El servidor respondió pero con un error de negocio (ej: correo ya registrado)
+                        // El servidor respondió con éxito pero el negocio rechazó el registro
                         _mensajeError.value = body?.mensaje ?: "Error en el registro"
                     }
-                }  else {
-            // Error de código HTTP (400, 500, etc.)
-            val errorRaw = response.errorBody()?.string() ?: "Error desconocido"
+                } else {
+                    // ⚠️ AQUÍ CAEN LOS ERRORES HTTP REALES (400, 401, 500, etc.)
+                    val errorRaw = response.errorBody()?.string() ?: "Error desconocido"
 
-            // Limpiamos y traducimos el error para que se vea amigable en la app
-            val mensajeAmigable = when {
-                errorRaw.contains("Duplicate entry", ignoreCase = true) ||
-                        errorRaw.contains("email", ignoreCase = true) ->
-                    "Este correo electrónico ya está registrado. Intenta con otro o inicia sesión."
-
-                errorRaw.contains("ConstraintViolation", ignoreCase = true) ->
-                    "Por favor, verifica que los datos ingresados sean correctos."
-
-                else -> "Ocurrió un error al procesar el registro. Inténtalo de nuevo."
-            }
-
-            _mensajeError.value = mensajeAmigable
-        }
+                    // Esto te mostrará el código y el JSON exacto que manda Render en la pantalla del celular
+                    _mensajeError.value = "HTTP ${response.code()}: $errorRaw"
+                }
             } catch (e: Exception) {
                 // Error de infraestructura (Sin internet, servidor caído)
                 _mensajeError.value = "Fallo de conexión: Verifique su internet"
