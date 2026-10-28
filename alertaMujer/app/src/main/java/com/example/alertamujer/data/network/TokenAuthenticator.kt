@@ -1,6 +1,7 @@
 package com.example.alertamujer.data.network
 
 import android.content.Context
+import com.example.alertamujer.BuildConfig // 👈 1. Importa el BuildConfig de tu paquete
 import com.example.alertamujer.util.SessionManager
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -56,8 +57,11 @@ class TokenAuthenticator(
 
         val client = OkHttpClient()
 
+        
+        val urlRefresh = "${BuildConfig.BASE_URL}api/auth/refresh"
+
         val request = Request.Builder()
-            .url("http://192.168.1.22:8080/api/auth/refresh")
+            .url(urlRefresh)
             .post("".toRequestBody(null))
             .addHeader("Authorization", "Bearer $tokenViejo")
             .build()
